@@ -19,6 +19,6 @@
   "models": {
     "human": null,
     "frontier": "anthropic/claude-fable-5-1",
-    "cheap": "anthropic/claude-haiku-4-5-20251001"
+    "cheap": "anthropic/claude-sonnet-5"
   }
 }

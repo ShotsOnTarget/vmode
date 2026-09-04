@@ -12,7 +12,7 @@
 - **Errors**: raise ValueError if kind invalid. RecordError propagates.
 - **Allowed imports**: pytest, json, os, subprocess, shutil, pathlib, and the function under test. Nothing else.
 - **Checklist items this job serves**: Story 0001-1 items 2
-- **Setup**: record_* tests run `bd init --prefix vm --non-interactive` in `tmp_path` in a fixture and `monkeypatch.chdir(tmp_path)`. log_* tests use `tmp_path / 'log.jsonl'`.
+- **Setup**: use the shared fixture `bd_repo` from `src/conftest.py` by naming it as a test argument. It gives a fresh record with cwd set. Do not define a fixture named bd_repo yourself, do not run bd init yourself.
 - **Cases**, one test function each, exactly these names, nothing more:
   - `test_filters_by_kind`: create one intent and two stories; record_list_kind('story') returns exactly two, both kind story
   - `test_includes_closed`: set one story to done; it still appears

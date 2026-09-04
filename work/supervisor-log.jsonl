@@ -1,0 +1,11 @@
+{"gate": "Built", "inputs": {"lines": 34, "note_lines": 6, "public_fns": 1}, "item": "0001-1-record_run-code", "rule": "lines<=50, one public fn, note has six lines, only allowed files", "state": "done", "ts": "2026-09-04T12:01:14.599355+00:00"}
+{"gate": "Built", "inputs": {"lines": 41}, "item": "0001-1-record_run-test", "rule": "lines<=50, only allowed files", "state": "done", "ts": "2026-09-04T12:01:14.599355+00:00"}
+{"gate": "Proven", "inputs": {"result": "4 errors: bd init fails, embedded Dolt requires CGO", "retry": 0}, "item": "0001-1-record_run", "rule": "pytest passes", "state": "blocked", "ts": "2026-09-04T12:01:14.599355+00:00"}
+{"gate": "Built", "inputs": {"lines": 10, "public_fns": 1}, "item": "0001-5-log_append-code", "rule": "lines<=50, one public fn", "state": "done", "ts": "2026-09-04T12:01:14.599355+00:00"}
+{"gate": "Built", "inputs": {"lines": 47}, "item": "0001-5-log_append-test", "rule": "lines<=50", "state": "done", "ts": "2026-09-04T12:01:14.599355+00:00"}
+{"gate": "Proven", "inputs": {"result": "4 passed"}, "item": "0001-5-log_append", "rule": "pytest passes", "state": "done", "ts": "2026-09-04T12:01:14.599355+00:00"}
+{"gate": "Built", "inputs": {"lines": 20, "public_fns": 1}, "item": "0001-5-log_read_item-code", "rule": "lines<=50, one public fn", "state": "done", "ts": "2026-09-04T12:01:14.599355+00:00"}
+{"gate": "Built", "inputs": {"lines": 53, "retry": 1}, "item": "0001-5-log_read_item-test", "rule": "lines<=50", "state": "in_progress", "ts": "2026-09-04T12:01:14.599355+00:00"}
+{"gate": "Built", "inputs": {"lines": 41, "retry": 1}, "item": "0001-5-log_read_item-test", "rule": "lines<=50", "state": "done", "ts": "2026-09-04T12:02:11.371153+00:00"}
+{"gate": "Proven", "inputs": {"result": "4 passed"}, "item": "0001-5-log_read_item", "rule": "pytest passes", "state": "done", "ts": "2026-09-04T12:02:11.371153+00:00"}
+{"gate": "Verified", "inputs": {}, "item": "0001-5", "rule": "awaiting Architect tick of checklist", "state": "checking", "ts": "2026-09-04T12:02:11.371153+00:00"}
