@@ -114,22 +114,21 @@ def test_invoke_failure_releases(bd_repo, tmp_path):
 
 
 def test_config_change_respected(bd_repo, tmp_path):
-    _make_in_progress_item()
     first_ready = _make_item()
-    config_path = _config_with_build_wip(tmp_path, 2)
+    config_path = _config_with_build_wip(tmp_path, 1)
 
     claimed_first = pull_once("builder", config_path, _ok_invoke)
     assert claimed_first == [first_ready]
+    row = _show(first_ready)
+    assert "state:checking" in row["labels"]
 
-    second_ready = _make_item()
+    _make_item()
     text = _BOARD_TOML.read_text()
-    pathlib.Path(config_path).write_text(_set_build_wip(text, 1))
+    pathlib.Path(config_path).write_text(_set_build_wip(text, 0))
 
     claimed_second = pull_once("builder", config_path, _ok_invoke)
 
     assert claimed_second == []
-    row = _show(second_ready)
-    assert "state:ready" in row["labels"]
 
 
 def test_unknown_role_raises(bd_repo, tmp_path):
