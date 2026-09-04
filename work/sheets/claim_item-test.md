@@ -8,7 +8,7 @@
 - **Files you may change**: `src/claim_item/test_claim_item.py`
 - **Signature under test**: `claim_item(item_id: str, actor: str) -> dict`
 - **Inputs**: as stated. Import with `from claim_item.claim_item import claim_item`.
-- **Outputs**: {'id': item_id, 'owner': owner, 'state': 'in_progress'} after one atomic record operation: record_run(['update', item_id, '--claim']) claims for the current bd user; then set assignee to owner and the state label via record_set_owner and record_set_state. The claim call must come first and is the only guard.
+- **Outputs**: {'id': item_id, 'claimed_by': actor, 'state': 'in_progress'}; the assignee becomes the actor, the owner label is untouched.
 - **Errors**: RecordError if the item is already claimed by someone else (bd --claim exits non-zero in that case). ValueError if owner is empty.
 - **Allowed imports**: pytest, json, record_run, and the function under test. Nothing else.
 - **Checklist items this job serves**: Story 0003-2 items 6

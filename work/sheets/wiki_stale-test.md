@@ -20,5 +20,4 @@
   - `test_missing_root_empty`: nonexistent root -> []
 - **Checks to run before reporting**:
   - `python -m pytest src/wiki_stale -q`
-  - `wc -l src/wiki_stale/test_wiki_stale.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

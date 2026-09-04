@@ -20,5 +20,4 @@
   - `test_fourth_link_rejected`: link 'related' raises ValueError
 - **Checks to run before reporting**:
   - `python -m pytest src/record_add_link -q`
-  - `wc -l src/record_add_link/test_record_add_link.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

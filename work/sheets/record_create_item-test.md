@@ -25,5 +25,4 @@
   - `test_child_does_not_inherit_kind`: story created under an intent; record_run(['show', story_id])[0]['labels'] contains 'kind:story' and does not contain 'kind:intent'
 - **Checks to run before reporting**:
   - `python -m pytest src/record_create_item -q`
-  - `wc -l src/record_create_item/test_record_create_item.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

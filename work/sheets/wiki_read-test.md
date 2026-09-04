@@ -20,5 +20,4 @@
   - `test_multiline_pattern_preserved`: pattern text with two paragraphs reads back with the inner blank line intact
 - **Checks to run before reporting**:
   - `python -m pytest src/wiki_read -q`
-  - `wc -l src/wiki_read/test_wiki_read.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

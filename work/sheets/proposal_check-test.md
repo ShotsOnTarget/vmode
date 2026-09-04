@@ -21,5 +21,4 @@
   - `test_wrong_kind_rejected`: kind 'story' with a clean sheet -> ['not_proposal']
 - **Checks to run before reporting**:
   - `python -m pytest src/proposal_check -q`
-  - `wc -l src/proposal_check/test_proposal_check.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

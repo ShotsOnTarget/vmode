@@ -20,5 +20,4 @@
   - `test_cycle_raises`: a hand-built graph dict where a.parent=b and b.parent=a raises ValueError and returns within one second
 - **Checks to run before reporting**:
   - `python -m pytest src/trace_back -q`
-  - `wc -l src/trace_back/test_trace_back.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

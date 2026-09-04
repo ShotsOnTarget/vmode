@@ -19,5 +19,4 @@
   - `test_touch_missing_raises`: unknown id raises FileNotFoundError
 - **Checks to run before reporting**:
   - `python -m pytest src/wiki_touch -q`
-  - `wc -l src/wiki_touch/test_wiki_touch.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

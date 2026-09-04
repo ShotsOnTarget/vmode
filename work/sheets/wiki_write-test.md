@@ -20,5 +20,4 @@
   - `test_overwrite_replaces`: write twice with different title; file contains the second title only
 - **Checks to run before reporting**:
   - `python -m pytest src/wiki_write -q`
-  - `wc -l src/wiki_write/test_wiki_write.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

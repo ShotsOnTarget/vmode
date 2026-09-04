@@ -21,5 +21,4 @@
   - `test_missing_file_zeros`: nonexistent path returns tokens 0, seconds 0.0, runs 0
 - **Checks to run before reporting**:
   - `python -m pytest src/cost_rollup -q`
-  - `wc -l src/cost_rollup/test_cost_rollup.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

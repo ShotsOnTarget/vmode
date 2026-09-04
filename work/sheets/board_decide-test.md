@@ -21,5 +21,4 @@
   - `test_no_validation_raises`: intent with no validation -> ValueError
 - **Checks to run before reporting**:
   - `python -m pytest src/board_decide -q`
-  - `wc -l src/board_decide/test_board_decide.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

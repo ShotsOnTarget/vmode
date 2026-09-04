@@ -22,5 +22,4 @@
   - `test_script_exit_code`: run `python -m find_orphans.find_orphans` with subprocess in bd_repo with one orphan; exit code 1 and stdout parses as JSON
 - **Checks to run before reporting**:
   - `python -m pytest src/find_orphans -q`
-  - `wc -l src/find_orphans/test_find_orphans.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

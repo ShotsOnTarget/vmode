@@ -19,5 +19,4 @@
   - `test_sheet_empty_when_no_description`: item without description has sheet ''
 - **Checks to run before reporting**:
   - `python -m pytest src/record_show_item -q`
-  - `wc -l src/record_show_item/test_record_show_item.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

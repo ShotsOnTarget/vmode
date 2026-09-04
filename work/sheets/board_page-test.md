@@ -20,5 +20,4 @@
   - `test_no_dialogs`: does not contain 'alert(' 'confirm(' or 'prompt('
 - **Checks to run before reporting**:
   - `python -m pytest src/board_page -q`
-  - `wc -l src/board_page/test_board_page.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

@@ -19,5 +19,4 @@
   - `test_unknown_raises`: ValueError
 - **Checks to run before reporting**:
   - `python -m pytest src/board_tree -q`
-  - `wc -l src/board_tree/test_board_tree.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

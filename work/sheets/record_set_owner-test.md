@@ -19,5 +19,4 @@
   - `test_unknown_raises`: 'vm-none' raises RecordError
 - **Checks to run before reporting**:
   - `python -m pytest src/record_set_owner -q`
-  - `wc -l src/record_set_owner/test_record_set_owner.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

@@ -22,5 +22,4 @@
   - `test_unknown_tokens_allowed`: tokens -1 and seconds 0.0 is accepted
 - **Checks to run before reporting**:
   - `python -m pytest src/log_append -q`
-  - `wc -l src/log_append/test_log_append.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

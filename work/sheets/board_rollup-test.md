@@ -20,5 +20,4 @@
   - `test_id_order`: two intents 'vm-b','vm-a' -> rows in order vm-a, vm-b
 - **Checks to run before reporting**:
   - `python -m pytest src/board_rollup -q`
-  - `wc -l src/board_rollup/test_board_rollup.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

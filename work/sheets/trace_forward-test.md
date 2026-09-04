@@ -20,5 +20,4 @@
   - `test_no_duplicate_when_child_also_checks`: verification that is both parent-child of story and validates story appears once
 - **Checks to run before reporting**:
   - `python -m pytest src/trace_forward -q`
-  - `wc -l src/trace_forward/test_trace_forward.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

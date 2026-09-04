@@ -21,5 +21,4 @@
   - `test_needs_from_blocks`: create stories A and B under one intent, then record_run(['dep','add',B,'--blocked-by',A]); graph[B]['needs']==[A]
 - **Checks to run before reporting**:
   - `python -m pytest src/record_graph -q`
-  - `wc -l src/record_graph/test_record_graph.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

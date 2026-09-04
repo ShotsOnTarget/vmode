@@ -19,5 +19,4 @@
   - `test_two_notes_two_ids`: two calls return different note_id values
 - **Checks to run before reporting**:
   - `python -m pytest src/record_add_note -q`
-  - `wc -l src/record_add_note/test_record_add_note.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

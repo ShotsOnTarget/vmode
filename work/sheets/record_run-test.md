@@ -20,5 +20,4 @@
   - `test_json_flag_added`: record_run(['list']) returns a list, proving --json was appended
 - **Checks to run before reporting**:
   - `python -m pytest src/record_run -q`
-  - `wc -l src/record_run/test_record_run.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

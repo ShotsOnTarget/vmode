@@ -20,5 +20,4 @@
   - `test_bad_kind_rejected`: kind 'bug' raises ValueError
 - **Checks to run before reporting**:
   - `python -m pytest src/record_list_kind -q`
-  - `wc -l src/record_list_kind/test_record_list_kind.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

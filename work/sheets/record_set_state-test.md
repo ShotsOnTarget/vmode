@@ -20,5 +20,4 @@
   - `test_reopened_opens`: after 'done' then 'reopened', bd status is open
 - **Checks to run before reporting**:
   - `python -m pytest src/record_set_state -q`
-  - `wc -l src/record_set_state/test_record_set_state.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

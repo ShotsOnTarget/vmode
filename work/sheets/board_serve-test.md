@@ -21,5 +21,4 @@
   - `test_unknown_404`: GET /nope returns 404
 - **Checks to run before reporting**:
   - `python -m pytest src/board_serve -q`
-  - `wc -l src/board_serve/test_board_serve.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

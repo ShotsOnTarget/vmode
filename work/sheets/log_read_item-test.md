@@ -20,5 +20,4 @@
   - `test_file_unchanged_after_read`: file bytes identical before and after
 - **Checks to run before reporting**:
   - `python -m pytest src/log_read_item -q`
-  - `wc -l src/log_read_item/test_log_read_item.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

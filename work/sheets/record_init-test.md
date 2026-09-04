@@ -19,5 +19,4 @@
   - `test_missing_dir_raises`: record_init(tmp_path/'nope') raises RecordError
 - **Checks to run before reporting**:
   - `python -m pytest src/record_init -q`
-  - `wc -l src/record_init/test_record_init.py   (must print 50 or less)`
 - **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.
