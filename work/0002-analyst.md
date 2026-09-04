@@ -171,5 +171,6 @@ Runs count log lines under the item, including gate decisions with zero cost. 00
 | 0002-1 | 235,690 | 76 | 3,101 | 6 |
 | 0002-2 | 943,990 | 305 | 3,095 | 15 |
 | 0002-4 | 0 | 72 | 0 | 8 |
+| 0001-6 (unattended) | 13,880,272 | 149 | 93,156 | 4 Builder runs |
 
 Intent 0001 average: 4,251 tokens per line. Target for the next Story: at most 3,826. Note: 0001-3 board_page and board_serve retries were logged with tokens -1 (unreported), so 0001 is understated; 0002 rows are complete.
