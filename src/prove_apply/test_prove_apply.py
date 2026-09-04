@@ -1,9 +1,27 @@
+import os
 import pathlib
 
 from log_read_item.log_read_item import log_read_item
 from prove_apply.prove_apply import prove_apply
 from record_run.record_run import record_run
 from record_show_item.record_show_item import record_show_item
+
+
+def _job_repo(tmp_path, folder, code, note):
+    repo = tmp_path / "job_repo"
+    repo.mkdir()
+    os.system(f'git -C "{repo}" init -q')
+    os.system(f'git -C "{repo}" config user.email "builder@example.com"')
+    os.system(f'git -C "{repo}" config user.name "Builder"')
+    src = repo / "src" / folder
+    src.mkdir(parents=True)
+    (src / f"{folder}.py").write_text(code)
+    (src / f"{folder}.md").write_text(note)
+    return str(repo)
+
+
+def _last_commit_message(repo):
+    return os.popen(f'git -C "{repo}" log -1 --pretty=%B').read()
 
 
 def _create(kind):
@@ -43,12 +61,15 @@ _GOOD_CODE = (
 _GOOD_NOTE = "widget\nline two\nline three\nline four\nline five\nline six"
 
 
-def _base_gathered(**overrides):
+def _base_gathered(tmp_path, **overrides):
+    folder = overrides.get("folder", "widget")
+    code = overrides.get("code", _GOOD_CODE)
+    note = overrides.get("note", _GOOD_NOTE)
     gathered = {
-        "folder": "widget",
-        "changed": ["src/widget/widget.py", "src/widget/widget.md"],
-        "code": _GOOD_CODE,
-        "note": _GOOD_NOTE,
+        "folder": folder,
+        "changed": [f"src/{folder}/{folder}.py", f"src/{folder}/{folder}.md"],
+        "code": code,
+        "note": note,
         "fmt_out": "",
         "lint_out": "All checks passed!",
         "kind": "code",
@@ -56,6 +77,7 @@ def _base_gathered(**overrides):
         "usage": {"tokens": -1, "seconds": 1.0},
         "pytest_out": "",
         "cases": [],
+        "repo": _job_repo(tmp_path, folder, code, note),
     }
     gathered.update(overrides)
     return gathered
@@ -64,7 +86,7 @@ def _base_gathered(**overrides):
 def test_pass_moves_done(bd_repo, tmp_path):
     item_id = _create("code")
     log_path = str(tmp_path / "log.jsonl")
-    gathered = _base_gathered(usage={"tokens": 7, "seconds": 1.0})
+    gathered = _base_gathered(tmp_path, usage={"tokens": 7, "seconds": 1.0})
 
     result = prove_apply(item_id, gathered, log_path)
 
@@ -74,12 +96,14 @@ def test_pass_moves_done(bd_repo, tmp_path):
     built = [e for e in entries if e["gate"] == "Built"]
     assert built
     assert built[0]["tokens"] == 7
+    message = _last_commit_message(gathered["repo"])
+    assert item_id in message
 
 
 def test_fail_bounces(bd_repo, tmp_path):
     item_id = _create("code")
     log_path = str(tmp_path / "log.jsonl")
-    gathered = _base_gathered(lint_out="x.py:1:1: E501")
+    gathered = _base_gathered(tmp_path, lint_out="x.py:1:1: E501")
 
     result = prove_apply(item_id, gathered, log_path)
 
@@ -94,11 +118,10 @@ def test_fail_bounces(bd_repo, tmp_path):
     assert any(t.startswith("bounce:") for t in texts)
 
 
-def test_third_fail_blocks(bd_repo):
+def test_third_fail_blocks(bd_repo, tmp_path):
     item_id = _create("code")
     log_path = "log.jsonl"
-    gathered = _base_gathered(lint_out="x.py:1:1: E501", retries=3)
-    pathlib.Path("work/summaries").mkdir(parents=True)
+    gathered = _base_gathered(tmp_path, lint_out="x.py:1:1: E501", retries=3)
 
     result = prove_apply(item_id, gathered, log_path)
 
@@ -110,6 +133,7 @@ def test_test_kind_runs_proven(bd_repo, tmp_path):
     item_id = _create("test")
     log_path = str(tmp_path / "log.jsonl")
     gathered = _base_gathered(
+        tmp_path,
         kind="test",
         pytest_out="FAILED src/x/test_x.py::test_a - AssertionError",
         cases=["a"],
