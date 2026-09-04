@@ -14,7 +14,7 @@
 - **Checklist items this job serves**: Story 0001-1 items contract: output JSON, errors JSON
 - **Setup**: use the shared fixture `bd_repo` from `src/conftest.py` by naming it as a test argument. It gives a fresh record with cwd set. Do not define a fixture named bd_repo yourself, do not run bd init yourself.
 - **Cases**, one test function each, exactly these names, nothing more:
-  - `test_show_returns_dict`: after bd init in tmp_path and one bd create, record_run(['show', id]) returns a dict with key 'id'
+  - `test_show_returns_item`: after one bd create, record_run(['show', id]) returns a list whose first element is a dict with key 'id' equal to id
   - `test_nonzero_exit_raises`: record_run(['show', 'vm-nope']) raises RecordError
   - `test_missing_binary_raises`: with PATH emptied via monkeypatch, record_run(['list']) raises RecordError
   - `test_json_flag_added`: record_run(['list']) returns a list, proving --json was appended

@@ -9,3 +9,25 @@
 {"gate": "Built", "inputs": {"lines": 41, "retry": 1}, "item": "0001-5-log_read_item-test", "rule": "lines<=50", "state": "done", "ts": "2026-09-04T12:02:11.371153+00:00"}
 {"gate": "Proven", "inputs": {"result": "4 passed"}, "item": "0001-5-log_read_item", "rule": "pytest passes", "state": "done", "ts": "2026-09-04T12:02:11.371153+00:00"}
 {"gate": "Verified", "inputs": {}, "item": "0001-5", "rule": "awaiting Architect tick of checklist", "state": "checking", "ts": "2026-09-04T12:02:11.371153+00:00"}
+{"gate": "Verified", "inputs": {"1": "pass", "2": "pass", "3": "pass", "4": "functions log_append, log_read_item only; open modes a and r only"}, "item": "0001-5", "rule": "Architect ticks checklist 1-4", "state": "done", "ts": "2026-09-04T12:02:49.826622+00:00"}
+{"gate": "Proven", "inputs": {"result": "3 passed 1 failed: show returns list not dict", "retry": 1}, "item": "0001-1-record_run", "rule": "pytest passes", "state": "in_progress", "ts": "2026-09-04T12:05:50.414822+00:00"}
+{"gate": "Ready", "inputs": {"retry": 0}, "item": "0001-1-record_run-test", "rule": "Architect changed sheet: show case now expects list; retry count reset", "state": "in_progress", "ts": "2026-09-04T12:05:50.414822+00:00"}
+{"gate": "Built", "inputs": {"lines": 50}, "item": "0001-1-bd_repo_fixture-code", "rule": "lines<=50, only allowed file", "state": "done", "ts": "2026-09-04T12:07:41.746846+00:00"}
+{"gate": "Built", "inputs": {"lines": 36, "public_fns": 1}, "item": "0001-1-record_init-code", "rule": "lines<=50, one public fn, note six lines", "state": "done", "ts": "2026-09-04T12:07:41.746846+00:00"}
+{"gate": "Built", "inputs": {"lines": 48}, "item": "0001-1-record_init-test", "rule": "lines<=50", "state": "done", "ts": "2026-09-04T12:07:41.746846+00:00"}
+{"gate": "Built", "inputs": {"lines": 38, "public_fns": 1}, "item": "0001-1-record_create_item-code", "rule": "lines<=50, one public fn, note six lines", "state": "done", "ts": "2026-09-04T12:07:41.746846+00:00"}
+{"gate": "Built", "inputs": {"lines": 49}, "item": "0001-1-record_create_item-test", "rule": "lines<=50", "state": "done", "ts": "2026-09-04T12:07:41.746846+00:00"}
+{"gate": "Built", "inputs": {"lines": 17, "public_fns": 1}, "item": "0001-1-record_add_link-code", "rule": "lines<=50, one public fn, note six lines", "state": "done", "ts": "2026-09-04T12:07:41.746846+00:00"}
+{"gate": "Built", "inputs": {"lines": 37}, "item": "0001-1-record_add_link-test", "rule": "lines<=50", "state": "done", "ts": "2026-09-04T12:07:41.746846+00:00"}
+{"gate": "Built", "inputs": {"lines": 32, "public_fns": 1}, "item": "0001-1-record_set_state-code", "rule": "lines<=50, one public fn, note six lines", "state": "done", "ts": "2026-09-04T12:07:41.746846+00:00"}
+{"gate": "Built", "inputs": {"lines": 37, "public_fns": 1}, "item": "0001-1-record_list_kind-code", "rule": "lines<=50, one public fn, note six lines", "state": "done", "ts": "2026-09-04T12:07:41.746846+00:00"}
+{"gate": "Built", "inputs": {"lines": 37}, "item": "0001-1-record_list_kind-test", "rule": "lines<=50", "state": "done", "ts": "2026-09-04T12:07:41.746846+00:00"}
+{"gate": "Proven", "inputs": {"result": "3 passed"}, "item": "0001-1-record_init", "rule": "pytest passes", "state": "done", "ts": "2026-09-04T12:07:41.746846+00:00"}
+{"gate": "Proven", "inputs": {"result": "5 passed"}, "item": "0001-1-record_create_item", "rule": "pytest passes", "state": "done", "ts": "2026-09-04T12:07:41.746846+00:00"}
+{"gate": "Proven", "inputs": {"result": "4 passed"}, "item": "0001-1-record_add_link", "rule": "pytest passes", "state": "done", "ts": "2026-09-04T12:07:41.746846+00:00"}
+{"gate": "Proven", "inputs": {"result": "1 failed 3 passed: test setup used -l on bd update", "retry": 1}, "item": "0001-1-record_list_kind", "rule": "pytest passes", "state": "in_progress", "ts": "2026-09-04T12:07:41.746846+00:00"}
+{"gate": "Proven", "inputs": {"result": "4 passed"}, "item": "0001-1-record_set_state", "rule": "pytest passes", "state": "done", "ts": "2026-09-04T12:10:03.504562+00:00"}
+{"gate": "Proven", "inputs": {"result": "4 passed", "retry": 1}, "item": "0001-1-record_list_kind", "rule": "pytest passes", "state": "done", "ts": "2026-09-04T12:10:03.504562+00:00"}
+{"gate": "Proven", "inputs": {"result": "4 passed", "retry": 1}, "item": "0001-1-record_run", "rule": "pytest passes", "state": "done", "ts": "2026-09-04T12:10:03.504562+00:00"}
+{"gate": "Proven", "inputs": {"files_per_folder": 3, "folders": 8, "imports": "all within allowed lists", "result": "32 passed"}, "item": "0001-1", "rule": "full suite", "state": "done", "ts": "2026-09-04T12:10:03.504562+00:00"}
+{"gate": "Verified", "inputs": {"1": "test_empty_dir_inits,test_list_is_empty_after_init", "2": "test_each_kind_creates,test_filters_by_kind", "3": "test_no_parent_rejected", "4": "test_no_owner_rejected", "5": "test_parent_of_reads_back,test_needs_first_reads_back,test_checks_reads_back,test_fourth_link_rejected", "6": "test_each_state_sets,test_eighth_state_rejected", "7": "roles/work-record/CONVENTIONS.md exists"}, "item": "0001-1", "rule": "Architect ticks checklist 1-7", "state": "done", "ts": "2026-09-04T12:10:03.504562+00:00"}
