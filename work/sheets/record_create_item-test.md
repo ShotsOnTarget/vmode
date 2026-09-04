@@ -9,12 +9,13 @@
 - **Signature under test**: `record_create_item(kind: str, title: str, owner: str, parent: str | None = None) -> dict`
 - **Inputs**: as stated in the signature. Import with `from record_create_item.record_create_item import record_create_item` (and RecordError where needed, from `record_run.record_run`).
 - **Outputs**: {'id': str, 'kind': str, 'title': str, 'owner': str, 'parent': str | None, 'state': 'waiting'}.
-- **Errors**: raise ValueError before calling bd if kind is not one of the six, owner is empty, or parent is None and kind is not intent. RecordError propagates from record_run.
+- **Errors**: raise ValueError before calling bd if kind is not one of the seven, owner is empty, or parent is None and kind is not intent. RecordError propagates from record_run.
 - **Allowed imports**: pytest, json, os, subprocess, shutil, pathlib, and the function under test. Nothing else.
 - **Checklist items this job serves**: Story 0001-1 items 2, 3, 4
 - **Setup**: use the shared fixture `bd_repo` from `src/conftest.py` by naming it as a test argument. It gives a fresh record with cwd set. Do not define a fixture named bd_repo yourself, do not run bd init yourself.
 - **Cases**, one test function each, exactly these names, nothing more:
-  - `test_each_kind_creates`: for each of the six kinds (intent first, others with the intent as parent) the returned dict has that kind and a non-empty id
+  - `test_owner_is_label_not_assignee`: created item's labels contain owner:<owner> and record_run(['show', id])[0] has no assignee or an empty one
+  - `test_each_kind_creates`: for each of the seven kinds (intent first, others with the intent as parent) the returned dict has that kind and a non-empty id
   - `test_bad_kind_rejected`: kind 'bug' raises ValueError and bd is not called
   - `test_no_owner_rejected`: owner '' raises ValueError
   - `test_no_parent_rejected`: kind 'story' with parent None raises ValueError
