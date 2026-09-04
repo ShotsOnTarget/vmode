@@ -1,0 +1,24 @@
+# Instruction sheet
+
+- **Job id**: 0001-1-record_set_state-test
+- **Kind**: test
+- **Parent Story**: 0001-1
+- **Function name**: `record_set_state`
+- **Folder**: `src/record_set_state/`
+- **Files you may change**: `src/record_set_state/test_record_set_state.py`
+- **Signature under test**: `record_set_state(item_id: str, state: str) -> dict`
+- **Inputs**: as stated in the signature. Import with `from record_set_state.record_set_state import record_set_state` (and RecordError where needed, from `record_run.record_run`).
+- **Outputs**: {'id': str, 'state': str}.
+- **Errors**: raise ValueError before calling bd if state is not one of the seven. RecordError propagates.
+- **Allowed imports**: pytest, json, os, subprocess, shutil, pathlib, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0001-1 items 6
+- **Setup**: record_* tests run `bd init --prefix vm --non-interactive` in `tmp_path` in a fixture and `monkeypatch.chdir(tmp_path)`. log_* tests use `tmp_path / 'log.jsonl'`.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_each_state_sets`: for each of the seven states, after set, ['show',item_id] labels contain exactly one state: label and it is that state
+  - `test_eighth_state_rejected`: state 'paused' raises ValueError
+  - `test_done_closes`: after 'done', bd status is closed
+  - `test_reopened_opens`: after 'done' then 'reopened', bd status is open
+- **Checks to run before reporting**:
+  - `python -m pytest src/record_set_state -q`
+  - `wc -l src/record_set_state/test_record_set_state.py   (must print 50 or less)`
+- **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

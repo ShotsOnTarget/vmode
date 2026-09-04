@@ -1,0 +1,24 @@
+# Instruction sheet
+
+- **Job id**: 0001-5-log_append-test
+- **Kind**: test
+- **Parent Story**: 0001-5
+- **Function name**: `log_append`
+- **Folder**: `src/log_append/`
+- **Files you may change**: `src/log_append/test_log_append.py`
+- **Signature under test**: `log_append(path: str, entry: dict) -> None`
+- **Inputs**: as stated in the signature. Import with `from log_append.log_append import log_append` (and RecordError where needed, from `record_run.record_run`).
+- **Outputs**: nothing. One line appended: json.dumps(entry, sort_keys=True) plus newline.
+- **Errors**: raise ValueError, and write nothing, if any of the six keys is missing or extra keys are present.
+- **Allowed imports**: pytest, json, os, subprocess, shutil, pathlib, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0001-5 items 1, 2, 4
+- **Setup**: record_* tests run `bd init --prefix vm --non-interactive` in `tmp_path` in a fixture and `monkeypatch.chdir(tmp_path)`. log_* tests use `tmp_path / 'log.jsonl'`.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_append_then_readable`: one append, file has one line that json.loads to the entry
+  - `test_missing_key_writes_nothing`: entry without 'rule' raises ValueError and file does not exist or is unchanged
+  - `test_extra_key_rejected`: entry with a seventh key raises ValueError
+  - `test_three_appends_in_order`: three entries, file lines are in call order
+- **Checks to run before reporting**:
+  - `python -m pytest src/log_append -q`
+  - `wc -l src/log_append/test_log_append.py   (must print 50 or less)`
+- **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

@@ -16,10 +16,10 @@ Backend: **beads**. Reasons against the policy section 4 list.
 | Policy needs | beads has | Gap |
 |---|---|---|
 | Unique permanent id | Hierarchical ids, never reused | None |
-| Kind, parent, links | Issue types plus labels; parent-child, blocks, related, discovered-from | No "checks" link type. Map: right-side item is a child of the item it checks, labelled `checks`. |
+| Kind, parent, links | Labels; dependency types parent-child, blocks, validates | None. beads 1.0 has a native `validates` link, which is "checks". The label convention accepted as decision 2 is not needed. |
 | One owner | Assignee | None |
 | Fixed states | open, in_progress, blocked, closed; "ready" is computed from blockers | "checking" and "reopened" become labels |
-| Append-only history | JSONL in git; every change is a commit | Good enough for the record. The Supervisor log stays a separate append-only file. |
+| Append-only history | beads 1.0 stores in embedded Dolt: every change is a versioned commit, readable with `--as-of`. JSONL export committed to git. | None. The Supervisor log stays a separate file so it is readable without the tool. |
 | Trace both ways | Dependency graph, `bd ready`, tree views | Orphan check is a small script, not built in |
 | Agents read directly | CLI with JSON output, MCP server | None. CLI is the harness-neutral path. |
 
@@ -32,7 +32,7 @@ Agent access: one skill, `work-record`, that wraps the CLI. Every role skill poi
 ## Board decisions
 
 1. Record lives inside this git repo: **accepted** 2026-09-04.
-2. "Checks" link as child plus label convention: **accepted** 2026-09-04.
+2. "Checks" link as child plus label convention: **accepted** 2026-09-04, then found unnecessary: beads 1.0 has a native `validates` link. Using that instead. No Board action needed.
 3. Third-party Board screen: **accepted** 2026-09-04.
 
 ## System shape
@@ -75,7 +75,7 @@ Supervisor (code, later)  ---- reads record, writes log ---->  log (append-only 
   5. Each of the three link types can be added and read back; a fourth is rejected. [testing]
   6. Each of the seven states can be set and read back; an eighth is rejected. [testing]
   7. A convention document maps each policy field to a beads field, label, or convention. [looking]
-- **Job pairs**: `record_init`, `record_create_item`, `record_add_link`, `record_set_state`, `record_list_kind`
+- **Job pairs**: `record_run`, `record_init`, `record_create_item`, `record_add_link`, `record_set_state`, `record_list_kind`
 - **Needs first**: none
 
 ### Story 0001-2: trace both ways and find orphans
@@ -175,4 +175,4 @@ Supervisor (code, later)  ---- reads record, writes log ---->  log (append-only 
 
 ## Status
 
-All three Board decisions accepted. Stories 0001-1 and 0001-5 are ready for instruction sheets.
+All three Board decisions accepted. Instruction sheets for 0001-1 and 0001-5 are in `work/sheets/`. Language for all jobs: Python 3.12, tests with pytest. Chosen because the wrapper generator and the orphan tooling are already Python and every harness can run it.

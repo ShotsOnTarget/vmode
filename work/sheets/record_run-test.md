@@ -1,0 +1,24 @@
+# Instruction sheet
+
+- **Job id**: 0001-1-record_run-test
+- **Kind**: test
+- **Parent Story**: 0001-1
+- **Function name**: `record_run`
+- **Folder**: `src/record_run/`
+- **Files you may change**: `src/record_run/test_record_run.py`
+- **Signature under test**: `record_run(args: list[str]) -> dict | list`
+- **Inputs**: as stated in the signature. Import with `from record_run.record_run import record_run` (and RecordError where needed, from `record_run.record_run`).
+- **Outputs**: the parsed JSON that bd printed on stdout.
+- **Errors**: raise RecordError(message: str, stderr: str) if bd is not on PATH, exits non-zero, or prints non-JSON.
+- **Allowed imports**: pytest, json, os, subprocess, shutil, pathlib, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0001-1 items contract: output JSON, errors JSON
+- **Setup**: record_* tests run `bd init --prefix vm --non-interactive` in `tmp_path` in a fixture and `monkeypatch.chdir(tmp_path)`. log_* tests use `tmp_path / 'log.jsonl'`.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_show_returns_dict`: after bd init in tmp_path and one bd create, record_run(['show', id]) returns a dict with key 'id'
+  - `test_nonzero_exit_raises`: record_run(['show', 'vm-nope']) raises RecordError
+  - `test_missing_binary_raises`: with PATH emptied via monkeypatch, record_run(['list']) raises RecordError
+  - `test_json_flag_added`: record_run(['list']) returns a list, proving --json was appended
+- **Checks to run before reporting**:
+  - `python -m pytest src/record_run -q`
+  - `wc -l src/record_run/test_record_run.py   (must print 50 or less)`
+- **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

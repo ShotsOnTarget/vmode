@@ -1,0 +1,23 @@
+# Instruction sheet
+
+- **Job id**: 0001-1-record_init-test
+- **Kind**: test
+- **Parent Story**: 0001-1
+- **Function name**: `record_init`
+- **Folder**: `src/record_init/`
+- **Files you may change**: `src/record_init/test_record_init.py`
+- **Signature under test**: `record_init(path: str) -> dict`
+- **Inputs**: as stated in the signature. Import with `from record_init.record_init import record_init` (and RecordError where needed, from `record_run.record_run`).
+- **Outputs**: {'path': str, 'prefix': 'vm'}.
+- **Errors**: raise RecordError if the directory does not exist, or bd init fails.
+- **Allowed imports**: pytest, json, os, subprocess, shutil, pathlib, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0001-1 items 1
+- **Setup**: record_* tests run `bd init --prefix vm --non-interactive` in `tmp_path` in a fixture and `monkeypatch.chdir(tmp_path)`. log_* tests use `tmp_path / 'log.jsonl'`.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_empty_dir_inits`: record_init(tmp_path) returns prefix 'vm' and tmp_path/.beads exists
+  - `test_list_is_empty_after_init`: after record_init, running bd list --json in that dir returns []
+  - `test_missing_dir_raises`: record_init(tmp_path/'nope') raises RecordError
+- **Checks to run before reporting**:
+  - `python -m pytest src/record_init -q`
+  - `wc -l src/record_init/test_record_init.py   (must print 50 or less)`
+- **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

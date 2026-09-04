@@ -1,0 +1,25 @@
+# Instruction sheet
+
+- **Job id**: 0001-1-record_create_item-test
+- **Kind**: test
+- **Parent Story**: 0001-1
+- **Function name**: `record_create_item`
+- **Folder**: `src/record_create_item/`
+- **Files you may change**: `src/record_create_item/test_record_create_item.py`
+- **Signature under test**: `record_create_item(kind: str, title: str, owner: str, parent: str | None = None) -> dict`
+- **Inputs**: as stated in the signature. Import with `from record_create_item.record_create_item import record_create_item` (and RecordError where needed, from `record_run.record_run`).
+- **Outputs**: {'id': str, 'kind': str, 'title': str, 'owner': str, 'parent': str | None, 'state': 'waiting'}.
+- **Errors**: raise ValueError before calling bd if kind is not one of the six, owner is empty, or parent is None and kind is not intent. RecordError propagates from record_run.
+- **Allowed imports**: pytest, json, os, subprocess, shutil, pathlib, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0001-1 items 2, 3, 4
+- **Setup**: record_* tests run `bd init --prefix vm --non-interactive` in `tmp_path` in a fixture and `monkeypatch.chdir(tmp_path)`. log_* tests use `tmp_path / 'log.jsonl'`.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_each_kind_creates`: for each of the six kinds (intent first, others with the intent as parent) the returned dict has that kind and a non-empty id
+  - `test_bad_kind_rejected`: kind 'bug' raises ValueError and bd is not called
+  - `test_no_owner_rejected`: owner '' raises ValueError
+  - `test_no_parent_rejected`: kind 'story' with parent None raises ValueError
+  - `test_intent_needs_no_parent`: kind 'intent' with parent None succeeds
+- **Checks to run before reporting**:
+  - `python -m pytest src/record_create_item -q`
+  - `wc -l src/record_create_item/test_record_create_item.py   (must print 50 or less)`
+- **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

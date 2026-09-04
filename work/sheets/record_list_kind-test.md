@@ -1,0 +1,24 @@
+# Instruction sheet
+
+- **Job id**: 0001-1-record_list_kind-test
+- **Kind**: test
+- **Parent Story**: 0001-1
+- **Function name**: `record_list_kind`
+- **Folder**: `src/record_list_kind/`
+- **Files you may change**: `src/record_list_kind/test_record_list_kind.py`
+- **Signature under test**: `record_list_kind(kind: str) -> list[dict]`
+- **Inputs**: as stated in the signature. Import with `from record_list_kind.record_list_kind import record_list_kind` (and RecordError where needed, from `record_run.record_run`).
+- **Outputs**: list of {'id','kind','title','owner','state'} for every item with that kind label, including closed ones.
+- **Errors**: raise ValueError if kind invalid. RecordError propagates.
+- **Allowed imports**: pytest, json, os, subprocess, shutil, pathlib, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0001-1 items 2
+- **Setup**: record_* tests run `bd init --prefix vm --non-interactive` in `tmp_path` in a fixture and `monkeypatch.chdir(tmp_path)`. log_* tests use `tmp_path / 'log.jsonl'`.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_filters_by_kind`: create one intent and two stories; record_list_kind('story') returns exactly two, both kind story
+  - `test_includes_closed`: set one story to done; it still appears
+  - `test_empty_kind_returns_empty`: record_list_kind('validation') returns [] on a fresh record
+  - `test_bad_kind_rejected`: kind 'bug' raises ValueError
+- **Checks to run before reporting**:
+  - `python -m pytest src/record_list_kind -q`
+  - `wc -l src/record_list_kind/test_record_list_kind.py   (must print 50 or less)`
+- **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.
