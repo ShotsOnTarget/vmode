@@ -108,7 +108,7 @@ A gate is a checkpoint. Nothing passes a gate without meeting every rule at that
 | Gate | When | Passes if |
 |---|---|---|
 | **Ready** | Before a Story goes to Builders | Every checklist item is clear and checkable. Story is linked to an Intent. Every code job has its test job. |
-| **Built** | When a Builder says a job is done | Code fits the size and shape rules (section 8). Nothing outside the job was touched. |
+| **Built** | When a Builder says a job is done | Code fits the size and shape rules (section 8). Nothing outside the job was touched. The change is attributed to the job: a change to code that names no Builder job is rejected, whoever made it. The Architect never lands code, not even a helper script. |
 | **Proven** | When a test job is done | All tests pass. Tests cover every checklist item they were asked to cover. |
 | **Verified** | When all pairs under a Story are done | Architect ticks every item on the Story checklist. No conflict with other finished Stories under the same Intent. |
 | **Validated** | When all Stories under an Intent are done | Board says yes. |
