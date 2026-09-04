@@ -13,6 +13,8 @@ def record_create_item(
     if parent is None and kind != "intent":
         raise ValueError("parent is required unless kind is intent")
 
+    right_side = kind in ("test", "verification", "validation")
+
     args = [
         "create",
         title,
@@ -24,13 +26,17 @@ def record_create_item(
         owner,
         "--no-inherit-labels",
     ]
-    if parent:
+    if parent and not right_side:
         args += ["--parent", parent]
 
     result = record_run(args)
+    new_id = result["id"]
+
+    if right_side:
+        record_run(["dep", "add", new_id, parent, "-t", "validates"])
 
     return {
-        "id": result["id"],
+        "id": new_id,
         "kind": kind,
         "title": title,
         "owner": owner,

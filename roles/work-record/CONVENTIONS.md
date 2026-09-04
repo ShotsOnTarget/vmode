@@ -6,7 +6,8 @@ How each policy section 4 field maps onto beads 1.0. This is the only document t
 |---|---|---|
 | Id | issue id, `vm-xxxx`, permanent | assigned on create |
 | Kind | label `kind:<kind>`; type `epic` for intent, `task` for the rest | `bd create -l kind:story -t task` |
-| Parent | hierarchical parent | `bd create --parent <id>` or `bd dep add <child> <parent> -t parent-child` |
+| Parent, left-side kinds (intent, story, code) | hierarchical parent | `bd create --parent <id>` |
+| Parent, right-side kinds (validation, verification, test) | the item it checks, via the `validates` link only. Never `--parent`: beads refuses a validates link between a child and its parent. | `bd dep add <checker> <checked> -t validates` |
 | Link: parent_of | dependency type `parent-child` | `bd dep add <child> <parent> -t parent-child` |
 | Link: needs_first | dependency type `blocks` | `bd dep add <item> --blocked-by <other>` |
 | Link: checks | dependency type `validates` (native, no label needed) | `bd dep add <checker> <checked> -t validates` |
@@ -38,5 +39,7 @@ Kinds, left and right of the V:
 | intent | validation |
 | story | verification |
 | code | test |
+
+Reading the parent: a left-side item's parent is its hierarchical parent. A right-side item's parent is the target of its validates link. `record_graph` applies this rule so trace and orphan tools see one parent for every item.
 
 Every command used by tools takes `--json`. Every wrapper function shells out to `bd`, never touches the database directly.

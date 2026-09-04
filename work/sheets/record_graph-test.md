@@ -16,7 +16,8 @@
 - **Cases**, one test function each, exactly these names, nothing more:
   - `test_keys_are_all_ids`: create an intent and a child story; graph has exactly those two keys
   - `test_kind_and_state_from_labels`: story created with labels kind:story,state:waiting has kind 'story' and state 'waiting'
-  - `test_parent_and_checks`: story with parent intent, and a verification with a validates dep on the story; graph[story]['parent']==intent and graph[verification]['checks']==[story]
+  - `test_parent_and_checks`: story with parent intent, and a verification created WITHOUT --parent with a validates dep on the story; graph[story]['parent']==intent and graph[verification]['checks']==[story]
+  - `test_parent_from_validates`: a verification created without --parent and with a validates dep on a story has graph[verification]['parent'] == story
   - `test_needs_from_blocks`: create stories A and B under one intent, then record_run(['dep','add',B,'--blocked-by',A]); graph[B]['needs']==[A]
 - **Checks to run before reporting**:
   - `python -m pytest src/record_graph -q`

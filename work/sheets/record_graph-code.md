@@ -8,7 +8,7 @@
 - **Files you may change**: `src/record_graph/record_graph.py`, `src/record_graph/record_graph.md`
 - **Signature**: `record_graph() -> dict[str, dict]`
 - **Inputs**: none. Reads the whole record with record_run(['list','--all']).
-- **Outputs**: dict keyed by id. Each value: {'id': str, 'kind': str, 'title': str, 'owner': str, 'state': str, 'parent': str | None, 'checks': list[str], 'needs': list[str]}. kind and state come from labels 'kind:x' and 'state:x' (first match, '' if none). parent from the item's 'parent' field. checks: ids this item has a dependency on with type 'validates'. needs: ids this item has a dependency on with type 'blocks'.
+- **Outputs**: dict keyed by id. Each value: {'id': str, 'kind': str, 'title': str, 'owner': str, 'state': str, 'parent': str | None, 'checks': list[str], 'needs': list[str]}. kind and state come from labels 'kind:x' and 'state:x' (first match, '' if none). parent: the item's 'parent' field if set, otherwise the depends_on_id of its first dependency of type 'validates', otherwise None. checks: ids this item has a dependency on with type 'validates'. needs: ids this item has a dependency on with type 'blocks'.
 - **Errors**: RecordError propagates.
 - **Allowed imports**: from record_run.record_run import record_run, RecordError. Nothing else.
 - **Checklist items this job serves**: Story 0001-2 items contract: one read of the record

@@ -15,20 +15,21 @@ def record_graph() -> dict[str, dict]:
             (l.split("state:", 1)[1] for l in labels if l.startswith("state:")), ""
         )
         deps = item.get("dependencies", [])
-        checks = [
+        validates = [
             d["depends_on_id"] for d in deps if d.get("type") == "validates"
         ]
         needs = [
             d["depends_on_id"] for d in deps if d.get("type") == "blocks"
         ]
+        parent = item.get("parent") or (validates[0] if validates else None)
         graph[item_id] = {
             "id": item_id,
             "kind": kind,
             "title": item.get("title", ""),
             "owner": item.get("owner", ""),
             "state": state,
-            "parent": item.get("parent"),
-            "checks": checks,
+            "parent": parent,
+            "checks": validates,
             "needs": needs,
         }
 

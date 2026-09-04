@@ -31,6 +31,14 @@ def test_parent_and_checks(bd_repo):
     assert graph[verification]["checks"] == [story]
 
 
+def test_parent_from_validates(bd_repo):
+    story = _id(record_run(["create", "story1", "-a", "me", "--no-inherit-labels"]))
+    verification = _id(record_run(["create", "verification1", "-a", "me", "--no-inherit-labels"]))
+    record_run(["dep", "add", verification, story, "-t", "validates"])
+    graph = record_graph()
+    assert graph[verification]["parent"] == story
+
+
 def test_needs_from_blocks(bd_repo):
     intent = _id(record_run(["create", "intent1", "-t", "epic", "-a", "me", "--no-inherit-labels"]))
     story_a = _id(record_run(["create", "storyA", "-a", "me", "--no-inherit-labels", "--parent", intent]))
