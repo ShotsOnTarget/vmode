@@ -1,0 +1,21 @@
+# Instruction sheet
+
+- **Job id**: 0003-3-step-code
+- **Kind**: code
+- **Parent Story**: 0003-3
+- **Function name**: `step`
+- **Folder**: `src/step/`
+- **Files you may change**: `src/step/step.py`, `src/step/step.md`
+- **Signature**: `step(state: str, event: str, retries: int) -> tuple[str, str, int]`
+- **Inputs**: state: one of the seven policy states. event: one of gate_pass, gate_fail, sheet_changed, claim_timeout, edited, claimed, ready_gate_pass, needs_done. retries: current count >= 0.
+- **Outputs**: (action, next_state, new_retries) from a module-level dict TABLE keyed by (state, event). Exact rows: ('waiting','needs_done')->('none','waiting',r); ('waiting','ready_gate_pass')->('none','ready',r); ('ready','claimed')->('none','in_progress',r); ('in_progress','claim_timeout')->('release','ready',r); ('in_progress','gate_pass')->('none','checking',r) is NOT a row: the mover sets checking; ('checking','gate_pass')->('log_done','done',r); ('checking','gate_fail') with r<3 ->('bounce','ready',r+1); ('checking','gate_fail') with r>=3 ->('escalate','blocked',r); ('blocked','sheet_changed')->('reset','waiting',0); ('done','edited')->('reopen_checkers','reopened',r); ('reopened','ready_gate_pass')->('none','ready',r).
+- **Errors**: ValueError for any (state, event) not in TABLE.
+- **Allowed imports**: none. Nothing else.
+- **Checklist items this job serves**: Story 0003-3 items 1, 2, 3, 4
+- **How**: TABLE maps (state, event) to (action, next_state); the retry arithmetic for gate_fail is the only logic outside the lookup. Under 40 lines.
+- **Checks to run before reporting**:
+  - `ruff format src/step` then `ruff check src/step` (both clean)
+  - `python tools/lint.py`   (must print 'shape ok' for your folder; findings in other folders are not yours)
+  - `python -c "import ast,sys; t=ast.parse(open('src/step/step.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)
+- **Note file** `src/step/step.md` has exactly these six lines: purpose, signature, inputs, outputs, side effects, work item id 0003-3-step-code.
+- **Out of scope**: tests (another Builder writes them), any other folder, any import not listed, any behaviour not listed above. Never hand-pack lines; the formatter decides layout. If the formatted file exceeds 50 lines, report blocked.

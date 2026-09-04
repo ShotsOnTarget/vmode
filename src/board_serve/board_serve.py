@@ -10,23 +10,10 @@ from record_graph.record_graph import record_graph
 from record_run.record_run import RecordError, record_run
 
 
-def _route(self):
-    path, q, m = urlparse(self.path).path, urlparse(self.path).query, self.command
-    if m == "GET" and path == "/":
-        result = 200, board_page(), True
-    elif m == "GET" and path == "/api/intents":
-        items = record_run(["list", "--all"])
-        labels = [(it["id"], lb) for it in items for lb in it.get("labels", [])]
-        care = {i: lb[5:] for i, lb in labels if lb.startswith("care:")}
-        result = 200, board_rollup(record_graph(), care)
-    elif m == "GET" and path == "/api/tree":
-        result = 200, board_tree(parse_qs(q).get("id", [None])[0], record_graph())
-    elif m == "POST" and path == "/api/decide":
-        b = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
-        result = 200, board_decide(b["intent"], b["decision"], b.get("reason", ""))
-    else:
-        result = 404, {"error": "not found"}
-    return result
+def _care():
+    items = record_run(["list", "--all"])
+    labels = [(it["id"], lb) for it in items for lb in it.get("labels", [])]
+    return {i: lb[5:] for i, lb in labels if lb.startswith("care:")}
 
 
 def _handle(self):
@@ -36,8 +23,23 @@ def _handle(self):
         self.end_headers()
         self.wfile.write(body.encode() if html else json.dumps(body).encode())
 
+    path, q, m = urlparse(self.path).path, urlparse(self.path).query, self.command
+    gets = {
+        "/": lambda: (board_page(), True),
+        "/api/intents": lambda: (board_rollup(record_graph(), _care()),),
+        "/api/tree": lambda: (
+            board_tree(parse_qs(q).get("id", [None])[0], record_graph()),
+        ),
+    }
     try:
-        send(*_route(self))
+        if m == "GET" and path in gets:
+            result = 200, *gets[path]()
+        elif m == "POST" and path == "/api/decide":
+            b = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
+            result = 200, board_decide(b["intent"], b["decision"], b.get("reason", ""))
+        else:
+            result = 404, {"error": "not found"}
+        send(*result)
     except (ValueError, RecordError) as e:
         send(400, {"error": str(e)})
 

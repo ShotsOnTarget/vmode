@@ -1,0 +1,21 @@
+# Instruction sheet
+
+- **Job id**: 0003-1-gate_proven-code
+- **Kind**: code
+- **Parent Story**: 0003-1
+- **Function name**: `gate_proven`
+- **Folder**: `src/gate_proven/`
+- **Files you may change**: `src/gate_proven/gate_proven.py`, `src/gate_proven/gate_proven.md`
+- **Signature**: `gate_proven(job_id: str, pytest_output: str, cases: list[str]) -> list[str]`
+- **Inputs**: pytest_output: the text of `python -m pytest src/<folder> -q -rA` (with -rA so every test id is listed as PASSED or FAILED). cases: the case names from the sheet without the 'test_' prefix.
+- **Outputs**: rules broken in this fixed order: 'tests_failed' (any line containing ' FAILED ' or 'FAILED ' or ' ERROR ' or the summary line does not contain 'passed'), 'case_missing' (a case in cases with no line containing 'test_<case>'), 'case_extra' (a line containing '::test_' whose name after 'test_' is not in cases). Empty list when all pass and names match exactly.
+- **Errors**: none.
+- **Allowed imports**: re. Nothing else.
+- **Checklist items this job serves**: Story 0003-1 items 4, 5
+- **How**: Pure. Parse test names with the regex r'::(test_\w+)'. Names must match the case list as a set; order does not matter.
+- **Checks to run before reporting**:
+  - `ruff format src/gate_proven` then `ruff check src/gate_proven` (both clean)
+  - `python tools/lint.py`   (must print 'shape ok' for your folder; findings in other folders are not yours)
+  - `python -c "import ast,sys; t=ast.parse(open('src/gate_proven/gate_proven.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)
+- **Note file** `src/gate_proven/gate_proven.md` has exactly these six lines: purpose, signature, inputs, outputs, side effects, work item id 0003-1-gate_proven-code.
+- **Out of scope**: tests (another Builder writes them), any other folder, any import not listed, any behaviour not listed above. Never hand-pack lines; the formatter decides layout. If the formatted file exceeds 50 lines, report blocked.

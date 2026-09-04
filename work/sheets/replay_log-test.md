@@ -1,0 +1,25 @@
+# Instruction sheet
+
+- **Job id**: 0003-3-replay_log-test
+- **Kind**: test
+- **Parent Story**: 0003-3
+- **Function name**: `replay_log`
+- **Folder**: `src/replay_log/`
+- **Files you may change**: `src/replay_log/test_replay_log.py`
+- **Signature under test**: `replay_log(path: str, item_id: str) -> str`
+- **Inputs**: as stated. Import with `from replay_log.replay_log import replay_log`.
+- **Outputs**: the final state after mapping each of the item's lines to an event and feeding step. Mapping, in this order per line: state 'done' -> event gate_pass from state checking; state 'in_progress' or 'ready' with a 'retry' key in inputs -> gate_fail from state checking; state 'blocked' -> gate_fail from state checking; state 'reopened' -> edited from state done; state 'waiting' or 'ready' with gate 'Ready' -> ready_gate_pass from state waiting; any other line is skipped. Retries carry across lines; start state waiting, retries 0. Lines are replayed in file order.
+- **Errors**: ValueError from step propagates; ValueError on a malformed line.
+- **Allowed imports**: pytest, json, and the function under test. Nothing else. No record server is needed.
+- **Checklist items this job serves**: Story 0003-3 items 5
+- **Setup**: hand-build graphs, strings and log files under tmp_path. Test files have no line limit but must be formatter and linter clean.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_retry_then_done`: lines for X: {state:'in_progress',inputs:{'retry':1}} then {state:'done'} -> 'done'
+  - `test_three_fails_blocked`: three retry lines then {state:'blocked'} -> 'blocked'
+  - `test_reopen_after_done`: {state:'done'} then {state:'reopened'} -> 'reopened'
+  - `test_other_item_ignored`: lines for Y only -> 'waiting'
+  - `test_real_log_item`: on work/supervisor-log.jsonl, replay_log for '0001-1-record_run' returns 'done' (its lines: Proven blocked... it ends done); assert == 'done'
+- **Checks to run before reporting**:
+  - `ruff format src/replay_log` then `ruff check src/replay_log` (both clean)
+  - `python -m pytest src/replay_log -q`
+- **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.
