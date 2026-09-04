@@ -157,4 +157,4 @@ Cost so far, from `cost_rollup` over the log (tokens, seconds, Builder runs; 000
 | 0002-1 | 235,690 | 110 | 4 |
 | 0002-2 | 943,990 | 486 | 14 |
 
-Runs count log lines under the item, including gate decisions with zero cost. Next: 0002-3 (Analyst skill) and 0002-4 (proposal gate).
+Runs count log lines under the item, including gate decisions with zero cost. 0002-3 and 0002-4 Verified 2026-09-04. First Analyst run on Story 0001-1 produced wiki page `architect-sheet-assumes-cli-shape` (4 cited log lines, 1,075,796 tokens attributed) and proposal `vm-v1d.1.7` targeting `roles/architect/SKILL.md`, which passes `proposal_check`. It is High care (role skill) and awaits Board validation. Next: 0002-5, the measured loop.

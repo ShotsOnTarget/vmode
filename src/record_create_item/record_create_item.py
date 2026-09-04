@@ -1,6 +1,6 @@
 from record_run.record_run import record_run, RecordError
 
-_KINDS = ("intent", "story", "code", "test", "verification", "validation")
+_KINDS = ("intent", "story", "code", "test", "verification", "validation", "proposal")
 
 
 def record_create_item(

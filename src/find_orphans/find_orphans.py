@@ -15,7 +15,7 @@ def find_orphans(graph: dict[str, dict]) -> list[dict]:
         if kind != "intent" and item.get("parent") is None:
             results.append({"id": item_id, "rule": "no_parent"})
 
-        if kind in ("intent", "story", "code") and item_id not in checked_ids:
+        if kind in ("intent", "story", "code", "proposal") and item_id not in checked_ids:
             results.append({"id": item_id, "rule": "unchecked"})
 
         if kind in ("validation", "verification", "test") and not item.get("checks"):
