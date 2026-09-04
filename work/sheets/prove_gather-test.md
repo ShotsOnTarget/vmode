@@ -15,6 +15,7 @@
 - **Setup**: use the shared fixture `bd_repo` from `src/conftest.py`; create items with record_run(['create', ...]) per roles/work-record/CONVENTIONS.md with --no-inherit-labels and explicit kind:/state: labels; a temp config is a copy of roles/board.toml under tmp_path with the wip value edited; a fake invoke is a plain function.
 - **Cases**, one test function each, exactly these names, nothing more:
   - `test_gathers_files`: in bd_repo create a code job whose title is 'x code' with sheet listing '- `test_a`:', create src/x/x.py and src/x/x.md in the repo; prove_gather(id, 'x') has code text, note text, cases ['a'], kind 'code'
+  - `test_changed_filtered`: with the repo dirty outside src and another job 'y code' in state in_progress with a dirty src/y/, changed for folder x contains only src/x/ paths
   - `test_usage_from_note`: add note 'usage: {"tokens": 5, "seconds": 1.0, "report": "ok"}' -> usage tokens 5
   - `test_retry_label`: add label retry:2 -> retries 2
   - `test_no_usage_default`: no note -> usage tokens -1
