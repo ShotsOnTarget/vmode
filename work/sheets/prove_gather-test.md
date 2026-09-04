@@ -1,0 +1,24 @@
+# Instruction sheet
+
+- **Job id**: 0003-4-prove_gather-test
+- **Kind**: test
+- **Parent Story**: 0003-4
+- **Function name**: `prove_gather`
+- **Folder**: `src/prove_gather/`
+- **Files you may change**: `src/prove_gather/test_prove_gather.py` and nothing else. You never create or edit the code file.
+- **Signature under test**: `prove_gather(job_id: str, folder: str) -> dict`
+- **Inputs**: as stated. Import with `from prove_gather.prove_gather import prove_gather`.
+- **Outputs**: {'changed': list of repo-relative paths from `git status --porcelain` (columns 4 onward, forward slashes; renames use the new path), 'code': text of src/<folder>/<folder>.py or '', 'note': text of src/<folder>/<folder>.md or '', 'fmt_out': stdout+stderr of `ruff format --check --diff src/<folder>`, 'lint_out': stdout of `ruff check src/<folder> --output-format concise`, 'pytest_out': stdout of `python -m pytest src/<folder> -q -rA`, 'cases': names from the job's sheet: every line matching r'- `test_(\w+)`' with the test_ prefix removed, 'kind': the job's kind from record_show_item, 'usage': the parsed JSON of the most recent note on the job whose text starts with 'usage:' (text after 'usage:' is JSON with tokens, seconds, report), or {'tokens': -1, 'seconds': 0.0, 'report': ''} if none, 'retries': int from a label 'retry:N' on the job, 0 if absent}.
+- **Errors**: RecordError propagates. Subprocess failures are captured as output text, never raised.
+- **Allowed imports**: pytest, json, os, shutil, pathlib, record_run, record_show_item, log_read_item, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0003-4 items 4, 5
+- **Setup**: use the shared fixture `bd_repo` from `src/conftest.py`; create items with record_run(['create', ...]) per roles/work-record/CONVENTIONS.md with --no-inherit-labels and explicit kind:/state: labels; a temp config is a copy of roles/board.toml under tmp_path with the wip value edited; a fake invoke is a plain function.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_gathers_files`: in bd_repo create a code job whose title is 'x code' with sheet listing '- `test_a`:', create src/x/x.py and src/x/x.md in the repo; prove_gather(id, 'x') has code text, note text, cases ['a'], kind 'code'
+  - `test_usage_from_note`: add note 'usage: {"tokens": 5, "seconds": 1.0, "report": "ok"}' -> usage tokens 5
+  - `test_retry_label`: add label retry:2 -> retries 2
+  - `test_no_usage_default`: no note -> usage tokens -1
+- **Checks to run before reporting**:
+  - `ruff format src/prove_gather` then `ruff check src/prove_gather` (both clean)
+  - `python -m pytest src/prove_gather -q`
+- **Out of scope**: the code file, any other folder, any case not listed.

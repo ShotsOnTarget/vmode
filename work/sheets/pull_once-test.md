@@ -1,0 +1,25 @@
+# Instruction sheet
+
+- **Job id**: 0003-4-pull_once-test
+- **Kind**: test
+- **Parent Story**: 0003-4
+- **Function name**: `pull_once`
+- **Folder**: `src/pull_once/`
+- **Files you may change**: `src/pull_once/test_pull_once.py` and nothing else. You never create or edit the code file.
+- **Signature under test**: `pull_once(role: str, config_path: str, invoke) -> list[str]`
+- **Inputs**: as stated. Import with `from pull_once.pull_once import pull_once`.
+- **Outputs**: ids claimed this pass. For each column in the config whose role matches, in config order: headroom = min(wip_headroom(column), global headroom) where global headroom = limits.max_parallel_model_runs minus the count of in_progress items across all columns whose tier is not 'none' or 'human'; take that many from column_items; for each: claim_item(id, role); then usage = invoke(item, column); record_add_note(id, 'usage: ' + json.dumps(usage)); record_set_state(id, 'checking'); on any exception from invoke: record_set_state(id, 'ready') and record_add_note(id, 'release: ' + str(exc)[:200]).
+- **Errors**: ValueError if role has no column. RecordError propagates.
+- **Allowed imports**: pytest, json, os, shutil, pathlib, record_run, record_show_item, log_read_item, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0003-4 items 1, 2, 3, 7
+- **Setup**: use the shared fixture `bd_repo` from `src/conftest.py`; create items with record_run(['create', ...]) per roles/work-record/CONVENTIONS.md with --no-inherit-labels and explicit kind:/state: labels; a temp config is a copy of roles/board.toml under tmp_path with the wip value edited; a fake invoke is a plain function.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_claims_within_wip`: two ready code jobs, a temp config with build wip 1 -> first call claims one; second call with the first still in_progress claims none
+  - `test_invoke_result_recorded`: fake invoke returning {'tokens': 3, 'seconds': 0.5, 'report': 'ok'} -> item state checking and a note starting 'usage:'
+  - `test_invoke_failure_releases`: fake invoke raising RuntimeError -> item back in state ready with a note starting 'release:'
+  - `test_config_change_respected`: after lowering wip to 0 in the temp config file, the next call claims nothing
+  - `test_unknown_role_raises`: role 'nobody' -> ValueError
+- **Checks to run before reporting**:
+  - `ruff format src/pull_once` then `ruff check src/pull_once` (both clean)
+  - `python -m pytest src/pull_once -q`
+- **Out of scope**: the code file, any other folder, any case not listed.

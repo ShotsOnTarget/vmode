@@ -1,0 +1,21 @@
+# Instruction sheet
+
+- **Job id**: 0003-4-prove_apply-code
+- **Kind**: code
+- **Parent Story**: 0003-4
+- **Function name**: `prove_apply`
+- **Folder**: `src/prove_apply/`
+- **Files you may change**: `src/prove_apply/prove_apply.py`, `src/prove_apply/prove_apply.md`
+- **Signature**: `prove_apply(job_id: str, gathered: dict, log_path: str) -> str`
+- **Inputs**: job_id. gathered: the dict from prove_gather plus 'folder'. log_path: the Supervisor log.
+- **Outputs**: the resulting state, after: rules = gate_built(folder, {changed, code, note, fmt_out, lint_out}); if kind == 'test' also gate_proven(folder, pytest_out, cases) appended; event = 'gate_pass' if rules == [] else 'gate_fail'; (action, state, retries) = step('checking', event, gathered['retries']); apply: state via record_set_state; on bounce add note 'bounce: <rules joined by comma>' and set label retry:<n> (remove the old retry label first); on escalate write work/summaries/<job_id>.md in the shape of roles/shared/summary-format.md and set state blocked; always log_append one line per gate: {ts, item: job_id, gate: 'Built' or 'Proven', rule: rules joined or 'pass', inputs: {retries, action}, state, tokens: usage.tokens, seconds: usage.seconds}.
+- **Errors**: RecordError propagates.
+- **Allowed imports**: json, datetime, from gate_built.gate_built import gate_built; from gate_proven.gate_proven import gate_proven; from step.step import step; from record_set_state.record_set_state import record_set_state; from record_add_note.record_add_note import record_add_note; from record_run.record_run import record_run; from log_append.log_append import log_append. Nothing else.
+- **Checklist items this job serves**: Story 0003-4 items 4, 5, 6
+- **How**: One private helper per action (log line, bounce, escalate). Under 50 lines; if not possible report blocked. Any output shape you rely on from bd must be captured from a real run first, and the command named in the note file.
+- **Checks to run before reporting**:
+  - `ruff format src/prove_apply` then `ruff check src/prove_apply` (both clean; a noqa comment fails the shape check)
+  - `python tools/lint.py`   (no findings for your folder)
+  - `python -c "import ast,sys; t=ast.parse(open('src/prove_apply/prove_apply.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)
+- **Note file** `src/prove_apply/prove_apply.md` has exactly these six lines: purpose, signature, inputs, outputs, side effects, work item id 0003-4-prove_apply-code.
+- **Out of scope**: tests, any other folder, any import not listed. Never hand-pack lines. If the formatted file exceeds 50 lines, report blocked.

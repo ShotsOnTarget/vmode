@@ -1,0 +1,22 @@
+# Instruction sheet
+
+- **Job id**: 0003-2-record_labels-test
+- **Kind**: test
+- **Parent Story**: 0003-2
+- **Function name**: `record_labels`
+- **Folder**: `src/record_labels/`
+- **Files you may change**: `src/record_labels/test_record_labels.py` and nothing else. You never create or edit the code file.
+- **Signature under test**: `record_labels() -> dict[str, list[str]]`
+- **Inputs**: as stated. Import with `from record_labels.record_labels import record_labels`.
+- **Outputs**: id -> that item's labels list, for every item.
+- **Errors**: RecordError propagates.
+- **Allowed imports**: pytest, json, os, shutil, pathlib, record_run, record_show_item, log_read_item, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0003-2 items 3, 4
+- **Setup**: use the shared fixture `bd_repo` from `src/conftest.py`; create items with record_run(['create', ...]) per roles/work-record/CONVENTIONS.md with --no-inherit-labels and explicit kind:/state: labels; a temp config is a copy of roles/board.toml under tmp_path with the wip value edited; a fake invoke is a plain function.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_labels_returned`: create an item with labels kind:code,state:ready -> record_labels()[id] contains both
+  - `test_empty_record_empty`: fresh record -> {}
+- **Checks to run before reporting**:
+  - `ruff format src/record_labels` then `ruff check src/record_labels` (both clean)
+  - `python -m pytest src/record_labels -q`
+- **Out of scope**: the code file, any other folder, any case not listed.
