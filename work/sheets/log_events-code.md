@@ -9,10 +9,10 @@
 - **Signature**: `log_events(path: str, item_id: str) -> list[tuple[str, str]]`
 - **Inputs**: path: log file of JSON lines with keys ts, item, gate, rule, inputs, state. item_id: exact item.
 - **Outputs**: list of (from_state, event) tuples in file order for lines whose item == item_id, first match wins: state 'done' -> ('checking','gate_pass'); state in ('in_progress','ready') and 'retry' in inputs -> ('checking','gate_fail'); state 'blocked' -> ('checking','gate_fail'); state 'reopened' -> ('done','edited'); state in ('waiting','ready') and gate == 'Ready' -> ('waiting','ready_gate_pass'); otherwise skipped.
-- **Errors**: ValueError on a line that is not valid JSON or lacks item or state. Missing file returns [].
-- **Allowed imports**: json, os. Nothing else.
+- **Errors**: ValueError propagates from log_read_item on a malformed line; a line lacking state raises ValueError here. Missing file returns [] (log_read_item already does this).
+- **Allowed imports**: from log_read_item.log_read_item import log_read_item. Nothing else.
 - **Checklist items this job serves**: Story 0003-3 items 5
-- **How**: Pure read. Keep the mapping as a tuple of (predicate, from_state, event). Under 35 lines.
+- **How**: Call log_read_item(path, item_id) for the entries (it reads, filters by item, validates JSON, returns [] for a missing file); do no file reading here. Keep the mapping as a tuple of (predicate, from_state, event) and return the first match per entry. Under 30 lines.
 - **Checks to run before reporting**:
   - `ruff format src/log_events` then `ruff check src/log_events` (both clean; a noqa comment fails the shape check)
   - `python tools/lint.py`   (no findings for your folder)
