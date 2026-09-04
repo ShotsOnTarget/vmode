@@ -223,3 +223,4 @@
 {"gate": "Proven", "inputs": {"result": "6 passed"}, "item": "0003-3-log_events", "rule": "pytest passes", "seconds": 0.0, "state": "done", "tokens": 0, "ts": "2026-09-04T14:50:11.963148+00:00"}
 {"gate": "Built", "inputs": {"lines": 10}, "item": "0003-3-replay_log-code", "rule": "format, lint, shape (after split)", "seconds": 38.2, "state": "done", "tokens": 123799, "ts": "2026-09-04T14:50:11.963148+00:00"}
 {"gate": "Built", "inputs": {"cases": 5}, "item": "0003-3-replay_log-test", "rule": "format, lint", "seconds": 120.1, "state": "done", "tokens": 124808, "ts": "2026-09-04T14:50:11.963148+00:00"}
+{"gate": "Verified", "inputs": {"1-4": "test_step cases", "5": "replay_log('0001-1-record_run') == done; test_real_log_item"}, "item": "0003-3", "rule": "Architect ticks checklist 1-5", "seconds": 0.0, "state": "done", "tokens": 0, "ts": "2026-09-04T14:50:45.693557+00:00"}
