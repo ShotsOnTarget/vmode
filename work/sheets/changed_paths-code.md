@@ -1,0 +1,21 @@
+# Instruction sheet
+
+- **Job id**: 0003-4-changed_paths-code
+- **Kind**: code
+- **Parent Story**: 0003-4
+- **Function name**: `changed_paths`
+- **Folder**: `src/changed_paths/`
+- **Files you may change**: `src/changed_paths/changed_paths.py`, `src/changed_paths/changed_paths.md`
+- **Signature**: `changed_paths(folder: str, graph: dict, repo: str = ".") -> list[str]`
+- **Inputs**: folder: this job's function folder name. graph: from record_graph. repo: working tree path.
+- **Outputs**: repo-relative paths from `git status --porcelain` run in repo (take the text from column 4 onward; for a rename 'a -> b' take b; forward slashes), keeping only paths starting with 'src/', and dropping any path under src/<x>/ where x != folder and some item in graph of kind code or test has state in_progress or checking and a title starting with '<x> '. Sorted.
+- **Errors**: RuntimeError with stderr if git fails.
+- **Allowed imports**: subprocess. Nothing else.
+- **Checklist items this job serves**: Story 0003-4 items 4, 5
+- **How**: one helper builds the set of other claimed folders from graph, one parses porcelain lines. Under 40 lines.
+- **Checks to run before reporting**:
+  - `ruff format src/changed_paths` then `ruff check src/changed_paths` (both clean; a noqa comment fails the shape check)
+  - `python tools/lint.py`   (no findings for your folder)
+  - `python -c "import ast,sys; t=ast.parse(open('src/changed_paths/changed_paths.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)
+- **Note file** `src/changed_paths/changed_paths.md` has exactly these six lines: purpose, signature, inputs, outputs, side effects, work item id 0003-4-changed_paths-code.
+- **Out of scope**: tests, any other folder, any import not listed. Never run git against this repository while testing; use a temporary repository.

@@ -1,0 +1,25 @@
+# Instruction sheet
+
+- **Job id**: 0003-4-changed_paths-test
+- **Kind**: test
+- **Parent Story**: 0003-4
+- **Function name**: `changed_paths`
+- **Folder**: `src/changed_paths/`
+- **Files you may change**: `src/changed_paths/test_changed_paths.py` and nothing else. You never create or edit the code file.
+- **Signature under test**: `changed_paths(folder: str, graph: dict, repo: str = ".") -> list[str]`
+- **Inputs**: as stated. Import with `from changed_paths.changed_paths import changed_paths`.
+- **Outputs**: sorted src-only paths minus other claimed folders
+- **Errors**: RuntimeError if git fails
+- **Allowed imports**: pytest, subprocess, pathlib, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0003-4 items 4, 5
+- **Setup**: a temporary git repository under tmp_path (git init -q, user configured); create dirty files; hand-build graph dicts in the shape documented in work/sheets/record_graph-code.md. Never touch this repository's git state.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_only_src_paths`: dirty files src/x/x.py and work/log.jsonl -> ['src/x/x.py']
+  - `test_other_claimed_folder_dropped`: dirty src/x/x.py and src/y/y.py; graph has a code item titled 'y code' in state in_progress -> ['src/x/x.py']
+  - `test_other_unclaimed_folder_kept`: same but the y item is state done -> both paths, sorted
+  - `test_rename_uses_new_path`: a tracked file src/x/a.py renamed with git mv to src/x/b.py -> contains 'src/x/b.py' and not 'src/x/a.py'
+  - `test_git_failure_raises`: repo path that is not a git repository -> RuntimeError
+- **Checks to run before reporting**:
+  - `ruff format src/changed_paths` then `ruff check src/changed_paths` (both clean)
+  - `python -m pytest src/changed_paths -q`
+- **Out of scope**: the code file, any other folder, any case not listed.
