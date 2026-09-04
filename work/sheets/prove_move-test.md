@@ -1,0 +1,25 @@
+# Instruction sheet
+
+- **Job id**: 0003-4-prove_move-test
+- **Kind**: test
+- **Parent Story**: 0003-4
+- **Function name**: `prove_move`
+- **Folder**: `src/prove_move/`
+- **Files you may change**: `src/prove_move/test_prove_move.py` and nothing else. You never create or edit the code file.
+- **Signature under test**: `prove_move(job_id: str, outcome: dict) -> None`
+- **Inputs**: as stated. Import with `from prove_move.prove_move import prove_move`.
+- **Outputs**: record effects as described in work/sheets/prove_move-code.md
+- **Errors**: ValueError on missing key
+- **Allowed imports**: pytest, json, os, record_run, record_show_item, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0003-4 items 5, 6
+- **Setup**: use the shared fixture `bd_repo`; create items with record_run(['create', ...]) per roles/work-record/CONVENTIONS.md with --no-inherit-labels and explicit kind:/state: labels.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_bounce_sets_label_and_note`: item in checking; outcome bounce/ready/1/['lint_findings'] -> state label state:ready, label retry:1, a comment_count >= 1 via record_run(['show', id])
+  - `test_bounce_replaces_retry_label`: item with label retry:1; bounce with retries 2 -> labels contain retry:2 and not retry:1
+  - `test_escalate_writes_summary`: outcome escalate/blocked/3/['over_50_lines'] -> state:blocked and work/summaries/<id>.md exists and mentions over_50_lines (clean the file up after)
+  - `test_done_sets_state`: outcome log_done/done/0/[] -> state:done
+  - `test_missing_key_raises`: outcome without rules -> ValueError
+- **Checks to run before reporting**:
+  - `ruff format src/prove_move` then `ruff check src/prove_move` (both clean)
+  - `python -m pytest src/prove_move -q`
+- **Out of scope**: the code file, any other folder, any case not listed.

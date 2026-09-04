@@ -1,0 +1,24 @@
+# Instruction sheet
+
+- **Job id**: 0003-4-prove_rules-test
+- **Kind**: test
+- **Parent Story**: 0003-4
+- **Function name**: `prove_rules`
+- **Folder**: `src/prove_rules/`
+- **Files you may change**: `src/prove_rules/test_prove_rules.py` and nothing else. You never create or edit the code file.
+- **Signature under test**: `prove_rules(gathered: dict) -> list[str]`
+- **Inputs**: as stated. Import with `from prove_rules.prove_rules import prove_rules`.
+- **Outputs**: rules from the gates
+- **Errors**: ValueError from gate_built
+- **Allowed imports**: pytest, json, os, record_run, record_show_item, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0003-4 items 4, 5
+- **Setup**: hand-build gathered dicts.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_clean_code_empty`: kind code with clean inputs (10-line code with one def, six-line note containing folder, fmt_out '', lint_out 'All checks passed!', changed within folder) -> []
+  - `test_code_skips_proven`: kind code with pytest_out 'FAILED x' -> [] (proven not run)
+  - `test_test_runs_proven`: kind test with clean built inputs and pytest_out 'FAILED src/x/test_x.py::test_a' cases ['a'] -> contains 'tests_failed'
+  - `test_built_rules_first`: kind test with lint_out 'x:1:1: E501' and failing pytest -> 'lint_findings' appears before 'tests_failed'
+- **Checks to run before reporting**:
+  - `ruff format src/prove_rules` then `ruff check src/prove_rules` (both clean)
+  - `python -m pytest src/prove_rules -q`
+- **Out of scope**: the code file, any other folder, any case not listed.

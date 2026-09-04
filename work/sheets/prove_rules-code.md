@@ -1,0 +1,21 @@
+# Instruction sheet
+
+- **Job id**: 0003-4-prove_rules-code
+- **Kind**: code
+- **Parent Story**: 0003-4
+- **Function name**: `prove_rules`
+- **Folder**: `src/prove_rules/`
+- **Files you may change**: `src/prove_rules/prove_rules.py`, `src/prove_rules/prove_rules.md`
+- **Signature**: `prove_rules(gathered: dict) -> list[str]`
+- **Inputs**: gathered: the dict from prove_gather with 'folder' added (keys folder, kind, changed, code, note, fmt_out, lint_out, pytest_out, cases).
+- **Outputs**: gate_built(gathered['folder'], {changed, code, note, fmt_out, lint_out}) and, when kind == 'test', plus gate_proven(gathered['folder'], pytest_out, cases). Concatenated in that order.
+- **Errors**: ValueError from gate_built propagates.
+- **Allowed imports**: from gate_built.gate_built import gate_built; from gate_proven.gate_proven import gate_proven. Nothing else.
+- **Checklist items this job serves**: Story 0003-4 items 4, 5
+- **How**: Pure composition. Under 20 lines.
+- **Checks to run before reporting**:
+  - `ruff format src/prove_rules` then `ruff check src/prove_rules` (both clean; a noqa comment fails the shape check)
+  - `python tools/lint.py`   (no findings for your folder)
+  - `python -c "import ast,sys; t=ast.parse(open('src/prove_rules/prove_rules.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)
+- **Note file** `src/prove_rules/prove_rules.md` has exactly these six lines: purpose, signature, inputs, outputs, side effects, work item id 0003-4-prove_rules-code.
+- **Out of scope**: tests, any other folder, any import not listed. Never hand-pack lines. If the formatted file exceeds 50 lines, report blocked.

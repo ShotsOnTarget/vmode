@@ -1,0 +1,21 @@
+# Instruction sheet
+
+- **Job id**: 0003-4-prove_move-code
+- **Kind**: code
+- **Parent Story**: 0003-4
+- **Function name**: `prove_move`
+- **Folder**: `src/prove_move/`
+- **Files you may change**: `src/prove_move/prove_move.py`, `src/prove_move/prove_move.md`
+- **Signature**: `prove_move(job_id: str, outcome: dict) -> None`
+- **Inputs**: job_id. outcome: {'action': str from step, 'state': str, 'retries': int, 'rules': list[str]}.
+- **Outputs**: nothing. Effects by action: 'log_done' -> record_set_state(job_id, state). 'bounce' -> record_set_state(job_id, state); record_add_note(job_id, 'bounce: ' + ','.join(rules)); remove any label starting 'retry:' via record_run(['label','remove',job_id,<label>]) then record_run(['label','add',job_id,f'retry:{retries}']). 'escalate' -> record_set_state(job_id, state) and write work/summaries/<job_id>.md with the fields of roles/shared/summary-format.md filled from job_id, 'Supervisor', the rules, retries, and 'Architect: split, rewrite the sheet, or change the Story checklist'. Any other action -> record_set_state only.
+- **Errors**: ValueError if outcome lacks a key. RecordError propagates.
+- **Allowed imports**: os, from record_set_state.record_set_state import record_set_state; from record_add_note.record_add_note import record_add_note; from record_run.record_run import record_run, RecordError. Nothing else.
+- **Checklist items this job serves**: Story 0003-4 items 5, 6
+- **How**: Read current labels with record_run(['label','list',job_id]); capture that command's real output shape first and name it in the note file. One private helper per action. Under 45 lines.
+- **Checks to run before reporting**:
+  - `ruff format src/prove_move` then `ruff check src/prove_move` (both clean; a noqa comment fails the shape check)
+  - `python tools/lint.py`   (no findings for your folder)
+  - `python -c "import ast,sys; t=ast.parse(open('src/prove_move/prove_move.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)
+- **Note file** `src/prove_move/prove_move.md` has exactly these six lines: purpose, signature, inputs, outputs, side effects, work item id 0003-4-prove_move-code.
+- **Out of scope**: tests, any other folder, any import not listed. Never hand-pack lines. If the formatted file exceeds 50 lines, report blocked.
