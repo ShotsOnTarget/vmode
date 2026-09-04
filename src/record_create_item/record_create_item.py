@@ -20,9 +20,7 @@ def _build_args(kind: str, title: str, owner: str, parent: str | None) -> list[s
         "-t",
         "epic" if kind == "intent" else "task",
         "-l",
-        f"kind:{kind},state:waiting",
-        "-a",
-        owner,
+        f"kind:{kind},state:waiting,owner:{owner}",
         "--no-inherit-labels",
     ]
     if parent and kind not in _RIGHT_SIDE_KINDS:
