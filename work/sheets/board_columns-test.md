@@ -1,0 +1,24 @@
+# Instruction sheet
+
+- **Job id**: 0001-6-board_columns-test
+- **Kind**: test
+- **Parent Story**: 0001-6
+- **Function name**: `board_columns`
+- **Folder**: `src/board_columns/`
+- **Files you may change**: `src/board_columns/test_board_columns.py` and nothing else. You never create or edit the code file.
+- **Signature under test**: `board_columns(graph: dict, labels: dict, config: dict) -> list[dict]`
+- **Inputs**: as stated. Import with `from board_columns.board_columns import board_columns`.
+- **Outputs**: as in work/sheets/board_columns-code.md
+- **Errors**: none
+- **Allowed imports**: pytest, tomllib, board_config, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0001-6 items 1, 2
+- **Setup**: hand-build graph dicts; use board_config('roles/board.toml'), or a temp TOML copy under tmp_path when a column value must change.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_ready_job_in_build`: hand-built graph with one code item state ready -> the 'build' entry lists it and in_progress is 0
+  - `test_in_progress_counted`: same item with state in_progress -> in_progress 1 (note: in_progress items are placed by the column whose states include in_progress; if none does in the shipped config, assert the item is omitted and in_progress is 0 for build, and document which)
+  - `test_config_order_and_paused`: a temp config copy with build wip 0 -> columns come back in the config's order and 'build' is present with wip 0
+  - `test_no_column_omitted`: a story with state done and label 'learned' appears in no column
+- **Checks to run before reporting**:
+  - `ruff format src/board_columns` then `ruff check src/board_columns` (both clean)
+  - `python -m pytest src/board_columns -q`
+- **Out of scope**: the code file, any other folder, any case not listed.

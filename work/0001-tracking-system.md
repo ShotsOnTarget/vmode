@@ -170,6 +170,25 @@ Supervisor (code, later)  ---- reads record, writes log ---->  log (append-only 
 - **Job pairs**: `log_append`, `log_read_item`
 - **Needs first**: none
 
+### Story 0001-6: the columns view
+
+- **Parent Intent**: 0001
+- **One thing it must do**: the Board sees every column of the board with the items in it and the WIP limit, from the same screen.
+- **Customer**: the Board.
+- **Supplier**: Builders. Chosen as the first Story run unattended by the pullers (Intent 0003, Story 0003-5). Low care.
+- **Inputs**: the record via record_graph and record_labels; roles/board.toml via board_config.
+- **Outputs**: `board_columns(graph, labels, config) -> list[dict]`: one dict per column in config order: {'name', 'role', 'wip', 'in_progress': count of items in that column in state in_progress, 'items': [{'id','kind','title','state'}] in id order}. And `columns_page() -> str`: an HTML document that fetches GET /api/columns and renders one table per column with its name, role, in_progress/wip, and the items; every id is a link to /?id=<id> on the existing Board page.
+- **Contract**:
+  - board_columns is pure and uses column_of for placement; an item in no column is omitted.
+  - columns_page has no external resources and no dialogs.
+  - Wiring into board_serve is out of this Story; a later job adds the two routes.
+- **Checklist**:
+  1. A ready code job appears under 'build' with in_progress 0; after its state is in_progress the count is 1. [testing]
+  2. Columns come back in config order and a paused column (wip 0) is still listed. [testing]
+  3. The page contains '/api/columns' and no 'http'. [testing]
+- **Job pairs**: `board_columns`, `columns_page`
+- **Needs first**: 0001-3
+
 ## Order
 
 0001-1 and 0001-5 first, in parallel. Then 0001-2 and 0001-4. Then 0001-3. The Board is shown 0001-3 last.

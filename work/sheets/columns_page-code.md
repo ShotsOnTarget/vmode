@@ -1,0 +1,21 @@
+# Instruction sheet
+
+- **Job id**: 0001-6-columns_page-code
+- **Kind**: code
+- **Parent Story**: 0001-6
+- **Function name**: `columns_page`
+- **Folder**: `src/columns_page/`
+- **Files you may change**: `src/columns_page/columns_page.py`, `src/columns_page/columns_page.md`
+- **Signature**: `columns_page() -> str`
+- **Inputs**: none.
+- **Outputs**: a complete HTML document as a string: fetches GET /api/columns, and for each column renders a heading '<name> (<role>) <in_progress>/<wip>' and a table of items with id (as a link to /?id=<id>), kind, title, state.
+- **Errors**: none.
+- **Allowed imports**: none. Nothing else.
+- **Checklist items this job serves**: Story 0001-6 items 3
+- **How**: One triple-quoted string, vanilla JS, no external resources, no alert/confirm/prompt. Under 45 lines.
+- **Checks to run before reporting**:
+  - `ruff format src/columns_page` then `ruff check src/columns_page` (both clean; a noqa comment fails the shape check)
+  - `python tools/lint.py`   (no findings for your folder)
+  - `python -c "import ast,sys; t=ast.parse(open('src/columns_page/columns_page.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)
+- **Note file** `src/columns_page/columns_page.md` has exactly these six lines: purpose, signature, inputs, outputs, side effects, work item id 0001-6-columns_page-code.
+- **Out of scope**: tests, any other folder, any import not listed. Never hand-pack lines. If the formatted file exceeds 50 lines, report blocked.

@@ -12,7 +12,7 @@
 - **Errors**: RecordError propagates.
 - **Allowed imports**: datetime, from prove_rules.prove_rules import prove_rules; from prove_move.prove_move import prove_move; from step.step import step; from log_append.log_append import log_append; from commit_job.commit_job import commit_job. Nothing else.
 - **Checklist items this job serves**: Story 0003-4 items 4, 5, 6
-- **How**: rules, event, step, prove_move, then if action == 'log_done' call commit_job(job_id, gathered['folder']) so the Supervisor lands the change with the job id and no person commits; then one log_append per gate that ran (Built always; Proven when kind is test) with rule = ','.join(rules for that gate) or 'pass'. One private helper for the log line. Under 30 lines. Any output shape you rely on from bd must be captured from a real run first, and the command named in the note file.
+- **How**: rules, event, step, prove_move, then if action == 'log_done' call commit_job(job_id, gathered['folder'], gathered.get('repo', '.')) so the Supervisor lands the change with the job id and no person commits; then one log_append per gate that ran (Built always; Proven when kind is test) with rule = ','.join(rules for that gate) or 'pass'. One private helper for the log line. Plain statements: no walrus, no boolean short-circuit in place of if. Under 40 lines. Any output shape you rely on from bd must be captured from a real run first, and the command named in the note file.
 - **Checks to run before reporting**:
   - `ruff format src/prove_apply` then `ruff check src/prove_apply` (both clean; a noqa comment fails the shape check)
   - `python tools/lint.py`   (no findings for your folder)

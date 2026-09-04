@@ -12,9 +12,9 @@
 - **Errors**: RecordError propagates.
 - **Allowed imports**: pytest, json, os, shutil, pathlib, record_run, record_show_item, log_read_item, and the function under test. Nothing else.
 - **Checklist items this job serves**: Story 0003-4 items 4, 5, 6
-- **Setup**: use the shared fixture `bd_repo` from `src/conftest.py`; create items with record_run(['create', ...]) per roles/work-record/CONVENTIONS.md with --no-inherit-labels and explicit kind:/state: labels; a temp config is a copy of roles/board.toml under tmp_path with the wip value edited; a fake invoke is a plain function.
+- **Setup**: every gathered dict includes 'repo': a temporary git repository under tmp_path (git init -q, user configured) containing src/<folder>/ with the code and note files the gathered dict describes, so commit_job commits there and never in this repository. Use the shared fixture `bd_repo` from `src/conftest.py`; create items with record_run(['create', ...]) per roles/work-record/CONVENTIONS.md with --no-inherit-labels and explicit kind:/state: labels; a temp config is a copy of roles/board.toml under tmp_path with the wip value edited; a fake invoke is a plain function.
 - **Cases**, one test function each, exactly these names, nothing more:
-  - `test_pass_moves_done`: gathered with clean inputs (10-line code with one def, six-line note containing folder, fmt_out '', lint_out 'All checks passed!', kind code, retries 0, usage tokens 7) -> returns 'done', item state label state:done, log has a Built line with tokens 7
+  - `test_pass_moves_done`: gathered with clean inputs and a real temp repo folder src/widget (10-line code with one def, six-line note containing folder, fmt_out '', lint_out 'All checks passed!', kind code, retries 0, usage tokens 7) -> returns 'done', item state label state:done, log has a Built line with tokens 7, and the temp repo has a new commit whose message contains the job id
   - `test_fail_bounces`: gathered with lint_out 'x.py:1:1: E501' retries 0 -> 'ready', label retry:1, a note starting 'bounce:'
   - `test_third_fail_blocks`: retries 3 and failing -> 'blocked' and work/summaries/<id>.md exists
   - `test_test_kind_runs_proven`: kind test with pytest_out containing 'FAILED' -> 'ready' and log Proven line with rule containing tests_failed

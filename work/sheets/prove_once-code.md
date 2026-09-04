@@ -8,7 +8,7 @@
 - **Files you may change**: `src/prove_once/prove_once.py`, `src/prove_once/prove_once.md`
 - **Signature**: `prove_once(config_path: str, log_path: str) -> list[str]`
 - **Inputs**: config path (roles/board.toml) and log path.
-- **Outputs**: ids processed: every item in column 'prove' (via board_config, record_graph, record_labels, column_items); for each, folder = title text before ' code' or ' test'; gathered = prove_gather(id, folder) with 'folder' added; prove_apply(id, gathered, log_path). Then for each story whose code and test jobs are all state done and whose own state is not done or checking: record_set_state(story, 'checking') so it enters the verify column. Returns the processed ids in order.
+- **Outputs**: ids processed: every item in column 'prove' (via board_config, record_graph, record_labels, column_items); for each, folder = title text before ' code' or ' test'; gathered = prove_gather(id, folder) with 'folder' and 'repo': '.' added; prove_apply(id, gathered, log_path). Then for each story whose code and test jobs are all state done and whose own state is not done or checking: record_set_state(story, 'checking') so it enters the verify column. Returns the processed ids in order.
 - **Errors**: RecordError propagates.
 - **Allowed imports**: from board_config.board_config import board_config; from record_graph.record_graph import record_graph; from record_labels.record_labels import record_labels; from column_items.column_items import column_items; from prove_gather.prove_gather import prove_gather; from prove_apply.prove_apply import prove_apply; from record_set_state.record_set_state import record_set_state. Nothing else.
 - **Checklist items this job serves**: Story 0003-4 items 4
