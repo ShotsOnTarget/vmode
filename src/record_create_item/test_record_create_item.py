@@ -14,18 +14,13 @@ def test_each_kind_creates(bd_repo):
         assert item["kind"] == kind and item["id"]
 
 def test_bad_kind_rejected(bd_repo, monkeypatch):
-    called = False
-
+    called = []
     def fake_run(args):
-        nonlocal called
-        called = True
-        return {"id": "x"}
-    monkeypatch.setattr(
-        "record_create_item.record_create_item.record_run", fake_run
-    )
+        called.append(1); return {"id": "x"}
+    monkeypatch.setattr("record_create_item.record_create_item.record_run", fake_run)
     with pytest.raises(ValueError):
         record_create_item("bug", "title", "alice", "parent-id")
-    assert called is False
+    assert called == []
 
 def test_no_owner_rejected(bd_repo):
     with pytest.raises(ValueError):
@@ -43,8 +38,7 @@ def test_child_does_not_inherit_kind(bd_repo):
     intent = record_create_item("intent", "title", "alice")
     story = record_create_item("story", "title", "alice", intent["id"])
     labels = record_run(["show", story["id"]])[0]["labels"]
-    assert "kind:story" in labels
-    assert "kind:intent" not in labels
+    assert "kind:story" in labels and "kind:intent" not in labels
 
 def test_right_side_uses_validates(bd_repo):
     intent = record_create_item("intent", "title", "alice")
@@ -52,8 +46,4 @@ def test_right_side_uses_validates(bd_repo):
     test_item = record_create_item("test", "title", "alice", code["id"])
     shown = record_run(["show", test_item["id"]])[0]
     assert shown.get("parent") is None
-    deps = shown["dependencies"]
-    assert any(
-        d["depends_on_id"] == code["id"] and d["type"] == "validates"
-        for d in deps
-    )
+    assert any(d["id"] == code["id"] and d["dependency_type"] == "validates" for d in shown["dependencies"])

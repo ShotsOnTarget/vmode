@@ -19,7 +19,7 @@
   - `test_no_owner_rejected`: owner '' raises ValueError
   - `test_no_parent_rejected`: kind 'story' with parent None raises ValueError
   - `test_intent_needs_no_parent`: kind 'intent' with parent None succeeds
-  - `test_right_side_uses_validates`: a test item created with parent=code_id has no hierarchical parent in record_run(['show', test_id])[0] (field 'parent' is None or missing) and its dependencies include one with depends_on_id == code_id and type 'validates'
+  - `test_right_side_uses_validates`: a test item created with parent=code_id has no hierarchical parent in record_run(['show', test_id])[0] (field 'parent' is None or missing) and its 'dependencies' list (as returned by show) includes an entry whose 'id' == code_id and whose 'dependency_type' == 'validates'
   - `test_child_does_not_inherit_kind`: story created under an intent; record_run(['show', story_id])[0]['labels'] contains 'kind:story' and does not contain 'kind:intent'
 - **Checks to run before reporting**:
   - `python -m pytest src/record_create_item -q`
