@@ -18,13 +18,15 @@ def prove_apply(job_id: str, gathered: dict, log_path: str) -> str:
     prove_move(job_id, outcome)
     if action == "log_done":
         commit_job(job_id, gathered["folder"], gathered.get("repo", "."))
+    usage = gathered["usage"]
     base = {
         "ts": datetime.datetime.now(datetime.UTC).isoformat(),
         "item": job_id,
         "rule": ",".join(rules) if rules else "pass",
         "inputs": {"retries": retries, "action": action},
         "state": state,
-        **gathered["usage"],
+        "tokens": int(usage.get("tokens", -1)),
+        "seconds": float(usage.get("seconds", 0.0)),
     }
     _log(base, "Built")
     if gathered["kind"] == "test":

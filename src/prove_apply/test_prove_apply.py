@@ -129,6 +129,24 @@ def test_third_fail_blocks(bd_repo, tmp_path):
     assert pathlib.Path(f"work/summaries/{item_id}.md").is_file()
 
 
+def test_usage_extra_keys_ignored(bd_repo, tmp_path):
+    item_id = _create("code")
+    log_path = str(tmp_path / "log.jsonl")
+    gathered = _base_gathered(
+        tmp_path,
+        usage={"tokens": 5, "seconds": 1.0, "report": "x", "cost_usd": 0.2},
+    )
+
+    result = prove_apply(item_id, gathered, log_path)
+
+    assert result == "done"
+    entries = log_read_item(log_path, item_id)
+    built = [e for e in entries if e["gate"] == "Built"]
+    assert built
+    assert built[0]["tokens"] == 5
+    assert "report" not in built[0]
+
+
 def test_test_kind_runs_proven(bd_repo, tmp_path):
     item_id = _create("test")
     log_path = str(tmp_path / "log.jsonl")
