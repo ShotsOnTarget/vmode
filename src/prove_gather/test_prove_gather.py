@@ -1,3 +1,4 @@
+import os
 import pathlib
 
 from prove_gather.prove_gather import prove_gather
@@ -37,6 +38,35 @@ def test_gathers_files(bd_repo):
     assert result["note"] == "# x\n"
     assert result["cases"] == ["a"]
     assert result["kind"] == "code"
+
+
+def test_changed_filtered(bd_repo):
+    placeholder = pathlib.Path("src") / "placeholder.txt"
+    placeholder.parent.mkdir(parents=True, exist_ok=True)
+    placeholder.write_text("placeholder\n")
+    os.system("git add src")
+    os.system('git commit -q -m "seed src"')
+
+    sheet = "- `test_a`:"
+    item_id = _create("x code", sheet)
+    x_folder = pathlib.Path("src") / "x"
+    x_folder.mkdir(parents=True)
+    (x_folder / "x.py").write_text("def x():\n    pass\n")
+    (x_folder / "x.md").write_text("# x\n")
+
+    _create("y code", sheet)
+    y_folder = pathlib.Path("src") / "y"
+    y_folder.mkdir(parents=True)
+    (y_folder / "y.py").write_text("def y():\n    pass\n")
+
+    outside = pathlib.Path("outside.txt")
+    outside.write_text("dirty\n")
+
+    result = prove_gather(item_id, "x")
+
+    assert result["changed"]
+    for path in result["changed"]:
+        assert path.startswith("src/x/")
 
 
 def test_usage_from_note(bd_repo):

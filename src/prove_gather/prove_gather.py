@@ -2,6 +2,8 @@ import json
 import re
 import subprocess
 
+from changed_paths.changed_paths import changed_paths
+from record_graph.record_graph import record_graph
 from record_run.record_run import RecordError, record_run
 from record_show_item.record_show_item import record_show_item
 
@@ -18,25 +20,23 @@ def _run(cmd: list, both: bool = False) -> str:
     return proc.stdout + proc.stderr if both else proc.stdout
 
 
-def prove_gather(job_id: str, folder: str) -> dict:
-    info = record_show_item(job_id)
-    show = record_run(["show", job_id])[0]
+def _usage(job_id: str) -> dict:
     try:
         comments = record_run(["comments", job_id])
     except RecordError:
-        comments = show.get("comments", [])
-    usage = {"tokens": -1, "seconds": 0.0, "report": ""}
-    for c in reversed(comments):
-        if c.get("text", "").startswith("usage:"):
-            usage = json.loads(c["text"][len("usage:") :])
-            break
-    labels = show.get("labels", [])
-    retries = next((int(x[6:]) for x in labels if x.startswith("retry:")), 0)
+        comments = record_run(["show", job_id])[0].get("comments", [])
+    for comment in reversed(comments):
+        if comment.get("text", "").startswith("usage:"):
+            return json.loads(comment["text"][len("usage:") :])
+    return {"tokens": -1, "seconds": 0.0, "report": ""}
+
+
+def prove_gather(job_id: str, folder: str) -> dict:
+    info = record_show_item(job_id)
+    labels = record_run(["show", job_id])[0].get("labels", [])
     src, base = f"src/{folder}", f"src/{folder}/{folder}"
-    rows = _run(["git", "status", "--porcelain"], True).splitlines()
-    changed = [re.sub(r"^.*-> ", "", r[3:].strip()).replace("\\", "/") for r in rows]
     return {
-        "changed": changed,
+        "changed": changed_paths(folder, record_graph()),
         "code": _read(base + ".py"),
         "note": _read(base + ".md"),
         "fmt_out": _run(["ruff", "format", "--check", "--diff", src], True),
@@ -44,6 +44,6 @@ def prove_gather(job_id: str, folder: str) -> dict:
         "pytest_out": _run(["python", "-m", "pytest", src, "-q", "-rA"]),
         "cases": re.findall(r"- `test_(\w+)`", info["sheet"]),
         "kind": info["kind"],
-        "usage": usage,
-        "retries": retries,
+        "usage": _usage(job_id),
+        "retries": next((int(x[6:]) for x in labels if x.startswith("retry:")), 0),
     }
