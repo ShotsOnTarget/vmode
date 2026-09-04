@@ -8,7 +8,7 @@
 - **Files you may change**: `src/changed_paths/changed_paths.py`, `src/changed_paths/changed_paths.md`
 - **Signature**: `changed_paths(folder: str, graph: dict, repo: str = ".") -> list[str]`
 - **Inputs**: folder: this job's function folder name. graph: from record_graph. repo: working tree path.
-- **Outputs**: repo-relative paths from `git status --porcelain` run in repo (take the text from column 4 onward; for a rename 'a -> b' take b; forward slashes), keeping only paths starting with 'src/', and dropping any path under src/<x>/ where x != folder and some item in graph of kind code or test has state in_progress or checking and a title starting with '<x> '. Sorted.
+- **Outputs**: repo-relative paths from `git status --porcelain --untracked-files=all` run in repo (without --untracked-files=all git collapses a new folder to one line 'src/' and every file in it is lost) (take the text from column 4 onward; for a rename 'a -> b' take b; forward slashes), keeping only paths starting with 'src/', and dropping any path under src/<x>/ where x != folder and some item in graph of kind code or test has state in_progress or checking and a title starting with '<x> '. Sorted.
 - **Errors**: RuntimeError with stderr if git fails.
 - **Allowed imports**: subprocess. Nothing else.
 - **Checklist items this job serves**: Story 0003-4 items 4, 5

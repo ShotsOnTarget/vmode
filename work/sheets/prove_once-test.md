@@ -16,7 +16,8 @@
 - **Cases**, one test function each, exactly these names, nothing more:
   - `test_empty_prove_noop`: fresh record -> [] and log unchanged
   - `test_processes_checking_job`: a code job in state checking with a clean folder present in the repo -> returned and state becomes done
-  - `test_story_moves_to_checking`: story with one pair both done and story state ready -> after prove_once story state is checking
+  - `test_story_moves_to_checking`: story with one code job (parent story) and one test job (parent the code job, validates it), both done, story state ready -> after prove_once story state is checking
+  - `test_story_stays_when_test_open`: same but the test job state ready -> story state unchanged
 - **Checks to run before reporting**:
   - `ruff format src/prove_once` then `ruff check src/prove_once` (both clean)
   - `python -m pytest src/prove_once -q`
