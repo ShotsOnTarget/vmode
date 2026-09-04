@@ -28,11 +28,14 @@ def prove_once(config_path: str, log_path: str) -> list[str]:
         prove_apply(job_id, gathered, log_path)
         processed.append(job_id)
 
+    graph = record_graph()
     for item in graph.values():
-        children = [i for i in graph.values() if i["parent"] == item["id"]]
-        if not children or item["state"] in ("done", "checking"):
+        if item["kind"] != "story" or item["state"] in ("done", "checking"):
             continue
-        if all(child["state"] == "done" for child in children):
+        codes = [i for i in graph.values() if i["parent"] == item["id"]]
+        tests = [i for i in graph.values() if i["parent"] in {c["id"] for c in codes}]
+        jobs = codes + tests
+        if jobs and all(job["state"] == "done" for job in jobs):
             record_set_state(item["id"], "checking")
 
     return processed

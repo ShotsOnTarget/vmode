@@ -65,3 +65,16 @@ def test_story_moves_to_checking(bd_repo, tmp_path):
     prove_once(config_path, log_path)
 
     assert record_show_item(story_id)["state"] == "checking"
+
+
+def test_story_stays_when_test_open(bd_repo, tmp_path):
+    config_path = _config(tmp_path)
+    log_path = str(tmp_path / "log.jsonl")
+    story_id = _create("Story S", "kind:story,state:ready")
+    code_id = _create("Story S code", "kind:code,state:done", parent=story_id)
+    test_id = _create("Story S test", "kind:test,state:ready")
+    record_run(["dep", "add", test_id, code_id, "-t", "validates"])
+
+    prove_once(config_path, log_path)
+
+    assert record_show_item(story_id)["state"] == "ready"
