@@ -268,3 +268,5 @@
 {"gate": "Built", "inputs": {}, "item": "0003-4-prove_rules-code", "rule": "format, lint, shape", "seconds": 64.9, "state": "done", "tokens": 117703, "ts": "2026-09-04T15:04:13.110009+00:00"}
 {"gate": "Built", "inputs": {"lines": 50}, "item": "0003-4-pull_once-code", "rule": "format, lint, shape", "seconds": 254.5, "state": "done", "tokens": 138064, "ts": "2026-09-04T15:04:13.110009+00:00"}
 {"gate": "Built", "inputs": {"cases": 4}, "item": "0003-4-prove_apply-test", "rule": "format, lint", "seconds": 202.3, "state": "done", "tokens": 136880, "ts": "2026-09-04T15:04:13.110009+00:00"}
+{"gate": "Built", "inputs": {"cases": 4}, "item": "0003-4-prove_rules-test", "rule": "format, lint", "seconds": 67.6, "state": "done", "tokens": 124100, "ts": "2026-09-04T15:04:25.626605+00:00"}
+{"gate": "Proven", "inputs": {"result": "4 passed"}, "item": "0003-4-prove_rules", "rule": "pytest passes", "seconds": 0.0, "state": "done", "tokens": 0, "ts": "2026-09-04T15:04:25.626605+00:00"}
