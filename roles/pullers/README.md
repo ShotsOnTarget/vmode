@@ -18,8 +18,8 @@ invoke(item: dict, column: str) -> {"tokens": int, "seconds": float, "report": s
 ## Running
 
 ```
-python -m puller.puller builder roles/board.toml roles/pullers/claude_code.py work/stop
-python -m puller.puller supervisor roles/board.toml - work/stop
+python tools/run_puller.py builder roles/pullers/claude_code.py work/stop
+python tools/run_puller.py supervisor - work/stop
 ```
 
 The supervisor puller needs no invoke; its work is `prove_once`. Touch `work/stop` to end every puller at its next poll.
