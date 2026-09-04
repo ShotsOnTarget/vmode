@@ -1,4 +1,5 @@
 import json
+import os
 
 from board_config.board_config import board_config
 from claim_item.claim_item import claim_item
@@ -13,16 +14,15 @@ from wip_headroom.wip_headroom import wip_headroom
 def _global_headroom(graph: dict, config: dict) -> int:
     tiers = {k: r["tier"] for r in config["columns"].values() for k in r["kinds"]}
     busy = sum(
-        1
-        for item in graph.values()
-        if item["state"] == "in_progress"
+        item["state"] == "in_progress"
         and tiers.get(item["kind"], "") not in ("none", "human")
+        for item in graph.values()
     )
     return max(0, config["limits"]["max_parallel_model_runs"] - busy)
 
 
 def _claim_and_invoke(item: dict, column: str, role: str, invoke) -> str:
-    claim_item(item["id"], role)
+    claim_item(item["id"], role + "-" + str(os.getpid()))
     try:
         usage = invoke(item, column)
         record_add_note(item["id"], "usage: " + json.dumps(usage))
