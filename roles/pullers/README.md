@@ -11,7 +11,7 @@ invoke(item: dict, column: str) -> {"tokens": int, "seconds": float, "report": s
 - `item` is the graph entry: id, kind, title, owner, state, parent, checks, needs.
 - `column` is the column name the item was pulled from; it says which role skill to load.
 - Runs one role on one item and returns when it is finished. Blocking is fine; the puller is single-threaded on purpose.
-- `tokens` is input plus output from the harness, or -1 if the harness reported nothing. `seconds` is wall time. `report` is the role's final text, verbatim.
+- `tokens` is every token the harness bills for the run: input, cache creation, cache read and output (captured 2026-09-04: a trivial `claude -p` call reports about 105k cache creation tokens, which is the per-run baseline), or -1 if the harness reported nothing. `cost_usd` is included when the harness reports it. `seconds` is wall time. `report` is the role's final text, verbatim.
 - Raises on failure to start or on a timeout. The puller releases the item and records the error.
 - Never edits the record. The role does that through the work-record skill, or the puller does after invoke returns.
 

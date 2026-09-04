@@ -49,12 +49,17 @@ def invoke(item: dict, column: str) -> dict:
     if proc.returncode != 0:
         raise RuntimeError(proc.stderr[:500] or "claude exited non-zero")
     out = json.loads(proc.stdout)
-    usage = out.get("usage", {})
-    tokens = (
-        usage.get("input_tokens", 0) + usage.get("output_tokens", 0) if usage else -1
+    usage = out.get("usage") or {}
+    fields = (
+        "input_tokens",
+        "cache_creation_input_tokens",
+        "cache_read_input_tokens",
+        "output_tokens",
     )
+    tokens = sum(usage.get(f, 0) for f in fields) if usage else -1
     return {
         "tokens": tokens,
         "seconds": time.time() - start,
         "report": out.get("result", ""),
+        "cost_usd": out.get("total_cost_usd"),
     }
