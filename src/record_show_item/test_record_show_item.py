@@ -12,9 +12,7 @@ def test_returns_fields(bd_repo):
             "-t",
             "task",
             "-l",
-            "kind:story,state:waiting",
-            "-a",
-            "alice",
+            "kind:story,state:waiting,owner:alice",
             "--description",
             "do x",
             "--no-inherit-labels",
@@ -41,9 +39,7 @@ def test_sheet_empty_when_no_description(bd_repo):
             "-t",
             "task",
             "-l",
-            "kind:story,state:waiting",
-            "-a",
-            "alice",
+            "kind:story,state:waiting,owner:alice",
             "--no-inherit-labels",
         ]
     )
