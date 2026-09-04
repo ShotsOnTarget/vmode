@@ -50,7 +50,7 @@ None pending. Naming decided by the Board 2026-09-04: Analyst, not Historian.
   2. Rollup of an intent equals the sum of its stories, which equal the sum of their jobs. [testing]
   3. The Supervisor spec says where the figures come from and that a run with unknown cost is logged with tokens -1, never omitted. [looking]
   4. Intent 0001's log is back-filled from the run notes in this repo's history where the figures are known. [looking]
-- **Job pairs**: `log_append` (reopened), `cost_rollup`
+- **Job pairs**: `log_append` (the existing pair under 0001-5, reopened; a function has one folder), `cost_rollup`
 - **Needs first**: none
 
 ### Story 0002-2: the wiki exists and has a shape
@@ -62,10 +62,10 @@ None pending. Naming decided by the Board 2026-09-04: Analyst, not Historian.
 - **Inputs**: page fields: id, title, pattern (one paragraph), evidence (list of log line references), cost (tokens wasted, from the log), fix (one paragraph), created, last_used, times_used.
 - **Outputs**: one markdown file per page in `wiki/` with a fixed front matter, and three functions.
 - **Contract**:
-  - `wiki_write(page: dict) -> str` writes or overwrites `wiki/<id>.md` and returns the path. Rejects a page missing any field.
-  - `wiki_read(id) -> dict` parses it back exactly.
-  - `wiki_touch(id)` sets last_used to now and increments times_used.
-  - `wiki_stale(days) -> list[str]` returns ids not used in that many days.
+  - `wiki_write(root, page: dict) -> str` writes or overwrites `<root>/<id>.md` and returns the path. Rejects a page missing any field or citing code.
+  - `wiki_read(root, id) -> dict` parses it back exactly.
+  - `wiki_touch(root, id, now)` sets last_used to now and increments times_used.
+  - `wiki_stale(root, days, now) -> list[str]` returns ids not used in that many days. Callers pass the clock; the functions have none.
   - A page never references code. Evidence is log line references only.
 - **Checklist**:
   1. Write then read returns an equal dict. [testing]
@@ -142,4 +142,4 @@ None pending. Naming decided by the Board 2026-09-04: Analyst, not Historian.
 
 ## Status
 
-Written 2026-09-04. Not started. Blocked on nothing.
+0002-1 and 0002-2 started 2026-09-04 through the record: sheets live in each job's sheet field, Builders receive a job id only.

@@ -1,0 +1,23 @@
+# Instruction sheet
+
+- **Job id**: 0002-2-wiki_touch-test
+- **Kind**: test
+- **Parent Story**: 0002-2
+- **Function name**: `wiki_touch`
+- **Folder**: `src/wiki_touch/`
+- **Files you may change**: `src/wiki_touch/test_wiki_touch.py`
+- **Signature under test**: `wiki_touch(root: str, page_id: str, now: str) -> dict`
+- **Inputs**: as stated. Import with `from wiki_touch.wiki_touch import wiki_touch`.
+- **Outputs**: the updated page dict, with last_used == now and times_used incremented by one, and the file rewritten.
+- **Errors**: FileNotFoundError propagates from wiki_read.
+- **Allowed imports**: pytest, json, os, datetime, and the function under test plus wiki_write/wiki_read where the case needs a page on disk. Nothing else. No record server is needed for these tests.
+- **Checklist items this job serves**: Story 0002-2 items 3
+- **Setup**: use `tmp_path` as root or log path. For wiki pages you may write files directly in the documented format (see work/sheets/wiki_write-code.md How line) or via wiki_write.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_touch_increments`: page with times_used 2 -> 3 and last_used equals the given now
+  - `test_touch_persists`: after touch, wiki_read returns the updated values
+  - `test_touch_missing_raises`: unknown id raises FileNotFoundError
+- **Checks to run before reporting**:
+  - `python -m pytest src/wiki_touch -q`
+  - `wc -l src/wiki_touch/test_wiki_touch.py   (must print 50 or less)`
+- **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.
