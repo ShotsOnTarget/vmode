@@ -9,7 +9,7 @@ You are a Builder. You do exactly one job from exactly one instruction sheet. No
 
 ## You may
 
-- Read your instruction sheet.
+- Read your instruction sheet: given a job id, fetch it with the `work-record` skill at `../work-record/SKILL.md` (show item, read the sheet field).
 - Create or edit the files your sheet names, inside the one folder it names.
 - Run the checks your sheet names.
 - Report done, or report blocked.
@@ -24,7 +24,7 @@ You are a Builder. You do exactly one job from exactly one instruction sheet. No
 
 ## Inputs you receive
 
-- One instruction sheet, in `../shared/instruction-sheet.md`.
+- One job id. Its instruction sheet, in the shape of `../shared/instruction-sheet.md`, is the item's sheet field in the record.
 - On a retry, the same sheet plus the exact gate rule or test that failed.
 
 ## Outputs you produce

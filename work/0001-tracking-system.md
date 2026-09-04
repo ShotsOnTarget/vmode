@@ -175,4 +175,4 @@ Supervisor (code, later)  ---- reads record, writes log ---->  log (append-only 
 
 ## Status
 
-Stories 0001-1 and 0001-5 are Verified (2026-09-04, see work/supervisor-log.jsonl). Environment note: this bd build has no embedded Dolt, so the record runs in server mode against a local dolt sql-server; tests start one per test via src/conftest.py. Next: sheets for 0001-2 and 0001-4. Instruction sheets are in `work/sheets/`. Language for all jobs: Python 3.12, tests with pytest. Chosen because the wrapper generator and the orphan tooling are already Python and every harness can run it.
+Stories 0001-1, 0001-2, 0001-4 and 0001-5 are Verified (2026-09-04, see work/supervisor-log.jsonl). Remaining: 0001-3, the Board screen. Environment note: this bd build has no embedded Dolt, so the record runs in server mode against a local dolt sql-server; tests start one per test via src/conftest.py. Next: sheets for 0001-2 and 0001-4. Instruction sheets are in `work/sheets/`. Language for all jobs: Python 3.12, tests with pytest. Chosen because the wrapper generator and the orphan tooling are already Python and every harness can run it.

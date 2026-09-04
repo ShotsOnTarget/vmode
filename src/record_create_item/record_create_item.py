@@ -22,6 +22,7 @@ def record_create_item(
         f"kind:{kind},state:waiting",
         "-a",
         owner,
+        "--no-inherit-labels",
     ]
     if parent:
         args += ["--parent", parent]
