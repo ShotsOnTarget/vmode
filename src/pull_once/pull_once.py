@@ -7,6 +7,7 @@ from column_items.column_items import column_items
 from record_add_note.record_add_note import record_add_note
 from record_graph.record_graph import record_graph
 from record_labels.record_labels import record_labels
+from record_run.record_run import record_run
 from record_set_state.record_set_state import record_set_state
 from wip_headroom.wip_headroom import wip_headroom
 
@@ -14,9 +15,8 @@ from wip_headroom.wip_headroom import wip_headroom
 def _global_headroom(graph: dict, config: dict) -> int:
     tiers = {k: r["tier"] for r in config["columns"].values() for k in r["kinds"]}
     busy = sum(
-        item["state"] == "in_progress"
-        and tiers.get(item["kind"], "") not in ("none", "human")
-        for item in graph.values()
+        i["state"] == "in_progress" and tiers.get(i["kind"]) not in ("none", "human")
+        for i in graph.values()
     )
     return max(0, config["limits"]["max_parallel_model_runs"] - busy)
 
@@ -24,10 +24,10 @@ def _global_headroom(graph: dict, config: dict) -> int:
 def _claim_and_invoke(item: dict, column: str, role: str, invoke) -> str:
     claim_item(item["id"], role + "-" + str(os.getpid()))
     try:
-        usage = invoke(item, column)
-        record_add_note(item["id"], "usage: " + json.dumps(usage))
+        record_add_note(item["id"], "usage: " + json.dumps(invoke(item, column)))
         record_set_state(item["id"], "checking")
     except Exception as exc:
+        record_run(["update", item["id"], "-a", ""])
         record_set_state(item["id"], "ready")
         record_add_note(item["id"], "release: " + str(exc)[:200])
     return item["id"]

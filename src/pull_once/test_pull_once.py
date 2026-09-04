@@ -110,7 +110,12 @@ def test_invoke_failure_releases(bd_repo, tmp_path):
     assert claimed == [item_id]
     row = _show(item_id)
     assert "state:ready" in row["labels"]
+    assert not row.get("assignee")
     assert _last_comment_text(item_id).startswith("release:")
+
+    reclaimed = pull_once("builder", config_path, _ok_invoke)
+
+    assert reclaimed == [item_id]
 
 
 def test_config_change_respected(bd_repo, tmp_path):
