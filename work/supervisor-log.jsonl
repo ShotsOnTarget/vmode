@@ -276,3 +276,5 @@
 {"gate": "Proven", "inputs": {"result": "5 passed"}, "item": "0003-4-prove_move", "rule": "pytest passes", "seconds": 0.0, "state": "done", "tokens": 0, "ts": "2026-09-04T15:07:49.469196+00:00"}
 {"gate": "Built", "inputs": {}, "item": "0003-4-prove_once-code", "rule": "format, lint, shape", "seconds": 124.9, "state": "done", "tokens": 125461, "ts": "2026-09-04T15:07:49.469196+00:00"}
 {"gate": "Built", "inputs": {"lines": 34, "retry": 1}, "item": "0003-4-puller-code", "rule": "format, lint, shape (retry 1)", "seconds": 51.6, "state": "done", "tokens": 125384, "ts": "2026-09-04T15:08:02.026481+00:00"}
+{"gate": "Built", "inputs": {"cases": 3}, "item": "0003-4-puller-test", "rule": "format, lint", "seconds": 77.1, "state": "done", "tokens": 119702, "ts": "2026-09-04T15:08:15.191206+00:00"}
+{"gate": "Proven", "inputs": {"result": "3 passed"}, "item": "0003-4-puller", "rule": "pytest passes", "seconds": 0.0, "state": "done", "tokens": 0, "ts": "2026-09-04T15:08:15.191206+00:00"}
