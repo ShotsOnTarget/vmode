@@ -1,0 +1,24 @@
+{
+  "roles": {
+    "board": {
+      "description": "Board: writes and validates Intents, decides matters of judgement.",
+      "model": "human",
+      "mode": "primary"
+    },
+    "architect": {
+      "description": "Architect: turns Intents into Stories and job pairs, verifies finished Stories.",
+      "model": "frontier",
+      "mode": "primary"
+    },
+    "builder": {
+      "description": "Builder: does exactly one code or test job from one instruction sheet.",
+      "model": "cheap",
+      "mode": "subagent"
+    }
+  },
+  "models": {
+    "human": null,
+    "frontier": "anthropic/claude-fable-5-1",
+    "cheap": "anthropic/claude-haiku-4-5-20251001"
+  }
+}
