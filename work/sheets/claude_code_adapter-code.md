@@ -12,7 +12,7 @@
 - **Errors**: RuntimeError from adapter_command (claude missing) or from a non-zero exit propagates.
 - **Allowed imports**: json, subprocess, sys, time, pathlib, and `from adapter_command.adapter_command import adapter_command` after inserting ROOT/'src' on sys.path. Nothing else.
 - **Checklist items this job serves**: Story 0003-4 item 8
-- **How**: replace the whole file. Keep the module docstring saying this is the one file that names the harness. No PROMPT text in this file; the prompt lives in adapter_command. Under 50 lines, the policy limit.
+- **How**: replace the whole file. Keep the module docstring saying this is the one file that names the harness. No PROMPT text in this file; the prompt lives in adapter_command. No length limit: this file is outside src.
 - **Checks to run before reporting**:
   - `ruff format roles/pullers/claude_code.py` then `ruff check roles/pullers/claude_code.py` (both clean; no noqa)
   - `PYTHONPATH=src python -c "import importlib.util; s=importlib.util.spec_from_file_location('a','roles/pullers/claude_code.py'); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); print(callable(m.invoke))"`   (must print True)
