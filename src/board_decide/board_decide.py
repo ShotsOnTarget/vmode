@@ -26,10 +26,7 @@ def board_decide(intent_id: str, decision: str, reason: str) -> dict:
     record_set_state(validation_id, state)
     record_set_owner(validation_id, "board")
 
-    if decision == "yes":
-        note = "board: yes"
-    else:
-        note = f"board: no: {reason}"
+    note = "board: yes" if decision == "yes" else f"board: no: {reason}"
     record_add_note(validation_id, note)
 
     return {"intent": intent_id, "validation": validation_id, "state": state}

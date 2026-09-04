@@ -27,7 +27,7 @@ def _show(item_id):
 
 def _state_labels(item_id):
     labels = _show(item_id)["labels"]
-    return [l for l in labels if l.startswith("state:")]
+    return [label for label in labels if label.startswith("state:")]
 
 
 def test_each_state_sets(bd_repo):

@@ -44,9 +44,11 @@ def bd_repo(tmp_path, monkeypatch):
     if not connected:
         server.terminate()
         server.wait()
-        raise RuntimeError(
-            f"dolt sql-server did not accept connections on port {port} within 15 seconds"
+        message = (
+            f"dolt sql-server did not accept connections on port {port} "
+            "within 15 seconds"
         )
+        raise RuntimeError(message)
 
     try:
         subprocess.run(["git", "init", "-q"], cwd=repo, check=True)

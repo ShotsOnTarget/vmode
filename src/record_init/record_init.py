@@ -31,7 +31,7 @@ def record_init(path: str) -> dict:
             text=True,
         )
     except OSError as exc:
-        raise RecordError("failed to run bd init", str(exc))
+        raise RecordError("failed to run bd init", str(exc)) from exc
 
     if result.returncode != 0:
         raise RecordError("bd init exited non-zero", result.stderr)

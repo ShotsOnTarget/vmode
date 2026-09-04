@@ -1,0 +1,92 @@
+# The board: one column per step down and up the V. Roles pull from their
+# column. This file is the only place WIP, polling and model tier per column
+# are set. Tiers map to model names in manifest.json.
+#
+# An item's column is derived from its kind and state; nothing else moves it.
+# wip: max items in progress in the column at once. poll_seconds: how often
+# the column's puller looks for work. tier: which model pulls here.
+
+[columns.intent_new]        # Board writes an Intent and its validation
+kinds = ["intent"]
+states = ["waiting"]
+role = "board"
+tier = "human"
+wip = 2
+poll_seconds = 0            # humans are not polled
+
+[columns.story_todo]        # Architect decomposes an Intent into Stories
+kinds = ["intent"]
+states = ["ready"]
+role = "architect"
+tier = "frontier"
+wip = 1
+poll_seconds = 300
+
+[columns.sheet_todo]        # Architect writes job pairs and sheets for a Story
+kinds = ["story"]
+states = ["waiting"]
+role = "architect"
+tier = "frontier"
+wip = 2
+poll_seconds = 300
+
+[columns.build]             # Builder pulls one code job
+kinds = ["code"]
+states = ["ready"]
+role = "builder"
+tier = "cheap"
+wip = 4
+poll_seconds = 30
+
+[columns.test]              # Builder pulls one test job
+kinds = ["test"]
+states = ["ready"]
+role = "builder"
+tier = "cheap"
+wip = 4
+poll_seconds = 30
+
+[columns.prove]             # Supervisor gates a finished job, no model
+kinds = ["code", "test"]
+states = ["checking"]
+role = "supervisor"
+tier = "none"
+wip = 8
+poll_seconds = 15
+
+[columns.verify]            # Architect ticks a Story checklist
+kinds = ["story"]
+states = ["checking"]
+role = "architect"
+tier = "frontier"
+wip = 2
+poll_seconds = 300
+
+[columns.validate]          # Board says yes or no
+kinds = ["intent", "proposal"]
+states = ["checking"]
+role = "board"
+tier = "human"
+wip = 3
+poll_seconds = 0
+
+[columns.learn]             # Analyst reads the log for a Verified Story
+kinds = ["story"]
+states = ["done"]
+labels_absent = ["learned"] # leaves the column when the Analyst adds this label
+role = "analyst"
+tier = "cheap"
+wip = 1
+poll_seconds = 600
+
+[columns.blocked]           # awaiting a person; nobody pulls, everyone sees
+kinds = ["intent", "story", "code", "test", "proposal"]
+states = ["blocked"]
+role = "none"
+tier = "none"
+wip = 99
+poll_seconds = 0
+
+[limits]
+max_parallel_model_runs = 6   # across all columns, the hard spend cap
+claim_timeout_seconds = 1800  # a claimed item nobody finished returns to its column

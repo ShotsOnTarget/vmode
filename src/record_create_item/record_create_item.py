@@ -1,11 +1,10 @@
 from record_run.record_run import record_run
 
 _KINDS = ("intent", "story", "code", "test", "verification", "validation", "proposal")
+_RIGHT_SIDE_KINDS = ("test", "verification", "validation")
 
 
-def record_create_item(
-    kind: str, title: str, owner: str, parent: str | None = None
-) -> dict:
+def _validate(kind: str, owner: str, parent: str | None) -> None:
     if kind not in _KINDS:
         raise ValueError(f"kind must be one of {_KINDS}, got {kind!r}")
     if not owner:
@@ -13,8 +12,8 @@ def record_create_item(
     if parent is None and kind != "intent":
         raise ValueError("parent is required unless kind is intent")
 
-    right_side = kind in ("test", "verification", "validation")
 
+def _build_args(kind: str, title: str, owner: str, parent: str | None) -> list[str]:
     args = [
         "create",
         title,
@@ -26,20 +25,23 @@ def record_create_item(
         owner,
         "--no-inherit-labels",
     ]
-    if parent and not right_side:
+    if parent and kind not in _RIGHT_SIDE_KINDS:
         args += ["--parent", parent]
+    return args
 
+
+def record_create_item(
+    kind: str, title: str, owner: str, parent: str | None = None
+) -> dict:
+    _validate(kind, owner, parent)
+
+    args = _build_args(kind, title, owner, parent)
     result = record_run(args)
     new_id = result["id"]
 
-    if right_side:
+    if kind in _RIGHT_SIDE_KINDS:
         record_run(["dep", "add", new_id, parent, "-t", "validates"])
 
-    return {
-        "id": new_id,
-        "kind": kind,
-        "title": title,
-        "owner": owner,
-        "parent": parent,
-        "state": "waiting",
-    }
+    return dict(
+        id=new_id, kind=kind, title=title, owner=owner, parent=parent, state="waiting"
+    )

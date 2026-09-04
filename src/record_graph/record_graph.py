@@ -9,10 +9,20 @@ def record_graph() -> dict[str, dict]:
         item_id = item["id"]
         labels = item.get("labels", [])
         kind = next(
-            (l.split("kind:", 1)[1] for l in labels if l.startswith("kind:")), ""
+            (
+                label.split("kind:", 1)[1]
+                for label in labels
+                if label.startswith("kind:")
+            ),
+            "",
         )
         state = next(
-            (l.split("state:", 1)[1] for l in labels if l.startswith("state:")), ""
+            (
+                label.split("state:", 1)[1]
+                for label in labels
+                if label.startswith("state:")
+            ),
+            "",
         )
         deps = item.get("dependencies", [])
         validates = [d["depends_on_id"] for d in deps if d.get("type") == "validates"]

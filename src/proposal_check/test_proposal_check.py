@@ -7,7 +7,10 @@ def make(kind="proposal", page="p1", target="roles/x.md", care="low", diff=""):
 
 
 def test_two_files_rejected():
-    diff = "--- a/roles/x.md\n+++ b/roles/x.md\n+ line\n--- a/roles/y.md\n+++ b/roles/y.md\n+ line\n"
+    diff = (
+        "--- a/roles/x.md\n+++ b/roles/x.md\n+ line\n"
+        "--- a/roles/y.md\n+++ b/roles/y.md\n+ line\n"
+    )
     item = make(target="roles/x.md", diff=diff)
     result = proposal_check(item)
     assert "multi_file" in result
@@ -22,7 +25,10 @@ def test_src_target_rejected():
 
 
 def test_no_page_rejected():
-    sheet = "target: roles/x.md\ncare: low\n---\n--- a/roles/x.md\n+++ b/roles/x.md\n+ line\n"
+    sheet = (
+        "target: roles/x.md\ncare: low\n---\n"
+        "--- a/roles/x.md\n+++ b/roles/x.md\n+ line\n"
+    )
     item = {"kind": "proposal", "sheet": sheet}
     result = proposal_check(item)
     assert "no_page" in result

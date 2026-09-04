@@ -56,7 +56,8 @@ def test_cycle_raises():
     script = (
         "from trace_back.trace_back import trace_back as t\n"
         "g = {'a': {'id': 'a', 'parent': 'b'}, 'b': {'id': 'b', 'parent': 'a'}}\n"
-        "try:\n    t('a', g)\nexcept ValueError:\n    pass\nelse:\n    raise SystemExit(1)\n"
+        "try:\n    t('a', g)\nexcept ValueError:\n    pass\n"
+        "else:\n    raise SystemExit(1)\n"
     )
     env = {**os.environ, "PYTHONPATH": str(Path(__file__).resolve().parent.parent)}
     result = subprocess.run([sys.executable, "-c", script], timeout=1, env=env)

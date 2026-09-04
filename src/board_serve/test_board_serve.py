@@ -4,6 +4,8 @@ import threading
 import urllib.error
 import urllib.request
 
+import pytest
+
 from board_serve.board_serve import board_serve
 from record_run.record_run import record_run
 
@@ -96,6 +98,6 @@ def test_unknown_404():
     port = _start()
     try:
         urllib.request.urlopen(f"http://127.0.0.1:{port}/nope")
-        assert False, "expected 404"
+        pytest.fail("expected 404")
     except urllib.error.HTTPError as e:
         assert e.code == 404

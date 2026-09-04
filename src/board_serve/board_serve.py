@@ -10,54 +10,44 @@ from record_graph.record_graph import record_graph
 from record_run.record_run import RecordError, record_run
 
 
+def _route(self):
+    path, q, m = urlparse(self.path).path, urlparse(self.path).query, self.command
+    if m == "GET" and path == "/":
+        result = 200, board_page(), True
+    elif m == "GET" and path == "/api/intents":
+        items = record_run(["list", "--all"])
+        labels = [(it["id"], lb) for it in items for lb in it.get("labels", [])]
+        care = {i: lb[5:] for i, lb in labels if lb.startswith("care:")}
+        result = 200, board_rollup(record_graph(), care)
+    elif m == "GET" and path == "/api/tree":
+        result = 200, board_tree(parse_qs(q).get("id", [None])[0], record_graph())
+    elif m == "POST" and path == "/api/decide":
+        b = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
+        result = 200, board_decide(b["intent"], b["decision"], b.get("reason", ""))
+    else:
+        result = 404, {"error": "not found"}
+    return result
+
+
+def _handle(self):
+    def send(status, body, html=False):
+        self.send_response(status)
+        self.send_header("Content-Type", "text/html" if html else "application/json")
+        self.end_headers()
+        self.wfile.write(body.encode() if html else json.dumps(body).encode())
+
+    try:
+        send(*_route(self))
+    except (ValueError, RecordError) as e:
+        send(400, {"error": str(e)})
+
+
+class _Handler(BaseHTTPRequestHandler):
+    do_GET = do_POST = _handle
+
+    def log_message(self, *a):
+        pass
+
+
 def board_serve(port: int) -> None:
-    def care_map():
-        labels = [
-            (it["id"], lb)
-            for it in record_run(["list", "--all"])
-            for lb in it.get("labels", [])
-        ]
-        return {
-            i: lb.split("care:", 1)[1] for i, lb in labels if lb.startswith("care:")
-        }
-
-    class Handler(BaseHTTPRequestHandler):
-        def _send(self, status, body, html=False):
-            self.send_response(status)
-            self.send_header(
-                "Content-Type", "text/html" if html else "application/json"
-            )
-            self.end_headers()
-            self.wfile.write(body.encode() if html else json.dumps(body).encode())
-
-        def do_GET(self):
-            p = urlparse(self.path)
-            try:
-                if p.path == "/":
-                    return self._send(200, board_page(), True)
-                if p.path == "/api/intents":
-                    return self._send(200, board_rollup(record_graph(), care_map()))
-                if p.path == "/api/tree":
-                    iid = parse_qs(p.query).get("id", [None])[0]
-                    return self._send(200, board_tree(iid, record_graph()))
-                self._send(404, {"error": "not found"})
-            except (ValueError, RecordError) as e:
-                self._send(400, {"error": str(e)})
-
-        def do_POST(self):
-            try:
-                if urlparse(self.path).path != "/api/decide":
-                    return self._send(404, {"error": "not found"})
-                b = json.loads(
-                    self.rfile.read(int(self.headers.get("Content-Length", 0)))
-                )
-                self._send(
-                    200, board_decide(b["intent"], b["decision"], b.get("reason", ""))
-                )
-            except (ValueError, RecordError) as e:
-                self._send(400, {"error": str(e)})
-
-        def log_message(self, *a):
-            pass
-
-    ThreadingHTTPServer(("127.0.0.1", port), Handler).serve_forever()
+    ThreadingHTTPServer(("127.0.0.1", port), _Handler).serve_forever()

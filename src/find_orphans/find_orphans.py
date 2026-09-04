@@ -2,27 +2,36 @@ import json
 import sys
 
 
-def find_orphans(graph: dict[str, dict]) -> list[dict]:
+def _collect_checked_ids(graph: dict[str, dict]) -> set:
     checked_ids = set()
     for item in graph.values():
         for c in item.get("checks", []):
             checked_ids.add(c)
+    return checked_ids
+
+
+def _rules_for_item(item_id: str, item: dict, checked_ids: set) -> list[dict]:
+    kind = item.get("kind")
+    rules = []
+
+    if kind != "intent" and item.get("parent") is None:
+        rules.append({"id": item_id, "rule": "no_parent"})
+
+    if kind in ("intent", "story", "code", "proposal") and item_id not in checked_ids:
+        rules.append({"id": item_id, "rule": "unchecked"})
+
+    if kind in ("validation", "verification", "test") and not item.get("checks"):
+        rules.append({"id": item_id, "rule": "checks_nothing"})
+
+    return rules
+
+
+def find_orphans(graph: dict[str, dict]) -> list[dict]:
+    checked_ids = _collect_checked_ids(graph)
 
     results = []
     for item_id, item in graph.items():
-        kind = item.get("kind")
-
-        if kind != "intent" and item.get("parent") is None:
-            results.append({"id": item_id, "rule": "no_parent"})
-
-        if (
-            kind in ("intent", "story", "code", "proposal")
-            and item_id not in checked_ids
-        ):
-            results.append({"id": item_id, "rule": "unchecked"})
-
-        if kind in ("validation", "verification", "test") and not item.get("checks"):
-            results.append({"id": item_id, "rule": "checks_nothing"})
+        results.extend(_rules_for_item(item_id, item, checked_ids))
 
     return results
 

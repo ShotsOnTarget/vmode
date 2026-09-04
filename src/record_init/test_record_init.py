@@ -1,6 +1,8 @@
 import json
 import subprocess
 
+import pytest
+
 from record_init.record_init import record_init
 from record_run.record_run import RecordError
 
@@ -43,6 +45,6 @@ def test_missing_dir_raises(tmp_path, monkeypatch, bd_repo):
 
     try:
         record_init(str(missing))
-        assert False, "expected RecordError"
+        pytest.fail("expected RecordError")
     except RecordError:
         pass

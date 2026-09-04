@@ -50,7 +50,7 @@ def test_three_appends_in_order(tmp_path):
     for e in entries:
         log_append(str(path), e)
     lines = path.read_text().splitlines()
-    assert [json.loads(l) for l in lines] == entries
+    assert [json.loads(line) for line in lines] == entries
 
 
 def test_missing_tokens_rejected(tmp_path):

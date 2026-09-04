@@ -23,12 +23,12 @@ def record_run(args: list[str]) -> dict | list:
             text=True,
         )
     except OSError as exc:
-        raise RecordError("failed to run bd", str(exc))
+        raise RecordError("failed to run bd", str(exc)) from exc
 
     if result.returncode != 0:
         raise RecordError("bd exited non-zero", result.stderr)
 
     try:
         return json.loads(result.stdout)
-    except json.JSONDecodeError:
-        raise RecordError("bd printed non-JSON output", result.stderr)
+    except json.JSONDecodeError as exc:
+        raise RecordError("bd printed non-JSON output", result.stderr) from exc
