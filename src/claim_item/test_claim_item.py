@@ -22,7 +22,7 @@ def test_claims_ready_item(bd_repo):
 
     result = claim_item(item_id, "builder-1")
 
-    assert result == {"id": item_id, "owner": "builder-1", "state": "in_progress"}
+    assert result == {"id": item_id, "claimed_by": "builder-1", "state": "in_progress"}
     shown = _show(item_id)
     assert shown["assignee"] == "builder-1"
     assert "state:in_progress" in shown["labels"]
@@ -36,7 +36,7 @@ def test_second_claim_raises(bd_repo):
         claim_item(item_id, "builder-2")
 
 
-def test_empty_owner_raises(bd_repo):
+def test_empty_actor_raises(bd_repo):
     item_id = _make_item()
 
     with pytest.raises(ValueError):
