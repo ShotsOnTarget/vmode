@@ -62,7 +62,31 @@ Rules for work items:
 
 Nobody is allowed to write an item without its checklist. No checklist, not ready.
 
-## 4. Who checks whom
+## 4. Keeping track
+
+Every work item lives in one shared record that everyone can see. Not in someone's head, not in a chat, not in a note on a desk.
+
+Each item in the record always shows:
+
+- A unique id that never changes and is never reused.
+- Its kind (section 3), its parent, and its links.
+- Who owns it right now. Exactly one owner, always.
+- Its state: waiting, ready, in progress, blocked, checking, done, or reopened.
+- Its checklist and how it will be checked.
+- Its full history: every state change, every owner change, every edit, who made it and when. History is only ever added to, never edited or deleted.
+
+Two things must always be possible, and the Supervisor checks them at every gate:
+
+- **Trace back**: start at any line of code and walk up to the Intent that asked for it. Code, to code job, to Story, to Intent.
+- **Trace forward**: start at any Intent and walk down to every piece of code and every check that came from it. Nothing missing, nothing extra.
+
+If either walk breaks, that is an orphan. An item with no parent, or a left-side item nothing checks, or a right-side item that checks nothing. The gate fails until the orphan is fixed.
+
+Every code change names the id of the work item it serves. A change with no id is rejected.
+
+The record and the log (section 10) together are the audit trail. Anyone can pick a closed Intent, and without asking anyone, see every Story, every job, every gate result, every retry, and every person or helper that touched it.
+
+## 5. Who checks whom
 
 The person who made a thing never checks that thing. Always somebody else.
 
@@ -76,19 +100,19 @@ The person who made a thing never checks that thing. Always somebody else.
 
 This is written down because it is easy to skip when busy. It is never skipped.
 
-## 5. Gates
+## 6. Gates
 
 A gate is a checkpoint. Nothing passes a gate without meeting every rule at that gate. The Supervisor runs every gate and never uses judgement, only the rules.
 
 | Gate | When | Passes if |
 |---|---|---|
 | **Ready** | Before a Story goes to Builders | Every checklist item is clear and checkable. Story is linked to an Intent. Every code job has its test job. |
-| **Built** | When a Builder says a job is done | Code fits the size and shape rules (section 7). Nothing outside the job was touched. |
+| **Built** | When a Builder says a job is done | Code fits the size and shape rules (section 8). Nothing outside the job was touched. |
 | **Proven** | When a test job is done | All tests pass. Tests cover every checklist item they were asked to cover. |
 | **Verified** | When all pairs under a Story are done | Architect ticks every item on the Story checklist. No conflict with other finished Stories under the same Intent. |
 | **Validated** | When all Stories under an Intent are done | Board says yes. |
 
-## 6. When something fails
+## 7. When something fails
 
 The Supervisor follows these rules exactly. It does not think about why.
 
@@ -96,9 +120,9 @@ The Supervisor follows these rules exactly. It does not think about why.
 2. A test job fails: reopen its code job, attach the failure, run the pair again.
 3. The same pair fails **three** times: stop. Mark it blocked. Send the Architect a short summary: what failed, how many times, which rule. The Architect never sees the code or the raw error.
 4. The Architect cannot fix it by rewriting or splitting the jobs: send the Board a short summary.
-5. Every retry, every stop, every escalation is written in the log (section 9).
+5. Every retry, every stop, every escalation is written in the log (section 10).
 
-## 7. Shape of the code
+## 8. Shape of the code
 
 Very flat. One function, one folder. Nothing else.
 
@@ -119,7 +143,7 @@ Rules:
 
 Size and shape limits are checked by a tool at the Built gate, not by a person. The numbers live in the tool's settings, not here. Today they are roughly: fifty lines per file, fifty per function, very few branches, shallow nesting, few parameters. If a function cannot fit, the Architect splits the job. The Builder never decides that.
 
-## 8. How careful to be
+## 9. How careful to be
 
 Not every piece deserves the same effort. When the Board writes an Intent, it picks one of two levels.
 
@@ -128,7 +152,7 @@ Not every piece deserves the same effort. When the Board writes an Intent, it pi
 | **Low** | If this is wrong, it is annoying, not harmful. | Nothing extra. Supervisor verification is enough to close it. Board may skip looking. |
 | **High** | If this is wrong, it matters. | A different Builder writes tests, never the code author. The Board must be shown it working before it closes. |
 
-## 9. The log
+## 10. The log
 
 The Supervisor writes down every decision it makes, for every piece, at every level. Each entry says:
 
@@ -139,19 +163,19 @@ The Supervisor writes down every decision it makes, for every piece, at every le
 
 The log is how the Board can trust a closed item it never looked at. Nothing is ever removed from the log.
 
-## 10. One piece, start to finish
+## 11. One piece, start to finish
 
 1. Board writes an Intent, picks Low or High, and writes the Validation it will use to say yes.
 2. Architect writes Stories under it, each with a checklist and a Verification.
 3. Architect writes code and test job pairs under each Story, with full instruction sheets.
 4. Supervisor runs the Ready gate on each Story.
-5. Supervisor hands each pair to Builders, one job each, runs Built and Proven gates, retries on the rules in section 6.
+5. Supervisor hands each pair to Builders, one job each, runs Built and Proven gates, retries on the rules in section 7.
 6. Supervisor tells the Architect a Story is ready to verify. Architect checks the checklist and the other Stories under the Intent.
 7. Supervisor tells the Board an Intent is ready. Board looks, or is shown it for High, and says yes or no.
 8. Next piece.
 
 Good pieces are small. If a Story needs more than a handful of job pairs, it is probably two Stories.
 
-## 11. What this document is not
+## 12. What this document is not
 
 It is not a list of tools. Trackers, linters, models, and test runners come and go. The rules above stay the same whatever we plug in.
