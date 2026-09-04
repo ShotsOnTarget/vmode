@@ -26,7 +26,7 @@ CHECKERS = (
     ("states", _is_state_list, "must be a non-empty list of allowed states"),
     ("role", lambda v: isinstance(v, str), "must be a str"),
     ("tier", lambda v: v in TIERS, "must be one of human, frontier, cheap, none"),
-    ("wip", lambda v: _is_int_at_least(v, 1), "must be an int >= 1"),
+    ("wip", lambda v: _is_int_at_least(v, 0), "must be an int >= 0"),
     ("poll_seconds", lambda v: _is_int_at_least(v, 0), "must be an int >= 0"),
     ("labels_absent", _is_str_list, "must be a list of str"),
 )

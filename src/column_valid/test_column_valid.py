@@ -44,8 +44,14 @@ def test_bad_kind_reported():
     assert any(p.startswith("kinds:") for p in problems)
 
 
-def test_wip_zero_reported():
+def test_wip_zero_allowed():
     column = _valid_column()
     column["wip"] = 0
+    assert column_valid("intent", column) == []
+
+
+def test_wip_negative_reported():
+    column = _valid_column()
+    column["wip"] = -1
     problems = column_valid("intent", column)
     assert any(p.startswith("wip:") for p in problems)
