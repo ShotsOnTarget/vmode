@@ -1,0 +1,21 @@
+# Instruction sheet
+
+- **Job id**: 0003-4-commit_job-code
+- **Kind**: code
+- **Parent Story**: 0003-4
+- **Function name**: `commit_job`
+- **Folder**: `src/commit_job/`
+- **Files you may change**: `src/commit_job/commit_job.py`, `src/commit_job/commit_job.md`
+- **Signature**: `commit_job(job_id: str, folder: str, repo: str = ".") -> str | None`
+- **Inputs**: job_id: the record id of the job that just passed its gate. folder: the function folder name. repo: path of the git working tree.
+- **Outputs**: the new commit hash, or None if there was nothing to commit. Stages exactly `src/<folder>` (git add -- src/<folder>), then commits with the message `<folder>: job <job_id> passed Built and Proven` and a second line `Job: <job_id>`. No co-author line, no other files.
+- **Errors**: RuntimeError with git's stderr if add or commit fails for a reason other than nothing to commit.
+- **Allowed imports**: subprocess. Nothing else.
+- **Checklist items this job serves**: Story 0003-4 items 4, 5
+- **How**: three subprocess calls: git add, git diff --cached --quiet (exit 1 means there is something staged), git commit. Capture the real exit codes first and name them in the note file. Under 30 lines.
+- **Checks to run before reporting**:
+  - `ruff format src/commit_job` then `ruff check src/commit_job` (both clean; a noqa comment fails the shape check)
+  - `python tools/lint.py`   (no findings for your folder)
+  - `python -c "import ast,sys; t=ast.parse(open('src/commit_job/commit_job.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)
+- **Note file** `src/commit_job/commit_job.md` has exactly these six lines: purpose, signature, inputs, outputs, side effects, work item id 0003-4-commit_job-code.
+- **Out of scope**: tests, any other folder, any import not listed, committing anything outside the folder. Never run git against this repository while testing; use a temporary repository.
