@@ -13,5 +13,5 @@
 - **Allowed imports**: exact list. Nothing else.
 - **Checklist items this job serves**: ids from the Story.
 - **Cases** (test jobs only): named list, one line each, with expected result.
-- **Checks to run before reporting**: exact commands.
+- **Checks to run before reporting**: exact commands. Always includes, for the job's folder: the formatter (`ruff format src/<name>`), the linter (`ruff check src/<name>`), the shape checker (`python tools/lint.py`), and the tests.
 - **Out of scope**: what not to do.

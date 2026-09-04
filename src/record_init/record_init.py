@@ -13,11 +13,14 @@ def record_init(path: str) -> dict:
         raise RecordError("BD_SERVER_PORT is not set", "")
 
     args = [
-        "bd", "init",
-        "--prefix", "vm",
+        "bd",
+        "init",
+        "--prefix",
+        "vm",
         "--non-interactive",
         "--server",
-        "--server-port", port,
+        "--server-port",
+        port,
     ]
 
     try:

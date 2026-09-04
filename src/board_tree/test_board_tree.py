@@ -6,16 +6,34 @@ from board_tree.board_tree import board_tree
 def _graph():
     return {
         "intent1": {
-            "id": "intent1", "kind": "intent", "title": "I", "owner": "o",
-            "state": "open", "parent": None, "checks": [], "needs": [],
+            "id": "intent1",
+            "kind": "intent",
+            "title": "I",
+            "owner": "o",
+            "state": "open",
+            "parent": None,
+            "checks": [],
+            "needs": [],
         },
         "story1": {
-            "id": "story1", "kind": "story", "title": "S", "owner": "o",
-            "state": "open", "parent": "intent1", "checks": [], "needs": [],
+            "id": "story1",
+            "kind": "story",
+            "title": "S",
+            "owner": "o",
+            "state": "open",
+            "parent": "intent1",
+            "checks": [],
+            "needs": [],
         },
         "code1": {
-            "id": "code1", "kind": "code", "title": "C", "owner": "o",
-            "state": "open", "parent": "story1", "checks": [], "needs": [],
+            "id": "code1",
+            "kind": "code",
+            "title": "C",
+            "owner": "o",
+            "state": "open",
+            "parent": "story1",
+            "checks": [],
+            "needs": [],
         },
     }
 

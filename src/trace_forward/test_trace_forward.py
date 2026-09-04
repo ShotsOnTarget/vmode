@@ -1,6 +1,7 @@
 import pytest
-from record_run.record_run import record_run
+
 from record_graph.record_graph import record_graph
+from record_run.record_run import record_run
 from trace_forward.trace_forward import trace_forward
 
 
@@ -40,9 +41,20 @@ def test_unknown_id_raises(bd_repo):
 
 def test_no_duplicate_when_child_also_checks():
     graph = {
-        "story": {"id": "story", "kind": "story", "title": "s", "parent": None, "checks": []},
-        "verification": {"id": "verification", "kind": "verification", "title": "v",
-                          "parent": "story", "checks": ["story"]},
+        "story": {
+            "id": "story",
+            "kind": "story",
+            "title": "s",
+            "parent": None,
+            "checks": [],
+        },
+        "verification": {
+            "id": "verification",
+            "kind": "verification",
+            "title": "v",
+            "parent": "story",
+            "checks": ["story"],
+        },
     }
     children = trace_forward("story", graph)["children"]
     assert [c["id"] for c in children] == ["verification"]

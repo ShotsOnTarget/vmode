@@ -1,4 +1,4 @@
-from record_run.record_run import record_run, RecordError
+from record_run.record_run import record_run
 
 VALID_KINDS = {
     "intent",

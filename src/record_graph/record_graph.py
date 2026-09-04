@@ -1,4 +1,4 @@
-from record_run.record_run import record_run, RecordError
+from record_run.record_run import record_run
 
 
 def record_graph() -> dict[str, dict]:
@@ -15,12 +15,8 @@ def record_graph() -> dict[str, dict]:
             (l.split("state:", 1)[1] for l in labels if l.startswith("state:")), ""
         )
         deps = item.get("dependencies", [])
-        validates = [
-            d["depends_on_id"] for d in deps if d.get("type") == "validates"
-        ]
-        needs = [
-            d["depends_on_id"] for d in deps if d.get("type") == "blocks"
-        ]
+        validates = [d["depends_on_id"] for d in deps if d.get("type") == "validates"]
+        needs = [d["depends_on_id"] for d in deps if d.get("type") == "blocks"]
         parent = item.get("parent") or (validates[0] if validates else None)
         graph[item_id] = {
             "id": item_id,

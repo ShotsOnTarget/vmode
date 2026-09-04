@@ -1,7 +1,7 @@
-from record_graph.record_graph import record_graph
-from record_set_state.record_set_state import record_set_state
-from record_set_owner.record_set_owner import record_set_owner
 from record_add_note.record_add_note import record_add_note
+from record_graph.record_graph import record_graph
+from record_set_owner.record_set_owner import record_set_owner
+from record_set_state.record_set_state import record_set_state
 
 
 def board_decide(intent_id: str, decision: str, reason: str) -> dict:

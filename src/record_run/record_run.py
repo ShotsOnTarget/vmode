@@ -1,6 +1,6 @@
-import subprocess
 import json
 import shutil
+import subprocess
 
 
 class RecordError(Exception):

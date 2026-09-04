@@ -6,7 +6,7 @@ def log_read_item(path: str, item_id: str) -> list[dict]:
     if not os.path.isfile(path):
         return []
     results = []
-    with open(path, "r") as f:
+    with open(path) as f:
         for line in f:
             line = line.strip()
             if not line:

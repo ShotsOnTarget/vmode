@@ -1,16 +1,23 @@
 import pytest
 
-from record_set_state.record_set_state import record_set_state
 from record_run.record_run import record_run
+from record_set_state.record_set_state import record_set_state
 
 _STATES = (
-    "waiting", "ready", "in_progress", "blocked",
-    "checking", "done", "reopened",
+    "waiting",
+    "ready",
+    "in_progress",
+    "blocked",
+    "checking",
+    "done",
+    "reopened",
 )
 
 
 def _make_item():
-    item = record_run(["create", "-l", "kind:task", "-t", "task", "-a", "alice", "Item"])
+    item = record_run(
+        ["create", "-l", "kind:task", "-t", "task", "-a", "alice", "Item"]
+    )
     return item["id"]
 
 

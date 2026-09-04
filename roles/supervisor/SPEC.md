@@ -23,7 +23,7 @@ waiting, ready, in progress, blocked, checking, done, reopened.
 | Gate | Checks |
 |---|---|
 | Ready | Story has an Intent parent. Every checklist item has a check method. Every code job has a paired test job with the same function name. No orphans. |
-| Built | Only the named files changed. Size and shape checker passes. Note file has the six required lines. Work item id present. |
+| Built | Only the named files changed (by git diff, never by report). Formatter check passes. Linter passes. Shape checker passes: file and function length, one public function, three files, six-line note. Work item id present. |
 | Proven | Test runner passes. Every named case is present in the test file. |
 | Verified | Architect has recorded a tick on every checklist item. |
 | Validated | Board has recorded yes. For High care, a "shown" entry exists in the log. |

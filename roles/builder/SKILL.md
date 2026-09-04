@@ -42,7 +42,7 @@ Then a report, in `../shared/report-format.md`.
 
 ## Before you report done
 
-- The file is under the size and shape limits. Run the check named on the sheet.
+- Run the formatter on your folder first, then the linter, then the shape checker, then the tests, exactly as the sheet names them. All four clean. Never shorten lines by hand to fit; the formatter decides layout, and if the formatted file is over the limit, report blocked so the Architect splits the job.
 - Only the files named on the sheet changed.
 - For a test job: every named case exists and passes.
 - The report names the work item id.

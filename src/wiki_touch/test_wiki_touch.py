@@ -1,8 +1,8 @@
 import pytest
 
+from wiki_read.wiki_read import wiki_read
 from wiki_touch.wiki_touch import wiki_touch
 from wiki_write.wiki_write import wiki_write
-from wiki_read.wiki_read import wiki_read
 
 
 def _page(page_id):

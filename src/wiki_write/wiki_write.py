@@ -4,8 +4,15 @@ import os
 
 def wiki_write(root: str, page: dict) -> str:
     expected = {
-        "id", "title", "pattern", "evidence", "cost",
-        "fix", "created", "last_used", "times_used",
+        "id",
+        "title",
+        "pattern",
+        "evidence",
+        "cost",
+        "fix",
+        "created",
+        "last_used",
+        "times_used",
     }
     actual = set(page.keys())
     if actual != expected:
@@ -22,7 +29,15 @@ def wiki_write(root: str, page: dict) -> str:
     path = os.path.join(root, f"{page['id']}.md")
 
     lines = ["---"]
-    for key in ("id", "title", "evidence", "cost", "created", "last_used", "times_used"):
+    for key in (
+        "id",
+        "title",
+        "evidence",
+        "cost",
+        "created",
+        "last_used",
+        "times_used",
+    ):
         lines.append(f"{key}: {json.dumps(page[key])}")
     lines.append("---")
     lines.append("## Pattern")

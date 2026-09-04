@@ -17,9 +17,18 @@ def bd_repo(tmp_path, monkeypatch):
     repo.mkdir()
 
     server = subprocess.Popen(
-        ["dolt", "sql-server", "--host", "127.0.0.1", "--port", str(port),
-         "--data-dir", str(dolt_dir)],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        [
+            "dolt",
+            "sql-server",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            str(port),
+            "--data-dir",
+            str(dolt_dir),
+        ],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
 
     deadline = time.time() + 15
@@ -35,13 +44,25 @@ def bd_repo(tmp_path, monkeypatch):
     if not connected:
         server.terminate()
         server.wait()
-        raise RuntimeError(f"dolt sql-server did not accept connections on port {port} within 15 seconds")
+        raise RuntimeError(
+            f"dolt sql-server did not accept connections on port {port} within 15 seconds"
+        )
 
     try:
         subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
         subprocess.run(
-            ["bd", "init", "--prefix", "vm", "--non-interactive", "--server", "--server-port", str(port)],
-            cwd=repo, check=True,
+            [
+                "bd",
+                "init",
+                "--prefix",
+                "vm",
+                "--non-interactive",
+                "--server",
+                "--server-port",
+                str(port),
+            ],
+            cwd=repo,
+            check=True,
         )
         monkeypatch.chdir(repo)
         yield repo

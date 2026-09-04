@@ -1,8 +1,13 @@
-from record_run.record_run import record_run, RecordError
+from record_run.record_run import record_run
 
 _VALID_STATES = {
-    "waiting", "ready", "in_progress", "blocked",
-    "checking", "done", "reopened",
+    "waiting",
+    "ready",
+    "in_progress",
+    "blocked",
+    "checking",
+    "done",
+    "reopened",
 }
 
 _STATUS_MAP = {

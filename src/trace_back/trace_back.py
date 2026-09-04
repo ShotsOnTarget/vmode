@@ -8,17 +8,19 @@ def trace_back(item_id: str, graph: dict[str, dict]) -> list[dict]:
 
     while True:
         if current_id in visited:
-            raise ValueError('cycle')
+            raise ValueError("cycle")
         visited.add(current_id)
 
         item = graph[current_id]
-        result.append({
-            'id': current_id,
-            'kind': item.get('kind'),
-            'title': item.get('title'),
-        })
+        result.append(
+            {
+                "id": current_id,
+                "kind": item.get("kind"),
+                "title": item.get("title"),
+            }
+        )
 
-        parent_id = item.get('parent')
+        parent_id = item.get("parent")
         if not parent_id:
             break
         current_id = parent_id

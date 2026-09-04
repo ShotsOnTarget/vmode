@@ -1,4 +1,5 @@
 import pytest
+
 from wiki_write.wiki_write import wiki_write
 
 
@@ -22,6 +23,7 @@ def test_write_creates_file(tmp_path):
         content = f.read()
     assert content.startswith("---")
     import os
+
     assert os.path.exists(path)
 
 
@@ -31,6 +33,7 @@ def test_missing_field_rejected(tmp_path):
     with pytest.raises(ValueError):
         wiki_write(str(tmp_path), page)
     import os
+
     assert os.listdir(str(tmp_path)) == []
 
 

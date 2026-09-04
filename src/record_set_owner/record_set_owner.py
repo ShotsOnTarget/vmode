@@ -1,4 +1,4 @@
-from record_run.record_run import record_run, RecordError
+from record_run.record_run import record_run
 
 
 def record_set_owner(item_id: str, owner: str) -> dict:

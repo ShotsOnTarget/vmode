@@ -1,4 +1,4 @@
-from record_run.record_run import record_run, RecordError
+from record_run.record_run import record_run
 
 
 def record_show_item(item_id: str) -> dict:
@@ -9,9 +9,9 @@ def record_show_item(item_id: str) -> dict:
     state = ""
     for label in item.get("labels", []):
         if not kind and label.startswith("kind:"):
-            kind = label[len("kind:"):]
+            kind = label[len("kind:") :]
         if not state and label.startswith("state:"):
-            state = label[len("state:"):]
+            state = label[len("state:") :]
 
     return {
         "id": item.get("id", ""),

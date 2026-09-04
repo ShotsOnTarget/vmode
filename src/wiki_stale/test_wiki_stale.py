@@ -11,8 +11,12 @@ def _write_page(root, page_id, last_used):
     os.makedirs(root, exist_ok=True)
     lines = ["---"]
     for key, val in (
-        ("id", page_id), ("title", "t"), ("evidence", ["e"]),
-        ("cost", "c"), ("created", last_used), ("last_used", last_used),
+        ("id", page_id),
+        ("title", "t"),
+        ("evidence", ["e"]),
+        ("cost", "c"),
+        ("created", last_used),
+        ("last_used", last_used),
         ("times_used", 1),
     ):
         lines.append(f"{key}: {json.dumps(val)}")

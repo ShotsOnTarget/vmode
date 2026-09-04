@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from record_run.record_run import record_run
 from record_graph.record_graph import record_graph
+from record_run.record_run import record_run
 from trace_back.trace_back import trace_back
 
 
@@ -15,16 +15,32 @@ def _id(created):
 
 
 def test_code_to_intent_order(bd_repo):
-    intent = _id(record_run(["create", "intent1", "-t", "epic", "-a", "me", "--no-inherit-labels"]))
-    story = _id(record_run(["create", "story1", "-a", "me", "--no-inherit-labels", "--parent", intent]))
-    code = _id(record_run(["create", "code1", "-a", "me", "--no-inherit-labels", "--parent", story]))
+    intent = _id(
+        record_run(
+            ["create", "intent1", "-t", "epic", "-a", "me", "--no-inherit-labels"]
+        )
+    )
+    story = _id(
+        record_run(
+            ["create", "story1", "-a", "me", "--no-inherit-labels", "--parent", intent]
+        )
+    )
+    code = _id(
+        record_run(
+            ["create", "code1", "-a", "me", "--no-inherit-labels", "--parent", story]
+        )
+    )
     graph = record_graph()
     result = trace_back(code, graph)
     assert [r["id"] for r in result] == [code, story, intent]
 
 
 def test_intent_alone(bd_repo):
-    intent = _id(record_run(["create", "intent1", "-t", "epic", "-a", "me", "--no-inherit-labels"]))
+    intent = _id(
+        record_run(
+            ["create", "intent1", "-t", "epic", "-a", "me", "--no-inherit-labels"]
+        )
+    )
     graph = record_graph()
     result = trace_back(intent, graph)
     assert [r["id"] for r in result] == [intent]
