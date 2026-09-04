@@ -12,7 +12,7 @@
 - **Errors**: raise ValueError before calling bd if kind is not one of the six, owner is empty, or parent is None and kind is not intent. RecordError propagates from record_run.
 - **Allowed imports**: from record_run.record_run import record_run, RecordError. Nothing else.
 - **Checklist items this job serves**: Story 0001-1 items 2, 3, 4
-- **How**: Call record_run(['create', title, '-t', 'epic' if intent else 'task', '-l', f'kind:{kind},state:waiting', '-a', owner] + (['--parent', parent] if parent else [])). Read the id from the returned dict.
+- **How**: Call record_run(['create', title, '-t', 'epic' if intent else 'task', '-l', f'kind:{kind},state:waiting', '-a', owner, '--no-inherit-labels'] + (['--parent', parent] if parent else [])). The --no-inherit-labels flag is mandatory: without it a child copies its parent's kind label. Read the id from the returned dict.
 - **Checks to run before reporting**:
   - `wc -l src/record_create_item/record_create_item.py   (must print 50 or less)`
   - `python -c "import ast,sys; t=ast.parse(open('src/record_create_item/record_create_item.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)

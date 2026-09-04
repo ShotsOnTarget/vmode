@@ -1,0 +1,24 @@
+# Instruction sheet
+
+- **Job id**: 0001-2-record_graph-test
+- **Kind**: test
+- **Parent Story**: 0001-2
+- **Function name**: `record_graph`
+- **Folder**: `src/record_graph/`
+- **Files you may change**: `src/record_graph/test_record_graph.py`
+- **Signature under test**: `record_graph() -> dict[str, dict]`
+- **Inputs**: as stated. Import with `from record_graph.record_graph import record_graph`. Where a graph is needed, build it with `from record_graph.record_graph import record_graph` after creating items, or hand-build a dict in the shape record_graph documents (see work/sheets/record_graph-code.md, Outputs line) for cycle and no_parent cases.
+- **Outputs**: dict keyed by id. Each value: {'id': str, 'kind': str, 'title': str, 'owner': str, 'state': str, 'parent': str | None, 'checks': list[str], 'needs': list[str]}. kind and state come from labels 'kind:x' and 'state:x' (first match, '' if none). parent from the item's 'parent' field. checks: ids this item has a dependency on with type 'validates'. needs: ids this item has a dependency on with type 'blocks'.
+- **Errors**: RecordError propagates.
+- **Allowed imports**: pytest, json, os, subprocess, sys, pathlib, record_run, record_graph, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0001-2 items contract: one read of the record
+- **Setup**: use the shared fixture `bd_repo` from `src/conftest.py` by naming it as a test argument. Build items with record_run(['create', ...]) using the flags in roles/work-record/CONVENTIONS.md and always pass --no-inherit-labels; link with record_run(['dep','add',...]). Do not use other Builders' functions except record_run.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_keys_are_all_ids`: create an intent and a child story; graph has exactly those two keys
+  - `test_kind_and_state_from_labels`: story created with labels kind:story,state:waiting has kind 'story' and state 'waiting'
+  - `test_parent_and_checks`: story with parent intent, and a verification with a validates dep on the story; graph[story]['parent']==intent and graph[verification]['checks']==[story]
+  - `test_needs_from_blocks`: create stories A and B under one intent, then record_run(['dep','add',B,'--blocked-by',A]); graph[B]['needs']==[A]
+- **Checks to run before reporting**:
+  - `python -m pytest src/record_graph -q`
+  - `wc -l src/record_graph/test_record_graph.py   (must print 50 or less)`
+- **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

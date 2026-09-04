@@ -1,0 +1,23 @@
+# Instruction sheet
+
+- **Job id**: 0001-4-record_show_item-test
+- **Kind**: test
+- **Parent Story**: 0001-4
+- **Function name**: `record_show_item`
+- **Folder**: `src/record_show_item/`
+- **Files you may change**: `src/record_show_item/test_record_show_item.py`
+- **Signature under test**: `record_show_item(item_id: str) -> dict`
+- **Inputs**: as stated. Import with `from record_show_item.record_show_item import record_show_item`. Where a graph is needed, build it with `from record_graph.record_graph import record_graph` after creating items, or hand-build a dict in the shape record_graph documents (see work/sheets/record_graph-code.md, Outputs line) for cycle and no_parent cases.
+- **Outputs**: {'id','kind','title','owner','state','parent','sheet'} where sheet is the description text ('' if none).
+- **Errors**: RecordError propagates for an unknown id.
+- **Allowed imports**: pytest, json, os, subprocess, sys, pathlib, record_run, record_graph, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0001-4 items 2, 4
+- **Setup**: use the shared fixture `bd_repo` from `src/conftest.py` by naming it as a test argument. Build items with record_run(['create', ...]) using the flags in roles/work-record/CONVENTIONS.md and always pass --no-inherit-labels; link with record_run(['dep','add',...]). Do not use other Builders' functions except record_run.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_returns_fields`: created story with description 'do x' via --description; show returns kind story, owner, state waiting, parent, sheet 'do x'
+  - `test_unknown_raises`: 'vm-none' raises RecordError
+  - `test_sheet_empty_when_no_description`: item without description has sheet ''
+- **Checks to run before reporting**:
+  - `python -m pytest src/record_show_item -q`
+  - `wc -l src/record_show_item/test_record_show_item.py   (must print 50 or less)`
+- **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

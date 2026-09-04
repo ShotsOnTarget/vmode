@@ -1,0 +1,23 @@
+# Instruction sheet
+
+- **Job id**: 0001-4-record_add_note-test
+- **Kind**: test
+- **Parent Story**: 0001-4
+- **Function name**: `record_add_note`
+- **Folder**: `src/record_add_note/`
+- **Files you may change**: `src/record_add_note/test_record_add_note.py`
+- **Signature under test**: `record_add_note(item_id: str, text: str) -> dict`
+- **Inputs**: as stated. Import with `from record_add_note.record_add_note import record_add_note`. Where a graph is needed, build it with `from record_graph.record_graph import record_graph` after creating items, or hand-build a dict in the shape record_graph documents (see work/sheets/record_graph-code.md, Outputs line) for cycle and no_parent cases.
+- **Outputs**: {'id': item_id, 'note_id': str} where note_id comes from the comment's 'id' field.
+- **Errors**: raise ValueError if text is empty. RecordError propagates.
+- **Allowed imports**: pytest, json, os, subprocess, sys, pathlib, record_run, record_graph, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0001-4 items 2
+- **Setup**: use the shared fixture `bd_repo` from `src/conftest.py` by naming it as a test argument. Build items with record_run(['create', ...]) using the flags in roles/work-record/CONVENTIONS.md and always pass --no-inherit-labels; link with record_run(['dep','add',...]). Do not use other Builders' functions except record_run.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_note_added`: add note; record_run(['show', item_id]) first element has comment_count 1 or the note appears in record_run(['comment','list',item_id]) if that command exists; assert one of the two
+  - `test_empty_text_rejected`: '' raises ValueError
+  - `test_two_notes_two_ids`: two calls return different note_id values
+- **Checks to run before reporting**:
+  - `python -m pytest src/record_add_note -q`
+  - `wc -l src/record_add_note/test_record_add_note.py   (must print 50 or less)`
+- **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

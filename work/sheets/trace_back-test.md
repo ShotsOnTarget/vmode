@@ -1,0 +1,24 @@
+# Instruction sheet
+
+- **Job id**: 0001-2-trace_back-test
+- **Kind**: test
+- **Parent Story**: 0001-2
+- **Function name**: `trace_back`
+- **Folder**: `src/trace_back/`
+- **Files you may change**: `src/trace_back/test_trace_back.py`
+- **Signature under test**: `trace_back(item_id: str, graph: dict[str, dict]) -> list[dict]`
+- **Inputs**: as stated. Import with `from trace_back.trace_back import trace_back`. Where a graph is needed, build it with `from record_graph.record_graph import record_graph` after creating items, or hand-build a dict in the shape record_graph documents (see work/sheets/record_graph-code.md, Outputs line) for cycle and no_parent cases.
+- **Outputs**: list of {'id','kind','title'} starting at item_id and following parent until an item with no parent, that item last.
+- **Errors**: raise ValueError if item_id is not in graph. raise ValueError('cycle') if an id repeats while walking.
+- **Allowed imports**: pytest, json, os, subprocess, sys, pathlib, record_run, record_graph, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0001-2 items 1
+- **Setup**: use the shared fixture `bd_repo` from `src/conftest.py` by naming it as a test argument. Build items with record_run(['create', ...]) using the flags in roles/work-record/CONVENTIONS.md and always pass --no-inherit-labels; link with record_run(['dep','add',...]). Do not use other Builders' functions except record_run.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_code_to_intent_order`: intent > story > code chain; trace_back(code) returns [code, story, intent] by id
+  - `test_intent_alone`: trace_back(intent) returns one item
+  - `test_unknown_id_raises`: trace_back('vm-none', graph) raises ValueError
+  - `test_cycle_raises`: a hand-built graph dict where a.parent=b and b.parent=a raises ValueError and returns within one second
+- **Checks to run before reporting**:
+  - `python -m pytest src/trace_back -q`
+  - `wc -l src/trace_back/test_trace_back.py   (must print 50 or less)`
+- **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

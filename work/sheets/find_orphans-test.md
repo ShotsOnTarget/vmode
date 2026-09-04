@@ -1,0 +1,25 @@
+# Instruction sheet
+
+- **Job id**: 0001-2-find_orphans-test
+- **Kind**: test
+- **Parent Story**: 0001-2
+- **Function name**: `find_orphans`
+- **Folder**: `src/find_orphans/`
+- **Files you may change**: `src/find_orphans/test_find_orphans.py`
+- **Signature under test**: `find_orphans(graph: dict[str, dict]) -> list[dict]`
+- **Inputs**: as stated. Import with `from find_orphans.find_orphans import find_orphans`. Where a graph is needed, build it with `from record_graph.record_graph import record_graph` after creating items, or hand-build a dict in the shape record_graph documents (see work/sheets/record_graph-code.md, Outputs line) for cycle and no_parent cases.
+- **Outputs**: list of {'id': str, 'rule': str}, id order. rules, exact strings: 'no_parent' (kind is not intent and parent is None), 'unchecked' (kind in intent, story, code and no other item's checks contains this id), 'checks_nothing' (kind in validation, verification, test and checks is empty). An item can appear once per rule it breaks.
+- **Errors**: none. Return [] for an empty graph.
+- **Allowed imports**: pytest, json, os, subprocess, sys, pathlib, record_run, record_graph, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0001-2 items 3, 4, 5, 6, 7
+- **Setup**: use the shared fixture `bd_repo` from `src/conftest.py` by naming it as a test argument. Build items with record_run(['create', ...]) using the flags in roles/work-record/CONVENTIONS.md and always pass --no-inherit-labels; link with record_run(['dep','add',...]). Do not use other Builders' functions except record_run.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_story_without_verification`: intent, story (validation validates intent) -> story reported 'unchecked'
+  - `test_test_without_checks`: intent, story, verification(validates story), validation(validates intent), code, test with no validates -> test reported 'checks_nothing' and code reported 'unchecked'
+  - `test_story_without_parent`: hand-built graph with a story whose parent is None -> 'no_parent'
+  - `test_clean_graph_empty`: intent, story, code, test(validates code), verification(validates story), validation(validates intent) -> []
+  - `test_script_exit_code`: run `python -m find_orphans.find_orphans` with subprocess in bd_repo with one orphan; exit code 1 and stdout parses as JSON
+- **Checks to run before reporting**:
+  - `python -m pytest src/find_orphans -q`
+  - `wc -l src/find_orphans/test_find_orphans.py   (must print 50 or less)`
+- **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

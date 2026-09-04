@@ -1,0 +1,24 @@
+# Instruction sheet
+
+- **Job id**: 0001-2-trace_forward-test
+- **Kind**: test
+- **Parent Story**: 0001-2
+- **Function name**: `trace_forward`
+- **Folder**: `src/trace_forward/`
+- **Files you may change**: `src/trace_forward/test_trace_forward.py`
+- **Signature under test**: `trace_forward(item_id: str, graph: dict[str, dict]) -> dict`
+- **Inputs**: as stated. Import with `from trace_forward.trace_forward import trace_forward`. Where a graph is needed, build it with `from record_graph.record_graph import record_graph` after creating items, or hand-build a dict in the shape record_graph documents (see work/sheets/record_graph-code.md, Outputs line) for cycle and no_parent cases.
+- **Outputs**: tree {'id','kind','title','children': [subtrees]}. children are every item whose parent is this id, plus every item whose checks list contains this id, in id order, no duplicates.
+- **Errors**: raise ValueError if item_id not in graph. A cycle is broken by never visiting an id twice; it is not an error.
+- **Allowed imports**: pytest, json, os, subprocess, sys, pathlib, record_run, record_graph, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0001-2 items 2
+- **Setup**: use the shared fixture `bd_repo` from `src/conftest.py` by naming it as a test argument. Build items with record_run(['create', ...]) using the flags in roles/work-record/CONVENTIONS.md and always pass --no-inherit-labels; link with record_run(['dep','add',...]). Do not use other Builders' functions except record_run.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_full_tree`: intent with story, story with code job and verification (validates story); trace_forward(intent) contains story, and story's children contain both code and verification
+  - `test_leaf_has_no_children`: trace_forward(code) has children == []
+  - `test_unknown_id_raises`: raises ValueError
+  - `test_no_duplicate_when_child_also_checks`: verification that is both parent-child of story and validates story appears once
+- **Checks to run before reporting**:
+  - `python -m pytest src/trace_forward -q`
+  - `wc -l src/trace_forward/test_trace_forward.py   (must print 50 or less)`
+- **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

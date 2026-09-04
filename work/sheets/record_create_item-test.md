@@ -19,6 +19,7 @@
   - `test_no_owner_rejected`: owner '' raises ValueError
   - `test_no_parent_rejected`: kind 'story' with parent None raises ValueError
   - `test_intent_needs_no_parent`: kind 'intent' with parent None succeeds
+  - `test_child_does_not_inherit_kind`: story created under an intent; record_run(['show', story_id])[0]['labels'] contains 'kind:story' and does not contain 'kind:intent'
 - **Checks to run before reporting**:
   - `python -m pytest src/record_create_item -q`
   - `wc -l src/record_create_item/test_record_create_item.py   (must print 50 or less)`
