@@ -10,9 +10,9 @@ VALID_KINDS = {
 }
 
 
-def _state_from_labels(labels: list) -> str | None:
+def _label_value(labels: list, prefix: str) -> str | None:
     for label in labels or []:
-        if isinstance(label, str) and label.startswith("state:"):
+        if isinstance(label, str) and label.startswith(prefix):
             return label.split(":", 1)[1]
     return None
 
@@ -25,13 +25,14 @@ def record_list_kind(kind: str) -> list[dict]:
 
     result = []
     for item in items:
+        labels = item.get("labels")
         result.append(
             {
                 "id": item.get("id"),
                 "kind": kind,
                 "title": item.get("title"),
-                "owner": item.get("assignee"),
-                "state": _state_from_labels(item.get("labels")),
+                "owner": _label_value(labels, "owner:"),
+                "state": _label_value(labels, "state:"),
             }
         )
     return result
