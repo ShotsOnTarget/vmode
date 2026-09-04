@@ -13,8 +13,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 PROMPT = (
-    "You are the {role}. Working directory: {root}. Read roles/{role}/SKILL.md and "
-    "follow it exactly. Your work item id is {item}. Fetch it from the record with "
+    "You are the {role}. Working directory: {root}. "
+    "Read roles/{role}/SKILL.md and follow it exactly. Your work item id is {item}. Fetch it from the record with "
     "the work-record skill (roles/work-record/SKILL.md). Do only that item. "
     "{extra}Report in roles/shared/report-format.md and nothing else."
 )
