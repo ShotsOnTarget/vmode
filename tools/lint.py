@@ -1,7 +1,8 @@
 """Shape rules ruff cannot express. Exit 1 on any violation.
 
-Rules: file <= 50 lines; every function <= 50 lines; one public function per
-code file; exactly three files per function folder; note has six lines.
+Rules for code files: <= 50 lines; every function <= 50 lines; one public
+function. Test files and conftest are exempt from length (Board decision
+2026-09-04). Every folder: exactly three files; note has six lines.
 """
 import ast
 import sys
@@ -11,6 +12,8 @@ MAX = 50
 
 
 def check_file(path: Path) -> list[str]:
+    if path.name.startswith("test_") or path.name == "conftest.py":
+        return []
     text = path.read_text(encoding="utf-8")
     lines = text.count("\n") + (0 if text.endswith("\n") else 1)
     out = [f"{path}: {lines} lines"] if lines > MAX else []

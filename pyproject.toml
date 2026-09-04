@@ -7,6 +7,10 @@ src = ["src"]
 select = ["E", "F", "W", "I", "B", "C90", "PLR", "SIM", "UP"]
 ignore = ["PLR2004"]
 
+[tool.ruff.lint.per-file-ignores]
+"src/**/test_*.py" = ["PLR0913", "PLR0917", "PLR0915"]
+"src/conftest.py" = ["PLR0915"]
+
 [tool.ruff.lint.mccabe]
 max-complexity = 5
 
