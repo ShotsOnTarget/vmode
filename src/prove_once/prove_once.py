@@ -24,6 +24,7 @@ def prove_once(config_path: str, log_path: str) -> list[str]:
         folder = _folder_of(item["title"])
         gathered = prove_gather(job_id, folder)
         gathered["folder"] = folder
+        gathered["repo"] = "."
         prove_apply(job_id, gathered, log_path)
         processed.append(job_id)
 
