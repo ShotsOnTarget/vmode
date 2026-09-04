@@ -1,8 +1,8 @@
 import pathlib
 
 import pytest
-from prove_move.prove_move import prove_move
 
+from prove_move.prove_move import prove_move
 from record_run.record_run import record_run
 from record_show_item.record_show_item import record_show_item
 
