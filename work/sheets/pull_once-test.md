@@ -14,10 +14,10 @@
 - **Checklist items this job serves**: Story 0003-4 items 1, 2, 3, 7
 - **Setup**: use the shared fixture `bd_repo` from `src/conftest.py`; create items with record_run(['create', ...]) per roles/work-record/CONVENTIONS.md with --no-inherit-labels and explicit kind:/state: labels; a temp config is a copy of roles/board.toml under tmp_path with the wip value edited; a fake invoke is a plain function.
 - **Cases**, one test function each, exactly these names, nothing more:
-  - `test_claims_within_wip`: two ready code jobs, a temp config with build wip 1 -> first call claims one; second call with the first still in_progress claims none
+  - `test_claims_within_wip`: one ready code job plus one code job already in state in_progress (claimed by someone else), temp config with build wip 1 -> pull_once claims none; with build wip 2 it claims the ready one
   - `test_invoke_result_recorded`: fake invoke returning {'tokens': 3, 'seconds': 0.5, 'report': 'ok'} -> item state checking and a note starting 'usage:'
   - `test_invoke_failure_releases`: fake invoke raising RuntimeError -> item back in state ready with a note starting 'release:'
-  - `test_config_change_respected`: after lowering wip to 0 in the temp config file, the next call claims nothing
+  - `test_config_change_respected`: one ready code job; temp config build wip 1 -> first call claims it and it moves to checking; add another ready job, rewrite the temp config with build wip 0 (paused) -> the next call claims nothing
   - `test_unknown_role_raises`: role 'nobody' -> ValueError
 - **Checks to run before reporting**:
   - `ruff format src/pull_once` then `ruff check src/pull_once` (both clean)

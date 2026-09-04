@@ -3,7 +3,7 @@
 # are set. Tiers map to model names in manifest.json.
 #
 # An item's column is derived from its kind and state; nothing else moves it.
-# wip: max items in progress in the column at once. poll_seconds: how often
+# wip: max items in progress in the column at once; 0 pauses the column. poll_seconds: how often
 # the column's puller looks for work. tier: which model pulls here.
 
 [columns.intent_new]        # Board writes an Intent and its validation

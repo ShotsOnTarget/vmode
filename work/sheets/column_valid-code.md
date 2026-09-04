@@ -8,7 +8,7 @@
 - **Files you may change**: `src/column_valid/column_valid.py`, `src/column_valid/column_valid.md`
 - **Signature**: `column_valid(name: str, column: dict) -> list[str]`
 - **Inputs**: name: the column name, used only in messages. column: one column table from the TOML as a dict.
-- **Outputs**: list of problems as 'field: reason' strings, empty when valid. Checks: required keys kinds, states, role, tier, wip, poll_seconds present; no key outside those plus labels_absent; kinds a non-empty list drawn from intent, story, code, test, verification, validation, proposal; states a non-empty list drawn from waiting, ready, in_progress, blocked, checking, done, reopened; role a str; tier one of human, frontier, cheap, none; wip an int >= 1; poll_seconds an int >= 0; labels_absent, if present, a list of str.
+- **Outputs**: list of problems as 'field: reason' strings, empty when valid. Checks: required keys kinds, states, role, tier, wip, poll_seconds present; no key outside those plus labels_absent; kinds a non-empty list drawn from intent, story, code, test, verification, validation, proposal; states a non-empty list drawn from waiting, ready, in_progress, blocked, checking, done, reopened; role a str; tier one of human, frontier, cheap, none; wip an int >= 0 (0 means the column is paused: nothing is claimed from it); poll_seconds an int >= 0; labels_absent, if present, a list of str.
 - **Errors**: none; problems are returned, never raised.
 - **Allowed imports**: none. Nothing else.
 - **Checklist items this job serves**: Story 0003-2 items 1, 2

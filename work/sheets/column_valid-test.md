@@ -19,7 +19,8 @@
   - `test_unknown_key_reported`: extra key colour -> a string starting 'colour:'
   - `test_bad_tier_reported`: tier gpt -> a string starting 'tier:'
   - `test_bad_kind_reported`: kinds ['bug'] -> a string starting 'kinds:'
-  - `test_wip_zero_reported`: wip 0 -> a string starting 'wip:'
+  - `test_wip_zero_allowed`: wip 0 -> [] (a paused column)
+  - `test_wip_negative_reported`: wip -1 -> a string starting 'wip:'
 - **Checks to run before reporting**:
   - `ruff format src/column_valid` then `ruff check src/column_valid` (both clean)
   - `python -m pytest src/column_valid -q`
