@@ -142,4 +142,19 @@ None pending. Naming decided by the Board 2026-09-04: Analyst, not Historian.
 
 ## Status
 
-0002-1 and 0002-2 started 2026-09-04 through the record: sheets live in each job's sheet field, Builders receive a job id only.
+0002-1 and 0002-2 Verified 2026-09-04. First run through the record: sheets in each job's sheet field, Builders given a job id only. 104 tests.
+
+Cost so far, from `cost_rollup` over the log (tokens, seconds, Builder runs; 0001 back-filled from harness figures, -1 where unknown):
+
+| Item | Tokens | Seconds | Runs |
+|---|---|---|---|
+| 0001 | 5,757,420 | 3,117 | 150 |
+| 0001-1 | 2,294,709 | 1,455 | 51 |
+| 0001-2 | 1,089,821 | 641 | 25 |
+| 0001-3 | 705,135 | 249 | 36 |
+| 0001-4 | 844,869 | 512 | 17 |
+| 0001-5 | 822,886 | 259 | 19 |
+| 0002-1 | 235,690 | 110 | 4 |
+| 0002-2 | 943,990 | 486 | 14 |
+
+Runs count log lines under the item, including gate decisions with zero cost. Next: 0002-3 (Analyst skill) and 0002-4 (proposal gate).

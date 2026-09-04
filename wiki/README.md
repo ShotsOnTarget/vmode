@@ -1,26 +1,17 @@
 # Wiki
 
-One file per pattern, written by the Analyst, read by the Architect before writing sheets. Never references code; evidence is log line references only.
+One file per pattern. The Analyst writes, the Architect reads before writing sheets. Evidence is log line references only, never code.
 
-File `wiki/<id>.md`:
+File `wiki/<id>.md`: front matter between `---` lines, one `key: <json>` line each for id, title, evidence, cost, created, last_used, times_used; then:
 
 ```
----
-id: "<id>"
-title: "<short title>"
-evidence: ["<log item id or ts>", "..."]
-cost: <tokens wasted, int>
-created: "<ISO-8601>"
-last_used: "<ISO-8601>"
-times_used: <int>
----
 ## Pattern
 
 One paragraph: what keeps happening and why.
 
 ## Fix
 
-One paragraph: the proposed change, naming the target file under roles/ or policy/.
+One paragraph: the change, naming a file under roles/ or policy/.
 ```
 
-Front matter values are JSON. Pages unused for 90 days are candidates for removal, listed by `wiki_stale`.
+Pages unused for 90 days are listed by `wiki_stale` for removal.

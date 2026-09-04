@@ -39,7 +39,9 @@ waiting, ready, in progress, blocked, checking, done, reopened.
 
 ## Log entry
 
-One line of structured data per decision: timestamp, work item id, gate, rule checked, raw inputs (tool output, test output, retry count), resulting state. Append only.
+One line of structured data per decision: timestamp, work item id, gate, rule checked, raw inputs (tool output, test output, retry count), resulting state, tokens, seconds. Append only.
+
+Cost fields: `tokens` is the total tokens the harness reports for the Builder run that produced the decision (input plus output), `seconds` its wall time. Gate decisions with no Builder run carry tokens 0 and seconds 0.0. A run whose cost the harness did not report is logged with tokens -1, never omitted. `cost_rollup` sums per item, per Story, per Intent by id prefix.
 
 ## What the Supervisor never does
 
