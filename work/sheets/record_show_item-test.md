@@ -14,7 +14,7 @@
 - **Checklist items this job serves**: Story 0001-4 items 2, 4
 - **Setup**: use the shared fixture `bd_repo` from `src/conftest.py` by naming it as a test argument. Build items with record_run(['create', ...]) using the flags in roles/work-record/CONVENTIONS.md and always pass --no-inherit-labels; link with record_run(['dep','add',...]). Do not use other Builders' functions except record_run.
 - **Cases**, one test function each, exactly these names, nothing more:
-  - `test_returns_fields`: created story with description 'do x' via --description; show returns kind story, owner, state waiting, parent, sheet 'do x'
+  - `test_returns_fields`: created story with description 'do x' via --description; show returns kind story, owner from the owner: label, state waiting, parent, sheet 'do x'
   - `test_unknown_raises`: 'vm-none' raises RecordError
   - `test_sheet_empty_when_no_description`: item without description has sheet ''
 - **Checks to run before reporting**:

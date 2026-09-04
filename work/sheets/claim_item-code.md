@@ -6,11 +6,11 @@
 - **Function name**: `claim_item`
 - **Folder**: `src/claim_item/`
 - **Files you may change**: `src/claim_item/claim_item.py`, `src/claim_item/claim_item.md`
-- **Signature**: `claim_item(item_id: str, owner: str) -> dict`
-- **Inputs**: item_id: an item in the record whose state is ready. owner: the claimant name.
-- **Outputs**: {'id': item_id, 'owner': owner, 'state': 'in_progress'} after one atomic record operation: record_run(['update', item_id, '--claim']) claims for the current bd user; then set assignee to owner and the state label via record_set_owner and record_set_state. The claim call must come first and is the only guard.
-- **Errors**: RecordError if the item is already claimed by someone else (bd --claim exits non-zero in that case). ValueError if owner is empty.
-- **Allowed imports**: from record_run.record_run import record_run, RecordError; from record_set_owner.record_set_owner import record_set_owner; from record_set_state.record_set_state import record_set_state. Nothing else.
+- **Signature**: `claim_item(item_id: str, actor: str) -> dict`
+- **Inputs**: item_id: an item in the record whose state is ready and unassigned. actor: the unique puller name, e.g. builder-1.
+- **Outputs**: {'id': item_id, 'claimed_by': actor, 'state': 'in_progress'} after one atomic record operation: record_run(['update', item_id, '--claim', '--actor', actor]); then record_set_state(item_id, 'in_progress'). The claim call is the only guard; nothing is written before it. Owner label is untouched.
+- **Errors**: RecordError if the item is already claimed by another actor (bd --claim exits non-zero: probed 2026-09-04, message 'issue already claimed by <name>'). ValueError if actor is empty.
+- **Allowed imports**: from record_run.record_run import record_run, RecordError; from record_set_state.record_set_state import record_set_state. Nothing else.
 - **Checklist items this job serves**: Story 0003-2 items 6
 - **How**: Capture the real shape first: run `bd update <id> --claim --json` twice on a test item in the bd_repo fixture and read what the second call returns; write the sheet note file's error line from that. Under 25 lines.
 - **Checks to run before reporting**:

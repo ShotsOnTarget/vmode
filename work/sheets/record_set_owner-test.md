@@ -14,7 +14,7 @@
 - **Checklist items this job serves**: Story 0001-4 items 2
 - **Setup**: use the shared fixture `bd_repo` from `src/conftest.py` by naming it as a test argument. Build items with record_run(['create', ...]) using the flags in roles/work-record/CONVENTIONS.md and always pass --no-inherit-labels; link with record_run(['dep','add',...]). Do not use other Builders' functions except record_run.
 - **Cases**, one test function each, exactly these names, nothing more:
-  - `test_owner_changes`: set owner to 'builder-2'; show reports assignee 'builder-2'
+  - `test_owner_changes`: set owner to 'builder-2'; show reports a label owner:builder-2, no label owner:<old>, and the assignee unchanged
   - `test_empty_owner_rejected`: '' raises ValueError
   - `test_unknown_raises`: 'vm-none' raises RecordError
 - **Checks to run before reporting**:

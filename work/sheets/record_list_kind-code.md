@@ -12,7 +12,7 @@
 - **Errors**: raise ValueError if kind invalid. RecordError propagates.
 - **Allowed imports**: from record_run.record_run import record_run, RecordError. Nothing else.
 - **Checklist items this job serves**: Story 0001-1 items 2
-- **How**: Call record_run(['list','--all','-l',f'kind:{kind}']). Map assignee to owner and the state: label to state.
+- **How**: Call record_run(['list','--all','-l',f'kind:{kind}']). Map the owner: label to owner and the state: label to state; never the assignee.
 - **Checks to run before reporting**:
   - `wc -l src/record_list_kind/record_list_kind.py   (must print 50 or less)`
   - `python -c "import ast,sys; t=ast.parse(open('src/record_list_kind/record_list_kind.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)

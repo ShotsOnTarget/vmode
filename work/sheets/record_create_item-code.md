@@ -8,7 +8,7 @@
 - **Files you may change**: `src/record_create_item/record_create_item.py`, `src/record_create_item/record_create_item.md`
 - **Signature**: `record_create_item(kind: str, title: str, owner: str, parent: str | None = None) -> dict`
 - **Inputs**: kind: one of intent, story, code, test, verification, validation, proposal. title: non-empty. owner: non-empty. parent: an existing id, required unless kind is intent. For the right-side kinds test, verification and validation, parent is the item this one checks.
-- **Outputs**: {'id': str, 'kind': str, 'title': str, 'owner': str, 'parent': str | None, 'state': 'waiting'}. Owner is stored as the label owner:<owner>; the assignee is never set on create, it is the claim slot.
+- **Outputs**: {'id': str, 'kind': str, 'title': str, 'owner': str, 'parent': str | None, 'state': 'waiting'}. Owner is stored as the label owner:<owner>; the assignee is never set on create, it is the claim slot. Owner is stored as the label owner:<owner>; the assignee is never set on create, it is the claim slot.
 - **Errors**: raise ValueError before calling bd if kind is not one of the seven, owner is empty, or parent is None and kind is not intent. RecordError propagates from record_run.
 - **Allowed imports**: from record_run.record_run import record_run, RecordError. Nothing else.
 - **Checklist items this job serves**: Story 0001-1 items 2, 3, 4

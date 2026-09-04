@@ -12,7 +12,7 @@
 - **Errors**: RecordError propagates for an unknown id.
 - **Allowed imports**: from record_run.record_run import record_run, RecordError. Nothing else.
 - **Checklist items this job serves**: Story 0001-4 items 2, 4
-- **How**: record_run(['show', item_id]) returns a one-element list. kind and state from labels as in record_graph.
+- **How**: record_run(['show', item_id]) returns a one-element list. kind, state and owner from labels kind:, state:, owner: ('' if absent). Never read the assignee for owner.
 - **Checks to run before reporting**:
   - `wc -l src/record_show_item/record_show_item.py   (must print 50 or less)`
   - `python -c "import ast,sys; t=ast.parse(open('src/record_show_item/record_show_item.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)
