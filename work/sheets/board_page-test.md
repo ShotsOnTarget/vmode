@@ -1,0 +1,24 @@
+# Instruction sheet
+
+- **Job id**: 0001-3-board_page-test
+- **Kind**: test
+- **Parent Story**: 0001-3
+- **Function name**: `board_page`
+- **Folder**: `src/board_page/`
+- **Files you may change**: `src/board_page/test_board_page.py`
+- **Signature under test**: `board_page() -> str`
+- **Inputs**: as stated. Import with `from board_page.board_page import board_page`.
+- **Outputs**: a complete HTML document as a string. It fetches GET /api/intents and renders a table with id, title, state, care, stories done/total; clicking a row fetches GET /api/tree?id=<id> and renders 'forward' as nested lists and 'back' as a breadcrumb line; every item shows its id; clicking any id in the tree loads that item's tree; two buttons Yes and No (No prompts for a reason with a text input, not window.prompt) POST JSON {'intent','decision','reason'} to /api/decide and then reload the intent list.
+- **Errors**: none.
+- **Allowed imports**: pytest, json, threading, socket, urllib.request, urllib.error, record_run, record_graph, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0001-3 items 2, 3, 4, 5
+- **Setup**: use the shared fixture `bd_repo` from `src/conftest.py` where the record is needed. Build items with record_run(['create', ...]) using the flags in roles/work-record/CONVENTIONS.md (always --no-inherit-labels; right-side kinds get a validates dep, never --parent; intents get a care:high or care:low label). For pure functions hand-build a graph dict in the shape documented in work/sheets/record_graph-code.md.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_is_html`: starts with '<!doctype html>' case-insensitive and contains '</html>'
+  - `test_has_endpoints`: contains '/api/intents', '/api/tree', '/api/decide'
+  - `test_no_external`: does not contain 'http://' or 'https://'
+  - `test_no_dialogs`: does not contain 'alert(' 'confirm(' or 'prompt('
+- **Checks to run before reporting**:
+  - `python -m pytest src/board_page -q`
+  - `wc -l src/board_page/test_board_page.py   (must print 50 or less)`
+- **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

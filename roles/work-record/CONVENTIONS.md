@@ -12,6 +12,7 @@ How each policy section 4 field maps onto beads 1.0. This is the only document t
 | Link: needs_first | dependency type `blocks` | `bd dep add <item> --blocked-by <other>` |
 | Link: checks | dependency type `validates` (native, no label needed) | `bd dep add <checker> <checked> -t validates` |
 | Owner | assignee, required | `bd create -a <owner>` |
+| Care level (intents only) | label `care:low` or `care:high` | `bd label add <id> care:high` |
 | State | label `state:<state>` is the source of truth, plus bd status kept in step | see table below |
 | Checklist | acceptance field | `bd create --acceptance "..."` |
 | Instruction sheet | description field | `bd create --body-file sheet.md` |

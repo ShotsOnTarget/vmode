@@ -1,0 +1,25 @@
+# Instruction sheet
+
+- **Job id**: 0001-3-board_decide-test
+- **Kind**: test
+- **Parent Story**: 0001-3
+- **Function name**: `board_decide`
+- **Folder**: `src/board_decide/`
+- **Files you may change**: `src/board_decide/test_board_decide.py`
+- **Signature under test**: `board_decide(intent_id: str, decision: str, reason: str) -> dict`
+- **Inputs**: as stated. Import with `from board_decide.board_decide import board_decide`.
+- **Outputs**: {'intent': intent_id, 'validation': validation_id, 'state': 'done' or 'reopened'}.
+- **Errors**: ValueError if decision is not yes/no, or no is given with empty reason, or no validation item checks this intent. RecordError propagates.
+- **Allowed imports**: pytest, json, threading, socket, urllib.request, urllib.error, record_run, record_graph, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0001-3 items 5
+- **Setup**: use the shared fixture `bd_repo` from `src/conftest.py` where the record is needed. Build items with record_run(['create', ...]) using the flags in roles/work-record/CONVENTIONS.md (always --no-inherit-labels; right-side kinds get a validates dep, never --parent; intents get a care:high or care:low label). For pure functions hand-build a graph dict in the shape documented in work/sheets/record_graph-code.md.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_yes_closes_validation`: create intent + validation (validates intent); board_decide(intent,'yes','') -> validation state label is state:done and assignee board
+  - `test_no_reopens_with_reason`: 'no','missing X' -> state:reopened and a comment containing 'missing X' (check comment_count >= 1 via show, or bd comment list if available)
+  - `test_no_without_reason_rejected`: 'no','' raises ValueError
+  - `test_bad_decision_rejected`: 'maybe' raises ValueError
+  - `test_no_validation_raises`: intent with no validation -> ValueError
+- **Checks to run before reporting**:
+  - `python -m pytest src/board_decide -q`
+  - `wc -l src/board_decide/test_board_decide.py   (must print 50 or less)`
+- **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

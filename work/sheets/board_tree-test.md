@@ -1,0 +1,23 @@
+# Instruction sheet
+
+- **Job id**: 0001-3-board_tree-test
+- **Kind**: test
+- **Parent Story**: 0001-3
+- **Function name**: `board_tree`
+- **Folder**: `src/board_tree/`
+- **Files you may change**: `src/board_tree/test_board_tree.py`
+- **Signature under test**: `board_tree(item_id: str, graph: dict[str, dict]) -> dict`
+- **Inputs**: as stated. Import with `from board_tree.board_tree import board_tree`.
+- **Outputs**: {'back': trace_back(item_id, graph), 'forward': trace_forward(item_id, graph)}.
+- **Errors**: ValueError from either propagates.
+- **Allowed imports**: pytest, json, threading, socket, urllib.request, urllib.error, record_run, record_graph, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0001-3 items 3, 4
+- **Setup**: use the shared fixture `bd_repo` from `src/conftest.py` where the record is needed. Build items with record_run(['create', ...]) using the flags in roles/work-record/CONVENTIONS.md (always --no-inherit-labels; right-side kinds get a validates dep, never --parent; intents get a care:high or care:low label). For pure functions hand-build a graph dict in the shape documented in work/sheets/record_graph-code.md.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_both_keys`: hand-built intent>story>code graph, board_tree(code) has back of length 3 and forward with children []
+  - `test_intent_forward`: board_tree(intent)['forward']['children'] has one story
+  - `test_unknown_raises`: ValueError
+- **Checks to run before reporting**:
+  - `python -m pytest src/board_tree -q`
+  - `wc -l src/board_tree/test_board_tree.py   (must print 50 or less)`
+- **Out of scope**: the code file, any other folder, any case not listed, any assertion on internals.

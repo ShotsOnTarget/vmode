@@ -109,7 +109,7 @@ Supervisor (code, later)  ---- reads record, writes log ---->  log (append-only 
 - **Parent Intent**: 0001
 - **One thing it must do**: the Board can do its four jobs on a screen without a terminal.
 - **Customer**: the Board.
-- **Supplier**: an existing beads web UI, adopted. Builders only if none passes.
+- **Supplier**: Builders, after both existing UIs failed evaluation.
 - **Inputs**: the record, read live. A yes or no decision typed by the Board.
 - **Outputs**: on screen: intent list with rollup, forward tree, back trace. Into the record: the Board's decision as a state change on the validation item, with the Board as owner.
 - **Contract**:
@@ -123,7 +123,8 @@ Supervisor (code, later)  ---- reads record, writes log ---->  log (append-only 
   3. Open an intent and see the forward trace as a tree. [showing]
   4. Open any leaf and see the back trace to its intent. [showing]
   5. Record yes or no on an intent; afterwards the decision appears in the record with the Board as owner. [showing]
-- **Job pairs**: none if an existing UI passes. If not: `board_list_intents`, `board_show_tree`, `board_record_decision`, plus a page shell. Decided after item 1.
+- **Evaluation (item 1, 2026-09-04)**: beads-web reads `.beads/issues.jsonl`, which Dolt-mode beads does not produce, and has no tree or graph view: fails items 3 and 4 before install. beads-dashboard drives `bd` through subprocess and lists tree, graph, detail, status change and comments, so it was installed from GitHub and run against our record: the page renders blank with 67 identical `toLowerCase is not a function` errors in a minified bundle; the project has one commit and no version pin against beads 1.0. Fixing a stranger's minified frontend is not our work. **Pick: build our own, only the four things.**
+- **Job pairs**: `board_rollup`, `board_tree`, `board_decide`, `board_page`, `board_serve`. Server is Python stdlib http.server, page is one HTML string, no framework, no build step.
 - **Needs first**: 0001-2
 
 ### Story 0001-4: agents read and write the record through one skill
