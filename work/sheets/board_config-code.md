@@ -1,0 +1,21 @@
+# Instruction sheet
+
+- **Job id**: 0003-2-board_config-code
+- **Kind**: code
+- **Parent Story**: 0003-2
+- **Function name**: `board_config`
+- **Folder**: `src/board_config/`
+- **Files you may change**: `src/board_config/board_config.py`, `src/board_config/board_config.md`
+- **Signature**: `board_config(path: str) -> dict`
+- **Inputs**: path to a TOML file shaped like roles/board.toml.
+- **Outputs**: the parsed dict, validated. config is the dict returned by board_config: {'columns': {name: {'kinds': [...], 'states': [...], 'role': str, 'tier': str, 'wip': int, 'poll_seconds': int, 'labels_absent': [...] optional}}, 'limits': {'max_parallel_model_runs': int, 'claim_timeout_seconds': int}}. Validation: every column has kinds (non-empty list of the seven kinds), states (non-empty list of the seven policy states), role (str), tier (one of human, frontier, cheap, none), wip (int >= 1), poll_seconds (int >= 0); optional labels_absent (list of str); any other key raises. limits has both ints >= 1. Two columns whose kinds and states intersect AND whose labels_absent are equal is a conflict and raises.
+- **Errors**: ValueError with the column name and field in the message on any validation failure. FileNotFoundError if path is missing.
+- **Allowed imports**: tomllib, os, from column_valid.column_valid import column_valid. Nothing else.
+- **Checklist items this job serves**: Story 0003-2 items 1, 2
+- **How**: Load with tomllib.load on a file opened 'rb'. For each column call column_valid(name, column) (see work/sheets/column_valid-code.md) and raise ValueError with the first problem if any. Then check limits (both keys present, ints >= 1). Then the conflict check: two columns whose kinds intersect and states intersect and whose labels_absent lists are equal (missing counts as []) raise ValueError naming both. Under 40 lines; if not possible, report blocked.
+- **Checks to run before reporting**:
+  - `ruff format src/board_config` then `ruff check src/board_config` (both clean; a noqa comment fails the shape check)
+  - `python tools/lint.py`   (no findings for your folder)
+  - `python -c "import ast,sys; t=ast.parse(open('src/board_config/board_config.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)
+- **Note file** `src/board_config/board_config.md` has exactly these six lines: purpose, signature, inputs, outputs, side effects, work item id 0003-2-board_config-code.
+- **Out of scope**: tests, any other folder, any import not listed. Never hand-pack lines. If the formatted file exceeds 50 lines, report blocked.

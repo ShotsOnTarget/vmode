@@ -1,0 +1,25 @@
+# Instruction sheet
+
+- **Job id**: 0003-2-board_config-test
+- **Kind**: test
+- **Parent Story**: 0003-2
+- **Function name**: `board_config`
+- **Folder**: `src/board_config/`
+- **Files you may change**: `src/board_config/test_board_config.py`
+- **Signature under test**: `board_config(path: str) -> dict`
+- **Inputs**: as stated. Import with `from board_config.board_config import board_config`.
+- **Outputs**: the parsed dict, validated. config is the dict returned by board_config: {'columns': {name: {'kinds': [...], 'states': [...], 'role': str, 'tier': str, 'wip': int, 'poll_seconds': int, 'labels_absent': [...] optional}}, 'limits': {'max_parallel_model_runs': int, 'claim_timeout_seconds': int}}. Validation: every column has kinds (non-empty list of the seven kinds), states (non-empty list of the seven policy states), role (str), tier (one of human, frontier, cheap, none), wip (int >= 1), poll_seconds (int >= 0); optional labels_absent (list of str); any other key raises. limits has both ints >= 1. Two columns whose kinds and states intersect AND whose labels_absent are equal is a conflict and raises.
+- **Errors**: ValueError with the column name and field in the message on any validation failure. FileNotFoundError if path is missing.
+- **Allowed imports**: pytest, tomllib, and the functions under test plus board_config. Nothing else.
+- **Checklist items this job serves**: Story 0003-2 items 1, 2
+- **Setup**: hand-build graphs, label dicts and TOML files under tmp_path; use board_config('roles/board.toml') for the shipped config.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_shipped_config_loads`: board_config('roles/board.toml') returns a dict with 10 columns
+  - `test_conflict_raises`: a temp TOML with two columns both kinds ['code'] states ['ready'] and no labels_absent raises ValueError
+  - `test_bad_tier_raises`: tier 'gpt' raises ValueError
+  - `test_unknown_key_raises`: a column with key 'colour' raises ValueError
+  - `test_missing_file_raises`: FileNotFoundError
+- **Checks to run before reporting**:
+  - `ruff format src/board_config` then `ruff check src/board_config` (both clean)
+  - `python -m pytest src/board_config -q`
+- **Out of scope**: the code file, any other folder, any case not listed.

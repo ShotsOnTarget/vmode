@@ -1,0 +1,26 @@
+# Instruction sheet
+
+- **Job id**: 0003-2-column_valid-test
+- **Kind**: test
+- **Parent Story**: 0003-2
+- **Function name**: `column_valid`
+- **Folder**: `src/column_valid/`
+- **Files you may change**: `src/column_valid/test_column_valid.py` and nothing else. You never create or edit the code file.
+- **Signature under test**: `column_valid(name: str, column: dict) -> list[str]`
+- **Inputs**: as stated. Import with `from column_valid.column_valid import column_valid`.
+- **Outputs**: list of 'field: reason' strings, empty when valid
+- **Errors**: none
+- **Allowed imports**: pytest and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0003-2 items 1, 2
+- **Setup**: hand-build column dicts.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_valid_column_empty`: a complete valid column -> []
+  - `test_missing_key_reported`: column without wip -> a string starting 'wip:'
+  - `test_unknown_key_reported`: extra key colour -> a string starting 'colour:'
+  - `test_bad_tier_reported`: tier gpt -> a string starting 'tier:'
+  - `test_bad_kind_reported`: kinds ['bug'] -> a string starting 'kinds:'
+  - `test_wip_zero_reported`: wip 0 -> a string starting 'wip:'
+- **Checks to run before reporting**:
+  - `ruff format src/column_valid` then `ruff check src/column_valid` (both clean)
+  - `python -m pytest src/column_valid -q`
+- **Out of scope**: the code file, any other folder, any case not listed.

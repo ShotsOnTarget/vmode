@@ -6,7 +6,7 @@ The Supervisor is code, not a model. It never uses judgement. This spec is what 
 
 1. Pick the next job. Only jobs whose "needs first" links are all done.
 2. Run the Ready gate on a Story before any job under it is handed out.
-3. Hand one job to one Builder with its instruction sheet.
+3. Hand one job to one Builder by job id. The dispatch text for a test job says 'write your tests from the sheet'; never 'write from the sheet', which Builders have read as permission to write the code file.
 4. Run the Built and Proven gates on each returned job.
 5. Count retries per pair. On the third failure, block and escalate.
 6. Tell the Architect when a Story is ready to verify.

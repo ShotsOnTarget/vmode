@@ -1,0 +1,24 @@
+# Instruction sheet
+
+- **Job id**: 0003-2-wip_headroom-test
+- **Kind**: test
+- **Parent Story**: 0003-2
+- **Function name**: `wip_headroom`
+- **Folder**: `src/wip_headroom/`
+- **Files you may change**: `src/wip_headroom/test_wip_headroom.py`
+- **Signature under test**: `wip_headroom(name: str, graph: dict, config: dict) -> int`
+- **Inputs**: as stated. Import with `from wip_headroom.wip_headroom import wip_headroom`.
+- **Outputs**: config['columns'][name]['wip'] minus the number of items in graph whose kind is in that column's kinds and whose state is 'in_progress' (claimed items only, Board decision 2026-09-04), floored at 0.
+- **Errors**: ValueError if name is not a column.
+- **Allowed imports**: pytest, tomllib, and the functions under test plus board_config. Nothing else.
+- **Checklist items this job serves**: Story 0003-2 items 5
+- **Setup**: hand-build graphs, label dicts and TOML files under tmp_path; use board_config('roles/board.toml') for the shipped config.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_full_is_zero`: wip 2 and two in_progress code items -> 0
+  - `test_never_negative`: wip 1 and three in_progress -> 0
+  - `test_counts_only_column_kinds`: wip 2, one in_progress code and one in_progress story -> build headroom 1
+  - `test_unknown_column_raises`: ValueError
+- **Checks to run before reporting**:
+  - `ruff format src/wip_headroom` then `ruff check src/wip_headroom` (both clean)
+  - `python -m pytest src/wip_headroom -q`
+- **Out of scope**: the code file, any other folder, any case not listed.

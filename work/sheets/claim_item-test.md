@@ -1,0 +1,23 @@
+# Instruction sheet
+
+- **Job id**: 0003-2-claim_item-test
+- **Kind**: test
+- **Parent Story**: 0003-2
+- **Function name**: `claim_item`
+- **Folder**: `src/claim_item/`
+- **Files you may change**: `src/claim_item/test_claim_item.py`
+- **Signature under test**: `claim_item(item_id: str, owner: str) -> dict`
+- **Inputs**: as stated. Import with `from claim_item.claim_item import claim_item`.
+- **Outputs**: {'id': item_id, 'owner': owner, 'state': 'in_progress'} after one atomic record operation: record_run(['update', item_id, '--claim']) claims for the current bd user; then set assignee to owner and the state label via record_set_owner and record_set_state. The claim call must come first and is the only guard.
+- **Errors**: RecordError if the item is already claimed by someone else (bd --claim exits non-zero in that case). ValueError if owner is empty.
+- **Allowed imports**: pytest, json, record_run, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0003-2 items 6
+- **Setup**: use the shared fixture `bd_repo` from `src/conftest.py`; create items with record_run(['create', ...]) per roles/work-record/CONVENTIONS.md with --no-inherit-labels and labels kind:code,state:ready.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_claims_ready_item`: create a code item (state ready); claim_item -> state label state:in_progress and assignee owner
+  - `test_second_claim_raises`: claim twice with different owners -> second raises RecordError (if bd --claim is idempotent for the same user, set a different BD_ACTOR or user via env, or assert the assignee did not change and document which)
+  - `test_empty_owner_raises`: ValueError
+- **Checks to run before reporting**:
+  - `ruff format src/claim_item` then `ruff check src/claim_item` (both clean)
+  - `python -m pytest src/claim_item -q`
+- **Out of scope**: the code file, any other folder, any case not listed.

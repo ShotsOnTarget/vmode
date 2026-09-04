@@ -1,0 +1,21 @@
+# Instruction sheet
+
+- **Job id**: 0003-2-claim_item-code
+- **Kind**: code
+- **Parent Story**: 0003-2
+- **Function name**: `claim_item`
+- **Folder**: `src/claim_item/`
+- **Files you may change**: `src/claim_item/claim_item.py`, `src/claim_item/claim_item.md`
+- **Signature**: `claim_item(item_id: str, owner: str) -> dict`
+- **Inputs**: item_id: an item in the record whose state is ready. owner: the claimant name.
+- **Outputs**: {'id': item_id, 'owner': owner, 'state': 'in_progress'} after one atomic record operation: record_run(['update', item_id, '--claim']) claims for the current bd user; then set assignee to owner and the state label via record_set_owner and record_set_state. The claim call must come first and is the only guard.
+- **Errors**: RecordError if the item is already claimed by someone else (bd --claim exits non-zero in that case). ValueError if owner is empty.
+- **Allowed imports**: from record_run.record_run import record_run, RecordError; from record_set_owner.record_set_owner import record_set_owner; from record_set_state.record_set_state import record_set_state. Nothing else.
+- **Checklist items this job serves**: Story 0003-2 items 6
+- **How**: Capture the real shape first: run `bd update <id> --claim --json` twice on a test item in the bd_repo fixture and read what the second call returns; write the sheet note file's error line from that. Under 25 lines.
+- **Checks to run before reporting**:
+  - `ruff format src/claim_item` then `ruff check src/claim_item` (both clean; a noqa comment fails the shape check)
+  - `python tools/lint.py`   (no findings for your folder)
+  - `python -c "import ast,sys; t=ast.parse(open('src/claim_item/claim_item.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)
+- **Note file** `src/claim_item/claim_item.md` has exactly these six lines: purpose, signature, inputs, outputs, side effects, work item id 0003-2-claim_item-code.
+- **Out of scope**: tests, any other folder, any import not listed. Never hand-pack lines. If the formatted file exceeds 50 lines, report blocked.

@@ -1,0 +1,24 @@
+# Instruction sheet
+
+- **Job id**: 0003-2-column_of-test
+- **Kind**: test
+- **Parent Story**: 0003-2
+- **Function name**: `column_of`
+- **Folder**: `src/column_of/`
+- **Files you may change**: `src/column_of/test_column_of.py`
+- **Signature under test**: `column_of(item: dict, labels: list[str], config: dict) -> str | None`
+- **Inputs**: as stated. Import with `from column_of.column_of import column_of`.
+- **Outputs**: the single column name whose kinds contains item['kind'], states contains item['state'], and none of whose labels_absent entries is in labels. None if no column matches.
+- **Errors**: ValueError if more than one column matches (should be impossible after board_config validation, but checked).
+- **Allowed imports**: pytest, tomllib, and the functions under test plus board_config. Nothing else.
+- **Checklist items this job serves**: Story 0003-2 items 3
+- **Setup**: hand-build graphs, label dicts and TOML files under tmp_path; use board_config('roles/board.toml') for the shipped config.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_story_waiting_is_sheet_todo`: with the shipped config, kind story state waiting -> 'sheet_todo'
+  - `test_test_ready_is_test`: kind test state ready -> 'test'
+  - `test_learned_story_is_none`: kind story state done with labels ['learned'] -> None; without the label -> 'learn'
+  - `test_two_matches_raise`: hand-built config with two matching columns raises ValueError
+- **Checks to run before reporting**:
+  - `ruff format src/column_of` then `ruff check src/column_of` (both clean)
+  - `python -m pytest src/column_of -q`
+- **Out of scope**: the code file, any other folder, any case not listed.
