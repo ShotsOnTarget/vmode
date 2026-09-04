@@ -163,4 +163,4 @@ As asked:
 
 ## Status
 
-Rewritten 2026-09-04 for pull. Config at `roles/board.toml`. Loaded into the record. Board decisions 1 to 3 accepted; 0003-2 and 0003-4 unblocked.
+Rewritten 2026-09-04 for pull. Config at `roles/board.toml`. Stories 0003-1, 0003-2, 0003-3 Verified. 0003-4: all nine pairs Proven (pull_once, prove_gather, prove_rules, prove_move, prove_apply, prove_once, puller, plus record_labels and column_valid under 0003-2, and commit_job added so the Supervisor lands code with the job id and no person commits); item 8 running live on Story 0001-6. 0003-5 in progress on Story 0001-6.
