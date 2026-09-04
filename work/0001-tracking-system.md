@@ -25,44 +25,82 @@ Backend: **beads**. Reasons against the policy section 4 list.
 
 Not chosen: a hosted tracker (agents need auth and network, audit trail is theirs not ours), a hand-rolled SQLite app (rebuilds what beads already has).
 
-Frontend: **adopt an existing beads web UI before building one.** Candidates with a running web server and a read view: beads-dashboard (tree, activity feed, kanban, graph, live updates), beads-web (kanban, epics, multi-project). Story 0001-3 evaluates them against the four things the Board actually does. Build our own only if both fail, and then only those four things.
+Frontend: **adopt an existing beads web UI before building one.** Candidates: beads-dashboard, beads-web. Story 0001-3 evaluates them against the four things the Board actually does. Build our own only if both fail, and then only those four things.
 
-Agent access: one skill, `work-record`, that wraps the CLI. Every role skill points at it instead of naming the tool. Keeps the policy line: skills describe "read the record", the work-record skill knows it is beads.
+Agent access: one skill, `work-record`, that wraps the CLI. Every role skill points at it instead of naming the tool.
 
-## Escalations to the Board
+## Board decisions
 
-Judgement calls I will not make alone:
+1. Record lives inside this git repo: **accepted** 2026-09-04.
+2. "Checks" link as child plus label convention: **pending**, awaiting Board.
+3. Third-party Board screen: **accepted** 2026-09-04.
 
-1. The record lives inside the git repo. Fine for one project. If we want one record across many repos later, that is a different choice. Accept for now?
-2. The "checks" link is a convention (child plus label), not enforced by the tool. The orphan script enforces it. Accept, or require a tool that has the link natively?
-3. Board screen will be third-party code we do not control. Accept, given it is read-mostly?
+## System shape
+
+Four parts. Arrows are data flow.
+
+```
+Board screen  <---- reads ----  record (beads, in git)  <---- reads/writes ----  work-record skill  <---- Architect, Builders
+      |                              ^                                                    ^
+      +---- records yes/no ----------+                                                    |
+                                                                                          |
+Supervisor (code, later)  ---- reads record, writes log ---->  log (append-only file)      |
+                                       \--------------------- hands jobs to ------------+
+```
 
 ## Stories
 
 ### Story 0001-1: the record exists and holds the six kinds
 
 - **Parent Intent**: 0001
-- **One thing it must do**: a fresh checkout can create, link, and list all six item kinds with owner and state.
+- **One thing it must do**: a fresh checkout can create, link, list and update all six item kinds with owner and state.
+- **Customer**: the work-record skill (0001-4) and the trace tools (0001-2). Later, the Supervisor.
+- **Supplier**: beads, adopted as is, plus a thin set of wrapper functions written by Builders.
+- **Inputs**: a command with item kind, title, parent id, owner, and optional links, from a caller on the command line.
+- **Outputs**: the created or updated item as a JSON object, and the record file in git updated.
+- **Contract**:
+  - Ids are permanent and never reused.
+  - Kind is one of exactly six values: intent, story, code, test, verification, validation. Any other value is rejected.
+  - Every item except an intent has exactly one parent. Create without a parent is rejected for the other five kinds.
+  - Every item has exactly one owner. Create without an owner is rejected.
+  - State is one of: waiting, ready, in_progress, blocked, checking, done, reopened. Anything else is rejected.
+  - Link is one of: parent_of, needs_first, checks. Anything else is rejected.
+  - Every write lands in the git-tracked record file before the command returns.
+  - Output is always JSON on stdout, errors always JSON on stderr with a non-zero exit.
 - **Checklist**:
   1. `init` in a clean folder produces a record with no items. [testing]
-  2. Each of the six kinds can be created with a label naming the kind, and listed back filtered by kind. [testing]
-  3. Parent-of, needs-first, and checks links can be added and read back. [testing]
-  4. Every item has exactly one owner or the create is rejected. [testing]
-  5. A convention document says how each policy field maps to a record field. [looking]
-- **Job pairs**: `record_init`, `record_create_item`, `record_add_link`, `record_list_kind`
+  2. Each of the six kinds can be created with the kind label, and listed back filtered by kind. [testing]
+  3. Creating a non-intent without a parent is rejected. [testing]
+  4. Creating any item without an owner is rejected. [testing]
+  5. Each of the three link types can be added and read back; a fourth is rejected. [testing]
+  6. Each of the seven states can be set and read back; an eighth is rejected. [testing]
+  7. A convention document maps each policy field to a beads field, label, or convention. [looking]
+- **Job pairs**: `record_init`, `record_create_item`, `record_add_link`, `record_set_state`, `record_list_kind`
 - **Needs first**: none
 
 ### Story 0001-2: trace both ways and find orphans
 
 - **Parent Intent**: 0001
-- **One thing it must do**: given any id, walk up to its Intent and down to every leaf, and report any orphan in the whole record.
+- **One thing it must do**: given any id, walk up to its Intent and down to every leaf, and report every orphan in the record.
+- **Customer**: the Supervisor, which runs the orphan check at every gate. The Board screen, which shows traces. The Architect, when verifying a Story.
+- **Supplier**: Builders, writing three small functions over the record's JSON output.
+- **Inputs**: the record, and for trace functions one item id.
+- **Outputs**: trace back: an ordered list of items from the given id up to the intent. Trace forward: a tree rooted at the given id. Orphans: a list of items with the rule each one breaks.
+- **Contract**:
+  - Trace back on an intent returns just the intent.
+  - Trace back never loops; a cycle in the record is reported as an error, not followed.
+  - Trace forward includes every descendant by parent_of and every item linked by checks.
+  - Orphan rules, exactly these three: non-intent with no parent; left item (intent, story, code) with no checks link pointing at it; right item (validation, verification, test) with no checks link pointing from it.
+  - Zero orphans exits success. One or more exits non-zero with the list. The Supervisor relies on the exit code.
+  - Output is JSON.
 - **Checklist**:
-  1. Trace back from a code job returns the chain job, Story, Intent. [testing]
-  2. Trace forward from an Intent returns every Story, pair, and check under it. [testing]
-  3. A left-side item with nothing checking it is reported. [testing]
-  4. A right-side item checking nothing is reported. [testing]
-  5. An item with no parent that is not an Intent is reported. [testing]
-  6. A clean record reports zero orphans and exits success. [testing]
+  1. Trace back from a code job returns job, story, intent, in that order. [testing]
+  2. Trace forward from an intent returns every story, pair, and check under it. [testing]
+  3. A story with no verification is reported as an orphan. [testing]
+  4. A test job with no checks link is reported as an orphan. [testing]
+  5. A story with no parent is reported as an orphan. [testing]
+  6. A cycle is reported as an error and does not hang. [testing]
+  7. A clean record reports zero orphans and exits success. [testing]
 - **Job pairs**: `trace_back`, `trace_forward`, `find_orphans`
 - **Needs first**: 0001-1
 
@@ -70,38 +108,71 @@ Judgement calls I will not make alone:
 
 - **Parent Intent**: 0001
 - **One thing it must do**: the Board can do its four jobs on a screen without a terminal.
+- **Customer**: the Board.
+- **Supplier**: an existing beads web UI, adopted. Builders only if none passes.
+- **Inputs**: the record, read live. A yes or no decision typed by the Board.
+- **Outputs**: on screen: intent list with rollup, forward tree, back trace. Into the record: the Board's decision as a state change on the validation item, with the Board as owner.
+- **Contract**:
+  - The screen never writes anything except the Board's decision.
+  - The decision lands in the record within one refresh and is visible to the trace tools.
+  - Any item on screen shows its id, so the Board can quote it.
+  - Nothing on screen requires reading code.
 - **Checklist**:
-  1. List all Intents with a rollup: how many Stories, how many done, care level. [showing]
-  2. Open an Intent and see the forward trace as a tree. [showing]
-  3. Open any leaf and see the back trace to its Intent. [showing]
-  4. Record yes or no on an Intent, with the decision visible in the record afterwards. [showing]
-  5. Written evaluation of at least two existing UIs against items 1 to 4, with the pick and the reason. [reasoning]
-- **Job pairs**: none if an existing UI passes. If not: `board_list_intents`, `board_show_tree`, `board_record_decision`, plus a page shell. Decided after item 5.
+  1. Written evaluation of at least two existing UIs against items 2 to 5, with the pick and the reason. [reasoning]
+  2. List all intents with rollup: stories total, stories done, care level. [showing]
+  3. Open an intent and see the forward trace as a tree. [showing]
+  4. Open any leaf and see the back trace to its intent. [showing]
+  5. Record yes or no on an intent; afterwards the decision appears in the record with the Board as owner. [showing]
+- **Job pairs**: none if an existing UI passes. If not: `board_list_intents`, `board_show_tree`, `board_record_decision`, plus a page shell. Decided after item 1.
 - **Needs first**: 0001-2
 
 ### Story 0001-4: agents read and write the record through one skill
 
 - **Parent Intent**: 0001
 - **One thing it must do**: a role skill can say "read the record" and any harness does it.
+- **Customer**: the Architect and Builder skills, and through them every model on every harness.
+- **Supplier**: the Architect writes the skill file. Builders write the three missing wrapper functions.
+- **Inputs**: a role skill's instruction such as "fetch the instruction sheet for job X".
+- **Outputs**: `roles/work-record/SKILL.md` naming one exact command per operation. Each command returns JSON.
+- **Contract**:
+  - Exactly these operations, no more: create item, add link, list ready, show item, set state, set owner, add note.
+  - Every command works with no network and no credentials.
+  - Every command is one line a cheap model can copy without editing anything but the arguments.
+  - No role skill names beads. Only the work-record skill does.
 - **Checklist**:
-  1. `roles/work-record/SKILL.md` exists, lists the exact commands for: create item, add link, list ready, show item, set state, set owner, add note. [looking]
+  1. The skill file exists and lists the seven operations with exact commands. [looking]
   2. Every command returns machine-readable output. [testing]
-  3. Board, Architect, and Builder skills reference the work-record skill and no longer describe the record in their own words. [looking]
-  4. A Builder given a job id can fetch its instruction sheet from the record using only the skill. [testing]
-- **Job pairs**: `record_show_item`, `record_set_state`, `record_add_note`. The skill file is a looking item, not a job.
+  3. Board, Architect, and Builder skills reference the work-record skill and describe the record in no other words. [looking]
+  4. A Builder given only a job id can fetch its instruction sheet using only the skill. [testing]
+- **Job pairs**: `record_show_item`, `record_set_owner`, `record_add_note`. The skill file is a looking item, not a job.
 - **Needs first**: 0001-1
 
 ### Story 0001-5: the log
 
 - **Parent Intent**: 0001
-- **One thing it must do**: an append-only log per policy section 10, separate from the record, with one structured line per decision.
+- **One thing it must do**: an append-only log per policy section 10, separate from the record, one structured line per decision.
+- **Customer**: the Supervisor writes it. The Board and the Architect read it when they need to trust a closure they did not see.
+- **Supplier**: Builders.
+- **Inputs**: append: timestamp, item id, gate, rule, raw inputs, resulting state. Read: an item id.
+- **Outputs**: append: nothing on success, error on failure. Read: every line for that item, in write order, as JSON.
+- **Contract**:
+  - One line per call, one JSON object per line.
+  - The write path can only append. There is no edit or delete function.
+  - A line missing any of the six fields is rejected before it is written.
+  - Reading never changes the file.
+  - The log is git-tracked so history is also in git.
 - **Checklist**:
-  1. Append a line with timestamp, item id, gate, rule, raw inputs, resulting state. [testing]
-  2. Lines cannot be edited or removed by the normal write path. [testing]
-  3. Filter the log by item id and get every line for that item in order. [testing]
+  1. Append a full line and read it back by item id. [testing]
+  2. Append with a missing field is rejected and nothing is written. [testing]
+  3. Three appends for one id read back in order. [testing]
+  4. The module exposes no function that edits or removes a line. [looking]
 - **Job pairs**: `log_append`, `log_read_item`
 - **Needs first**: none
 
 ## Order
 
 0001-1 and 0001-5 first, in parallel. Then 0001-2 and 0001-4. Then 0001-3. The Board is shown 0001-3 last.
+
+## Blocked until
+
+Board decision 2 above. Ready gate cannot pass on 0001-1 and 0001-2 while the checks convention is undecided.
