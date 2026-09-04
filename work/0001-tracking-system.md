@@ -32,7 +32,7 @@ Agent access: one skill, `work-record`, that wraps the CLI. Every role skill poi
 ## Board decisions
 
 1. Record lives inside this git repo: **accepted** 2026-09-04.
-2. "Checks" link as child plus label convention: **pending**, awaiting Board.
+2. "Checks" link as child plus label convention: **accepted** 2026-09-04.
 3. Third-party Board screen: **accepted** 2026-09-04.
 
 ## System shape
@@ -173,6 +173,6 @@ Supervisor (code, later)  ---- reads record, writes log ---->  log (append-only 
 
 0001-1 and 0001-5 first, in parallel. Then 0001-2 and 0001-4. Then 0001-3. The Board is shown 0001-3 last.
 
-## Blocked until
+## Status
 
-Board decision 2 above. Ready gate cannot pass on 0001-1 and 0001-2 while the checks convention is undecided.
+All three Board decisions accepted. Stories 0001-1 and 0001-5 are ready for instruction sheets.
