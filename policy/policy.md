@@ -112,7 +112,7 @@ A gate is a checkpoint. Nothing passes a gate without meeting every rule at that
 | **Proven** | When a test job is done | All tests pass. Tests cover every checklist item they were asked to cover. |
 | **Verified** | When all pairs under a Story are done | Architect ticks every item on the Story checklist. No conflict with other finished Stories under the same Intent. |
 | **Validated** | When all Stories under an Intent are done | Board says yes. |
-| **Proposal** | When the Analyst proposes a change | Names a wiki page. Targets one file under roles or policy, never src. The diff touches only that file. Then the Architect (Low) or the Board (High, or any role skill) says yes. Only then does a Builder apply it as a normal job. |
+| **Proposal** | When the Analyst proposes a change | Names a wiki page. Targets one file under roles or policy, never src. The diff touches only that file. Then the Architect (Low) or the Board (High, or any role skill) says yes. Only then is it applied: a diff is applied mechanically by the Supervisor; a Builder is used only when a proposal is not a diff. |
 
 ## 7. When something fails
 

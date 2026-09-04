@@ -1,0 +1,26 @@
+# Instruction sheet
+
+- **Job id**: 0003-3-log_events-test
+- **Kind**: test
+- **Parent Story**: 0003-3
+- **Function name**: `log_events`
+- **Folder**: `src/log_events/`
+- **Files you may change**: `src/log_events/test_log_events.py`
+- **Signature under test**: `log_events(path: str, item_id: str) -> list[tuple[str, str]]`
+- **Inputs**: as stated. Import with `from log_events.log_events import log_events`.
+- **Outputs**: per the mapping in work/sheets/log_events-code.md
+- **Errors**: ValueError on malformed line; missing file -> []
+- **Allowed imports**: pytest, json, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0003-3 items 5
+- **Setup**: hand-build graphs and log files under tmp_path.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_done_maps`: one line state done -> [('checking','gate_pass')]
+  - `test_retry_maps`: state in_progress with inputs {'retry':1} -> [('checking','gate_fail')]
+  - `test_blocked_maps`: state blocked -> [('checking','gate_fail')]
+  - `test_other_item_skipped`: lines for another item -> []
+  - `test_malformed_raises`: a line of plain text raises ValueError
+  - `test_missing_file_empty`: nonexistent path -> []
+- **Checks to run before reporting**:
+  - `ruff format src/log_events` then `ruff check src/log_events` (both clean)
+  - `python -m pytest src/log_events -q`
+- **Out of scope**: the code file, any other folder, any case not listed.

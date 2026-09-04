@@ -17,6 +17,8 @@ def check_file(path: Path) -> list[str]:
     text = path.read_text(encoding="utf-8")
     lines = text.count("\n") + (0 if text.endswith("\n") else 1)
     out = [f"{path}: {lines} lines"] if lines > MAX else []
+    if "noqa" in text:
+        out.append(f"{path}: contains noqa; suppressions are not allowed")
     tree = ast.parse(text)
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):

@@ -10,9 +10,9 @@
 - **Inputs**: path: a log file of JSON lines with keys ts, item, gate, rule, inputs, state (tokens, seconds optional). item_id: exact item to replay.
 - **Outputs**: the final state after mapping each of the item's lines to an event and feeding step. Mapping, in this order per line: state 'done' -> event gate_pass from state checking; state 'in_progress' or 'ready' with a 'retry' key in inputs -> gate_fail from state checking; state 'blocked' -> gate_fail from state checking; state 'reopened' -> edited from state done; state 'waiting' or 'ready' with gate 'Ready' -> ready_gate_pass from state waiting; any other line is skipped. Retries carry across lines; start state waiting, retries 0. Lines are replayed in file order.
 - **Errors**: ValueError from step propagates; ValueError on a malformed line.
-- **Allowed imports**: json, from step.step import step. Nothing else.
+- **Allowed imports**: from step.step import step; from log_events.log_events import log_events. Nothing else.
 - **Checklist items this job serves**: Story 0003-3 items 5
-- **How**: Read the file once, filter by item == item_id. Keep the mapping as a small list of (predicate, from_state, event) tuples.
+- **How**: Call log_events(path, item_id) (see work/sheets/log_events-code.md) and fold through step: start state waiting, retries 0; for each (from_state, event) call step(from_state, event, retries) and keep the returned state and retries; return the final state. Under 20 lines. No file reading here.
 - **Checks to run before reporting**:
   - `ruff format src/replay_log` then `ruff check src/replay_log` (both clean)
   - `python tools/lint.py`   (must print 'shape ok' for your folder; findings in other folders are not yours)

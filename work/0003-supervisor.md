@@ -34,7 +34,11 @@ intent_new --> story_todo  -->  sheet_todo  -->  build  -->  test  -->  prove  -
 
 Down the V, an item is decomposed: intent to stories to job pairs. Up the V, the same items are checked: prove per job, verify per story, validate per intent. The learn column is the Analyst reading every Verified Story. The blocked column is visible to everyone and pulled by nobody.
 
-## Board decisions needed
+## Board decisions
+
+All three accepted by the Board 2026-09-04 as recommended: first puller on this harness; WIP counts claimed items only; the Supervisor applies accepted diffs itself (policy section 6 amended).
+
+As asked:
 
 1. First puller harness. Recommendation: the one this repo is built in, then pi and opencode as Low care Stories.
 2. Whether WIP counts claimed items only, or claimed plus ready. Recommendation: claimed only; ready is a queue and queues are allowed to be long.
@@ -159,4 +163,4 @@ Down the V, an item is decomposed: intent to stories to job pairs. Up the V, the
 
 ## Status
 
-Rewritten 2026-09-04 for pull. Config at `roles/board.toml`. Loaded into the record. Blocked on Board decisions 1 to 3.
+Rewritten 2026-09-04 for pull. Config at `roles/board.toml`. Loaded into the record. Board decisions 1 to 3 accepted; 0003-2 and 0003-4 unblocked.

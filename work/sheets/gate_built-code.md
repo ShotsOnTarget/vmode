@@ -6,13 +6,13 @@
 - **Function name**: `gate_built`
 - **Folder**: `src/gate_built/`
 - **Files you may change**: `src/gate_built/gate_built.py`, `src/gate_built/gate_built.md`
-- **Signature**: `gate_built(job_id: str, changed: list[str], code: str, note: str, fmt_out: str, lint_out: str) -> list[str]`
-- **Inputs**: job_id: the job's function name is the text after the last '-' in a title-derived id is NOT available, so pass the folder name as job_id, e.g. 'record_run'. changed: paths from `git status --porcelain` (the path part only, forward slashes). code: the code file text. note: the note file text. fmt_out: output of `ruff format --check --diff src/<job_id>` ('' when clean). lint_out: output of `ruff check src/<job_id> --output-format concise` ('' or 'All checks passed!' when clean).
+- **Signature**: `gate_built(job_id: str, inputs: dict) -> list[str]`
+- **Inputs**: job_id: the folder name, e.g. 'record_run'. inputs: a dict with exactly the keys changed, code, note, fmt_out, lint_out (ValueError if any is missing). changed: paths from `git status --porcelain` (the path part only, forward slashes). code: the code file text. note: the note file text. fmt_out: output of `ruff format --check --diff src/<job_id>` ('' when clean). lint_out: output of `ruff check src/<job_id> --output-format concise` ('' or 'All checks passed!' when clean).
 - **Outputs**: rules broken in this fixed order: 'file_outside_folder' (any changed path not starting with 'src/<job_id>/'), 'too_many_files' (more than 3 distinct paths under the folder), 'over_50_lines' (code has more than 50 lines), 'not_one_public_function' (top-level def count not starting with '_' is not 1, via ast), 'note_not_six_lines' (note stripped has a line count other than 6), 'note_missing_item_id' (note does not contain job_id), 'not_formatted' (fmt_out contains '---' or 'would reformat'), 'lint_findings' (lint_out is non-empty and does not start with 'All checks passed').
 - **Errors**: ValueError if code does not parse (SyntaxError).
 - **Allowed imports**: ast. Nothing else.
 - **Checklist items this job serves**: Story 0003-1 items 2, 3, 5
-- **How**: Pure. Count lines as text.count('\n') plus one if the text does not end with a newline. Empty changed list is fine.
+- **How**: Pure. Keep complexity under 5 by writing one private helper per rule, each returning the rule name or None, and building the result by iterating a tuple of those helpers in order. Count lines as text.count('\n') plus one if the text does not end with a newline. Empty changed list is fine.
 - **Checks to run before reporting**:
   - `ruff format src/gate_built` then `ruff check src/gate_built` (both clean)
   - `python tools/lint.py`   (must print 'shape ok' for your folder; findings in other folders are not yours)

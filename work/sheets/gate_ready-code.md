@@ -10,9 +10,9 @@
 - **Inputs**: story_id: an id in graph. graph is the dict documented in work/sheets/record_graph-code.md: id -> {'id','kind','title','owner','state','parent','checks','needs'}. sheets: job id -> sheet text ('' if none).
 - **Outputs**: rules broken, in this fixed order, empty if none: 'no_intent' (walking parent from the story never reaches an item of kind intent), 'code_without_test' (a code job under the story with no test item whose checks contains it), 'test_without_code' (a test item whose checks target is not a code job under the story), 'sheet_missing' (a code or test job under the story whose sheet text is empty or absent), 'orphan' (find_orphans(graph) reports any item under the story).
 - **Errors**: ValueError if story_id not in graph or its kind is not story.
-- **Allowed imports**: from find_orphans.find_orphans import find_orphans. Nothing else.
+- **Allowed imports**: from find_orphans.find_orphans import find_orphans; from story_jobs.story_jobs import story_jobs. Nothing else.
 - **Checklist items this job serves**: Story 0003-1 items 1, 5
-- **How**: Pure. 'Under the story' means parent == story_id for code jobs, and for tests: checks contains such a code id. Each rule appears at most once.
+- **How**: Pure. Call story_jobs(story_id, graph) once (see work/sheets/story_jobs-code.md) and derive every rule from its result plus sheets and find_orphans; do not walk the graph yourself. One private helper per rule returning the rule name or None; iterate a tuple of them. Under 40 lines. 'Under the story' means parent == story_id for code jobs, and for tests: checks contains such a code id. Each rule appears at most once.
 - **Checks to run before reporting**:
   - `ruff format src/gate_ready` then `ruff check src/gate_ready` (both clean)
   - `python tools/lint.py`   (must print 'shape ok' for your folder; findings in other folders are not yours)

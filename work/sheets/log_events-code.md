@@ -1,0 +1,21 @@
+# Instruction sheet
+
+- **Job id**: 0003-3-log_events-code
+- **Kind**: code
+- **Parent Story**: 0003-3
+- **Function name**: `log_events`
+- **Folder**: `src/log_events/`
+- **Files you may change**: `src/log_events/log_events.py`, `src/log_events/log_events.md`
+- **Signature**: `log_events(path: str, item_id: str) -> list[tuple[str, str]]`
+- **Inputs**: path: log file of JSON lines with keys ts, item, gate, rule, inputs, state. item_id: exact item.
+- **Outputs**: list of (from_state, event) tuples in file order for lines whose item == item_id, first match wins: state 'done' -> ('checking','gate_pass'); state in ('in_progress','ready') and 'retry' in inputs -> ('checking','gate_fail'); state 'blocked' -> ('checking','gate_fail'); state 'reopened' -> ('done','edited'); state in ('waiting','ready') and gate == 'Ready' -> ('waiting','ready_gate_pass'); otherwise skipped.
+- **Errors**: ValueError on a line that is not valid JSON or lacks item or state. Missing file returns [].
+- **Allowed imports**: json, os. Nothing else.
+- **Checklist items this job serves**: Story 0003-3 items 5
+- **How**: Pure read. Keep the mapping as a tuple of (predicate, from_state, event). Under 35 lines.
+- **Checks to run before reporting**:
+  - `ruff format src/log_events` then `ruff check src/log_events` (both clean; a noqa comment fails the shape check)
+  - `python tools/lint.py`   (no findings for your folder)
+  - `python -c "import ast,sys; t=ast.parse(open('src/log_events/log_events.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)
+- **Note file** `src/log_events/log_events.md` has exactly these six lines: purpose, signature, inputs, outputs, side effects, work item id 0003-3-log_events-code.
+- **Out of scope**: tests, any other folder, any import not listed. Never hand-pack lines. If the formatted file exceeds 50 lines, report blocked.

@@ -6,7 +6,7 @@
 - **Function name**: `gate_built`
 - **Folder**: `src/gate_built/`
 - **Files you may change**: `src/gate_built/test_gate_built.py`
-- **Signature under test**: `gate_built(job_id: str, changed: list[str], code: str, note: str, fmt_out: str, lint_out: str) -> list[str]`
+- **Signature under test**: `gate_built(job_id: str, inputs: dict) -> list[str]`
 - **Inputs**: as stated. Import with `from gate_built.gate_built import gate_built`.
 - **Outputs**: rules broken in this fixed order: 'file_outside_folder' (any changed path not starting with 'src/<job_id>/'), 'too_many_files' (more than 3 distinct paths under the folder), 'over_50_lines' (code has more than 50 lines), 'not_one_public_function' (top-level def count not starting with '_' is not 1, via ast), 'note_not_six_lines' (note stripped has a line count other than 6), 'note_missing_item_id' (note does not contain job_id), 'not_formatted' (fmt_out contains '---' or 'would reformat'), 'lint_findings' (lint_out is non-empty and does not start with 'All checks passed').
 - **Errors**: ValueError if code does not parse (SyntaxError).
