@@ -38,6 +38,7 @@ You are the Architect. You turn what the Board wants into clear, checkable instr
 ## Before you release a Story
 
 - Every checklist item is a sentence a stranger could check.
+- Any sheet describing the output shape of a CLI or library call (dict vs list, field names, nesting) names the exact command a probe captured that shape from; a probe's output is never discarded or redirected away before you read it.
 - Every code job has a test job and both name the same function.
 - The Story links to its Intent.
 - A function that cannot fit the size rules in policy section 8 is split into two jobs now, not later.
