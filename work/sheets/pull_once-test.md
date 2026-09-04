@@ -16,7 +16,7 @@
 - **Cases**, one test function each, exactly these names, nothing more:
   - `test_claims_within_wip`: one ready code job plus one code job already in state in_progress (claimed by someone else), temp config with build wip 1 -> pull_once claims none; with build wip 2 it claims the ready one
   - `test_invoke_result_recorded`: fake invoke returning {'tokens': 3, 'seconds': 0.5, 'report': 'ok'} -> item state checking and a note starting 'usage:'
-  - `test_invoke_failure_releases`: fake invoke raising RuntimeError -> item back in state ready with a note starting 'release:'
+  - `test_invoke_failure_releases`: fake invoke raising RuntimeError -> item back in state ready, assignee empty or absent, a note starting 'release:', and a second pull_once with a working invoke can claim it
   - `test_config_change_respected`: one ready code job; temp config build wip 1 -> first call claims it and it moves to checking; add another ready job, rewrite the temp config with build wip 0 (paused) -> the next call claims nothing
   - `test_unknown_role_raises`: role 'nobody' -> ValueError
 - **Checks to run before reporting**:

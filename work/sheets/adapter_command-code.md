@@ -1,0 +1,21 @@
+# Instruction sheet
+
+- **Job id**: 0003-4-adapter_command-code
+- **Kind**: code
+- **Parent Story**: 0003-4
+- **Function name**: `adapter_command`
+- **Folder**: `src/adapter_command/`
+- **Files you may change**: `src/adapter_command/adapter_command.py`, `src/adapter_command/adapter_command.md`
+- **Signature**: `adapter_command(item: dict, column: str, roots: dict) -> list[str]`
+- **Inputs**: item: graph entry with id and kind. column: column name. roots: {'board': path to board.toml, 'manifest': path to manifest.json, 'root': repo root path as str}.
+- **Outputs**: the argv list for one Builder run on the Claude Code harness: [exe, '-p', prompt, '--output-format', 'json'] plus ['--model', name] when the column's tier maps to a model in the manifest. exe is shutil.which('claude') (on Windows this finds claude.cmd). prompt is: 'You are the <role>. Working directory: <root>. Read roles/<role>/SKILL.md and follow it exactly. Your work item id is <id>. Fetch it from the record with the work-record skill (roles/work-record/SKILL.md). Do only that item. ' then for kind test 'You write your tests from the sheet; you never create or edit the code file. ' or for kind code 'Do not write tests. ' then 'Report in roles/shared/report-format.md and nothing else.' role is the column's role from board.toml; model name is the manifest models[tier] with any 'provider/' prefix removed.
+- **Errors**: RuntimeError('claude not found on PATH') if shutil.which returns None. KeyError propagates for an unknown column.
+- **Allowed imports**: shutil, json, tomllib. Nothing else.
+- **Checklist items this job serves**: Story 0003-4 items 8
+- **How**: Pure apart from shutil.which and reading the two config files. One helper for the prompt, one for the model. Under 45 lines.
+- **Checks to run before reporting**:
+  - `ruff format src/adapter_command` then `ruff check src/adapter_command` (both clean; a noqa comment fails the shape check)
+  - `python tools/lint.py`   (no findings for your folder)
+  - `python -c "import ast,sys; t=ast.parse(open('src/adapter_command/adapter_command.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)
+- **Note file** `src/adapter_command/adapter_command.md` has exactly these six lines: purpose, signature, inputs, outputs, side effects, work item id 0003-4-adapter_command-code.
+- **Out of scope**: tests, any other folder, any import not listed. Never hand-pack lines. If the formatted file exceeds 50 lines, report blocked.
