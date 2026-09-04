@@ -11,7 +11,8 @@ How each policy section 4 field maps onto beads 1.0. This is the only document t
 | Link: parent_of | dependency type `parent-child` | `bd dep add <child> <parent> -t parent-child` |
 | Link: needs_first | dependency type `blocks` | `bd dep add <item> --blocked-by <other>` |
 | Link: checks | dependency type `validates` (native, no label needed) | `bd dep add <checker> <checked> -t validates` |
-| Owner | assignee, required | `bd create -a <owner>` |
+| Owner | label `owner:<name>`, required | `bd create -l owner:architect` |
+| Claim slot | assignee. Empty while an item waits; set atomically by the puller that takes it. Never set on create. | `bd update <id> --claim --actor <puller>` |
 | Care level (intents only) | label `care:low` or `care:high` | `bd label add <id> care:high` |
 | State | label `state:<state>` is the source of truth, plus bd status kept in step | see table below |
 | Checklist | acceptance field | `bd create --acceptance "..."` |
@@ -45,5 +46,7 @@ Kinds, left and right of the V:
 A proposal is a left-side kind: hierarchical child of the Story it learned from, label `kind:proposal`, sheet field in the shape of `roles/shared/proposal-format.md`.
 
 Reading the parent: a left-side item's parent is its hierarchical parent. A right-side item's parent is the target of its validates link. `record_graph` applies this rule so trace and orphan tools see one parent for every item.
+
+Claiming (probed 2026-09-04): `bd update <id> --claim --actor <name>` succeeds only when the item is unassigned or already assigned to that actor; any other assignee is refused. That is the atomic claim. So assignee is never set on create, and each puller passes a unique actor name.
 
 Every command used by tools takes `--json`. Every wrapper function shells out to `bd`, never touches the database directly.
