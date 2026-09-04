@@ -24,7 +24,7 @@ def load_invoke(path: str):
 def main(argv: list[str]) -> int:
     role, adapter = argv[1], argv[2]
     stop = argv[3] if len(argv) > 3 else "work/stop"
-    passes = puller(role, "roles/board.toml", load_invoke(adapter), stop)
+    passes = puller(role, "roles/board.toml", load_invoke(adapter), {"stop_file": stop})
     print(f"{role}: {passes} passes")
     return 0
 

@@ -6,7 +6,7 @@
 - **Function name**: `puller`
 - **Folder**: `src/puller/`
 - **Files you may change**: `src/puller/test_puller.py` and nothing else. You never create or edit the code file.
-- **Signature under test**: `puller(role: str, config_path: str, invoke, stop_file: str, once=None) -> int`
+- **Signature under test**: `puller(role: str, config_path: str, invoke, options: dict) -> int`
 - **Inputs**: as stated. Import with `from puller.puller import puller`.
 - **Outputs**: the number of passes made. Loop: call once(role, config_path, invoke); sleep the smallest poll_seconds among the role's columns (at least 1); repeat until stop_file exists; check the stop file both before and after sleeping.
 - **Errors**: ValueError if the role has no column with poll_seconds > 0 (humans are not polled).

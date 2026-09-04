@@ -6,8 +6,8 @@
 - **Function name**: `puller`
 - **Folder**: `src/puller/`
 - **Files you may change**: `src/puller/puller.py`, `src/puller/puller.md`
-- **Signature**: `puller(role: str, config_path: str, invoke, stop_file: str, once=None) -> int`
-- **Inputs**: role, config_path, invoke as for pull_once. stop_file: path; the loop ends when it exists. once: optional callable replacing pull_once (for tests); default pull_once. For role 'supervisor' the default once is a wrapper that calls prove_once(config_path, 'work/supervisor-log.jsonl') and ignores invoke.
+- **Signature**: `puller(role: str, config_path: str, invoke, options: dict) -> int`
+- **Inputs**: role, config_path, invoke as for pull_once. options: dict with 'stop_file' (path; the loop ends when it exists) and optional 'once' (a callable replacing pull_once, for tests; default pull_once). Four parameters, no more. For role 'supervisor' the default once is a wrapper that calls prove_once(config_path, 'work/supervisor-log.jsonl') and ignores invoke.
 - **Outputs**: the number of passes made. Loop: call once(role, config_path, invoke); sleep the smallest poll_seconds among the role's columns (at least 1); repeat until stop_file exists; check the stop file both before and after sleeping.
 - **Errors**: ValueError if the role has no column with poll_seconds > 0 (humans are not polled).
 - **Allowed imports**: os, time, from board_config.board_config import board_config; from pull_once.pull_once import pull_once; from prove_once.prove_once import prove_once. Nothing else.
