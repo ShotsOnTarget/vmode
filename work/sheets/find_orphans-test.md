@@ -18,6 +18,7 @@
   - `test_test_without_checks`: intent, story, verification(validates story), validation(validates intent), code, test with no validates -> test reported 'checks_nothing' and code reported 'unchecked'
   - `test_story_without_parent`: hand-built graph with a story whose parent is None -> 'no_parent'
   - `test_clean_graph_empty`: intent, story, code, test(validates code), verification(validates story), validation(validates intent) -> []
+  - `test_proposal_unchecked`: hand-built graph with a proposal (parent a story) and nothing validating it -> 'unchecked' for the proposal
   - `test_script_exit_code`: run `python -m find_orphans.find_orphans` with subprocess in bd_repo with one orphan; exit code 1 and stdout parses as JSON
 - **Checks to run before reporting**:
   - `python -m pytest src/find_orphans -q`

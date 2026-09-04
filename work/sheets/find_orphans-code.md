@@ -8,7 +8,7 @@
 - **Files you may change**: `src/find_orphans/find_orphans.py`, `src/find_orphans/find_orphans.md`
 - **Signature**: `find_orphans(graph: dict[str, dict]) -> list[dict]`
 - **Inputs**: graph from record_graph.
-- **Outputs**: list of {'id': str, 'rule': str}, id order. rules, exact strings: 'no_parent' (kind is not intent and parent is None), 'unchecked' (kind in intent, story, code and no other item's checks contains this id), 'checks_nothing' (kind in validation, verification, test and checks is empty). An item can appear once per rule it breaks.
+- **Outputs**: list of {'id': str, 'rule': str}, id order. rules, exact strings: 'no_parent' (kind is not intent and parent is None), 'unchecked' (kind in intent, story, code, proposal and no other item's checks contains this id), 'checks_nothing' (kind in validation, verification, test and checks is empty). An item can appear once per rule it breaks.
 - **Errors**: none. Return [] for an empty graph.
 - **Allowed imports**: json, sys. Nothing else.
 - **Checklist items this job serves**: Story 0001-2 items 3, 4, 5, 6, 7

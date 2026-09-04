@@ -40,6 +40,9 @@ Kinds, left and right of the V:
 | intent | validation |
 | story | verification |
 | code | test |
+| proposal | verification (Low care) or validation (High care) |
+
+A proposal is a left-side kind: hierarchical child of the Story it learned from, label `kind:proposal`, sheet field in the shape of `roles/shared/proposal-format.md`.
 
 Reading the parent: a left-side item's parent is its hierarchical parent. A right-side item's parent is the target of its validates link. `record_graph` applies this rule so trace and orphan tools see one parent for every item.
 

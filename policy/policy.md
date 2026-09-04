@@ -40,13 +40,14 @@ Problems go **up one level only**. A Builder talks to the Supervisor. The Superv
 
 ## 3. The work items
 
-Everything we do is a work item. There are six kinds. Each one on the left has a partner on the right that checks it.
+Everything we do is a work item. There are six kinds, plus one for learning. Each one on the left has a partner on the right that checks it.
 
 | Going down (what we want) | Going up (checking it) | Who writes it |
 |---|---|---|
 | **Intent**: what we want and why | **Validation**: the Board says "yes, that is it" | Board |
 | **Story**: one thing it must do, with a checklist of what "done" looks like | **Verification**: the Architect ticks every item on the checklist | Architect |
 | **Code job**: build one small function | **Test job**: prove that function works | Architect writes both, Builders do them |
+| **Proposal**: a change to how we work, learned from the log | **Verification** for Low care, **Validation** for High care or any role skill | Analyst writes, Architect or Board checks |
 
 Rules for work items:
 
@@ -111,6 +112,7 @@ A gate is a checkpoint. Nothing passes a gate without meeting every rule at that
 | **Proven** | When a test job is done | All tests pass. Tests cover every checklist item they were asked to cover. |
 | **Verified** | When all pairs under a Story are done | Architect ticks every item on the Story checklist. No conflict with other finished Stories under the same Intent. |
 | **Validated** | When all Stories under an Intent are done | Board says yes. |
+| **Proposal** | When the Analyst proposes a change | Names a wiki page. Targets one file under roles or policy, never src. The diff touches only that file. Then the Architect (Low) or the Board (High, or any role skill) says yes. Only then does a Builder apply it as a normal job. |
 
 ## 7. When something fails
 
