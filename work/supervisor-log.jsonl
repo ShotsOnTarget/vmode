@@ -63,3 +63,21 @@
 {"gate": "Ready", "inputs": {"architect_fault": "probe on 2026-09-04 redirected the failing command's output to /dev/null", "evidence": "bd dep add vm-kfv.1 vm-kfv -t validates -> 'would create a deadlock'"}, "item": "0001-2-record_graph", "rule": "Architect changed sheet: right-side kinds attach by validates only; beads refuses validates between child and parent", "state": "reopened", "ts": "2026-09-04T12:39:14.402955+00:00"}
 {"gate": "Proven", "inputs": {"action": "sheet corrected, count reset", "cause": "Architect sheet described bd list's dependency shape, test uses bd show which differs", "result": "1 failed 6 passed: KeyError depends_on_id", "retry": 0}, "item": "0001-1-record_create_item", "rule": "pytest passes", "state": "in_progress", "ts": "2026-09-04T12:42:57.844471+00:00"}
 {"gate": "Proven", "inputs": {"result": "5 passed"}, "item": "0001-2-record_graph", "rule": "pytest passes after reopen", "state": "done", "ts": "2026-09-04T12:42:57.844471+00:00"}
+{"gate": "Ready", "inputs": {"beads-dashboard": "renders blank, 67 toLowerCase errors", "beads-web": "reads issues.jsonl, no tree"}, "item": "0001-3", "rule": "evaluation of two UIs written; both fail; build decision recorded", "state": "in_progress", "ts": "2026-09-04T12:51:40.751068+00:00"}
+{"gate": "Built", "inputs": {"lines": 9}, "item": "0001-3-board_tree-code", "rule": "lines<=50, one public fn", "state": "done", "ts": "2026-09-04T12:51:40.751068+00:00"}
+{"gate": "Built", "inputs": {"lines": 39}, "item": "0001-3-board_tree-test", "rule": "lines<=50", "state": "done", "ts": "2026-09-04T12:51:40.751068+00:00"}
+{"gate": "Proven", "inputs": {"result": "3 passed"}, "item": "0001-3-board_tree", "rule": "pytest passes", "state": "done", "ts": "2026-09-04T12:51:40.751068+00:00"}
+{"gate": "Built", "inputs": {"lines": 26}, "item": "0001-3-board_rollup-code", "rule": "lines<=50, one public fn", "state": "done", "ts": "2026-09-04T12:51:40.751068+00:00"}
+{"gate": "Built", "inputs": {"lines": 40}, "item": "0001-3-board_rollup-test", "rule": "lines<=50", "state": "done", "ts": "2026-09-04T12:51:40.751068+00:00"}
+{"gate": "Proven", "inputs": {"result": "4 passed"}, "item": "0001-3-board_rollup", "rule": "pytest passes", "state": "done", "ts": "2026-09-04T12:51:40.751068+00:00"}
+{"gate": "Built", "inputs": {"lines": 42}, "item": "0001-3-board_page-code", "rule": "lines<=50, one public fn", "state": "done", "ts": "2026-09-04T12:51:40.751068+00:00"}
+{"gate": "Built", "inputs": {"lines": 27}, "item": "0001-3-board_page-test", "rule": "lines<=50", "state": "done", "ts": "2026-09-04T12:51:40.751068+00:00"}
+{"gate": "Proven", "inputs": {"result": "4 passed"}, "item": "0001-3-board_page", "rule": "pytest passes", "state": "done", "ts": "2026-09-04T12:51:40.751068+00:00"}
+{"gate": "Built", "inputs": {"lines": 35}, "item": "0001-3-board_decide-code", "rule": "lines<=50, one public fn", "state": "done", "ts": "2026-09-04T12:51:40.751068+00:00"}
+{"gate": "Built", "inputs": {"lines": 46}, "item": "0001-3-board_decide-test", "rule": "lines<=50", "state": "done", "ts": "2026-09-04T12:51:40.751068+00:00"}
+{"gate": "Proven", "inputs": {"result": "5 passed"}, "item": "0001-3-board_decide", "rule": "pytest passes", "state": "done", "ts": "2026-09-04T12:51:40.751068+00:00"}
+{"gate": "Proven", "inputs": {"action": "sheet corrected, count reset", "cause": "Architect sheet omitted POST body keys; page sheet names them", "result": "4 passed 1 failed: KeyError intent_id", "retry": 0}, "item": "0001-3-board_serve", "rule": "pytest passes", "state": "in_progress", "ts": "2026-09-04T12:53:43.851571+00:00"}
+{"gate": "Built", "inputs": {"lines": 50}, "item": "0001-3-board_serve-code", "rule": "lines<=50, one public fn", "state": "done", "ts": "2026-09-04T12:57:48.563658+00:00"}
+{"gate": "Built", "inputs": {"lines": 50}, "item": "0001-3-board_serve-test", "rule": "lines<=50", "state": "done", "ts": "2026-09-04T12:57:48.563658+00:00"}
+{"gate": "Proven", "inputs": {"result": "5 passed", "retry": 1}, "item": "0001-3-board_serve", "rule": "pytest passes", "state": "done", "ts": "2026-09-04T12:57:48.563658+00:00"}
+{"gate": "Proven", "inputs": {"folders": 20, "result": "82 passed"}, "item": "0001", "rule": "full suite", "state": "done", "ts": "2026-09-04T12:57:48.563658+00:00"}
