@@ -126,6 +126,8 @@ The Supervisor follows these rules exactly. It does not think about why.
 
 ## 8. Shape of the code
 
+Good code is code that can be changed. Every piece is small enough to read in one sitting, does one thing, and can be replaced without touching its neighbours.
+
 Very flat. One function, one folder. Nothing else.
 
 ```
@@ -143,7 +145,7 @@ Rules:
 - Exactly three files in the folder. Never a fourth.
 - The note says only: what the function is for, its signature, what goes in, what comes out, what else it touches, and which work item asked for it.
 
-Size, shape and style are checked by tools at the Built gate, not by a person. The numbers live in the tools' settings, not here. Today: fifty lines per code file and per function, for code under src only; test files, tools, harness adapters, policy, skills and specs have no length limit (Board decision 2026-09-04). Also low complexity, few branches, shallow nesting, few parameters, and every file formatted by the formatter before it is measured. A file that is not formatter-clean or lint-clean fails the gate. If a function cannot fit, the Architect splits the job. The Builder never decides that.
+Whether a piece is small enough, simple enough, and tidy enough is decided by tools at the Built gate, never by a person, and never by suppressing the tool. The numbers those tools use live in their own settings, not here. A file that the formatter would change, or the linter or shape checker would flag, fails the gate. If a function cannot meet the tools, the Architect splits the job. The Builder never decides that.
 
 ## 9. How careful to be
 
