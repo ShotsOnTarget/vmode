@@ -1,6 +1,13 @@
 from record_run.record_run import record_run
 
 
+def _label(labels, prefix):
+    return next(
+        (label.split(prefix, 1)[1] for label in labels if label.startswith(prefix)),
+        "",
+    )
+
+
 def record_graph() -> dict[str, dict]:
     items = record_run(["list", "--all"])
 
@@ -8,22 +15,9 @@ def record_graph() -> dict[str, dict]:
     for item in items:
         item_id = item["id"]
         labels = item.get("labels", [])
-        kind = next(
-            (
-                label.split("kind:", 1)[1]
-                for label in labels
-                if label.startswith("kind:")
-            ),
-            "",
-        )
-        state = next(
-            (
-                label.split("state:", 1)[1]
-                for label in labels
-                if label.startswith("state:")
-            ),
-            "",
-        )
+        kind = _label(labels, "kind:")
+        state = _label(labels, "state:")
+        owner = _label(labels, "owner:")
         deps = item.get("dependencies", [])
         validates = [d["depends_on_id"] for d in deps if d.get("type") == "validates"]
         needs = [d["depends_on_id"] for d in deps if d.get("type") == "blocks"]
@@ -32,11 +26,12 @@ def record_graph() -> dict[str, dict]:
             "id": item_id,
             "kind": kind,
             "title": item.get("title", ""),
-            "owner": item.get("owner", ""),
+            "owner": owner,
             "state": state,
             "parent": parent,
             "checks": validates,
             "needs": needs,
+            "claimed_by": item.get("assignee") or "",
         }
 
     return graph
