@@ -2,14 +2,16 @@
 line-length = 88
 target-version = "py311"
 src = ["src"]
+include = ["src/**/*.py"]
+extend-exclude = ["tools", "roles", "work"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "C90", "PLR", "SIM", "UP"]
 ignore = ["PLR2004"]
 
 [tool.ruff.lint.per-file-ignores]
-"src/**/test_*.py" = ["PLR0913", "PLR0917", "PLR0915"]
-"src/conftest.py" = ["PLR0915"]
+"src/**/test_*.py" = ["PLR", "C90"]
+"src/conftest.py" = ["PLR", "C90"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 5
