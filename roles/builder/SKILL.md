@@ -45,7 +45,7 @@ Run `python tools/check.py src/<name> <job id>` from the repo root. It prints th
 
 Standard rules, every job:
 
-- Code file and function each stay under 50 lines after formatting. If the formatted file is over, report blocked so the Architect splits the job.
+- Code file and function each stay under 80 lines after formatting; the linter's complexity, branch and nesting limits are what keep functions small. If the formatted file is over, report blocked so the Architect splits the job.
 - The public function has a docstring: what it does, its inputs and outputs, its side effects. There is no note file; the folder holds the code file and the test file, nothing else.
 - Import only what the sheet allows. Nothing else.
 - Out of scope, always: tests on a code job, the code file on a test job, any other folder, any case or behaviour the sheet did not name.

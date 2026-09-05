@@ -1,6 +1,6 @@
 """Shape rules ruff cannot express. Exit 1 on any violation.
 
-Rules for code files: <= 50 lines; every function <= 50 lines; one public
+Rules for code files: <= 80 lines; every function <= 80 lines; one public
 function, with a docstring. Test files and conftest are exempt from length
 (Board decision 2026-09-04). Every folder: exactly two files, the code file
 and its test file (Board decision 2026-09-05: the note file is retired).
@@ -10,7 +10,7 @@ import ast
 import sys
 from pathlib import Path
 
-MAX = 50
+MAX = 80
 
 
 def check_file(path: Path) -> list[str]:

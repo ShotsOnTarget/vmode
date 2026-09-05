@@ -18,10 +18,10 @@ max-complexity = 5
 
 [tool.ruff.lint.pylint]
 max-args = 4
-max-branches = 5
+max-branches = 4
 max-returns = 3
-max-statements = 25
-max-nested-blocks = 3
+max-statements = 20
+max-nested-blocks = 2
 
 [tool.ruff.format]
 quote-style = "double"
