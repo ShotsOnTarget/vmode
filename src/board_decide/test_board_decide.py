@@ -49,6 +49,7 @@ def test_yes_closes_validation(bd_repo):
     assert result == {"intent": iid, "validation": vid, "state": "done"}
     shown = _show(vid)
     assert "state:done" in shown["labels"] and shown["assignee"] == "board"
+    assert "state:done" in record_run(["show", iid])[0]["labels"]
 
 
 def test_no_reopens_with_reason(bd_repo):
