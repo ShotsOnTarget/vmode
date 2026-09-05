@@ -10,7 +10,7 @@ def _story():
     return record_create_item("story", "S", "architect", intent["id"])["id"]
 
 
-def test_siblings_under_story(bd_repo):
+def test_siblings_under_story(fake_bd):
     story = _story()
     pair = create_pair(story, "widget", "supervisor")
     graph = record_graph()
@@ -18,7 +18,7 @@ def test_siblings_under_story(bd_repo):
     assert graph[pair["test"]]["parent"] == story
 
 
-def test_code_needs_test(bd_repo):
+def test_code_needs_test(fake_bd):
     story = _story()
     pair = create_pair(story, "widget", "supervisor")
     graph = record_graph()
@@ -26,6 +26,6 @@ def test_code_needs_test(bd_repo):
     assert graph[pair["test"]]["checks"] == [pair["code"]]
 
 
-def test_bad_name_rejected(bd_repo):
+def test_bad_name_rejected(fake_bd):
     with pytest.raises(ValueError):
         create_pair(_story(), "two words", "supervisor")

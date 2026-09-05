@@ -15,7 +15,7 @@ def _entry(item, gate, tokens=1):
     }
 
 
-def test_returns_in_order(bd_repo):
+def test_returns_in_order(fake_bd):
     log_append(_entry("A", "Built"))
     log_append(_entry("A", "Proven"))
     log_append(_entry("A", "Verified"))
@@ -25,7 +25,7 @@ def test_returns_in_order(bd_repo):
     assert [r["gate"] for r in result] == ["built", "proven", "verified"]
 
 
-def test_other_target_excluded(bd_repo):
+def test_other_target_excluded(fake_bd):
     log_append(_entry("B", "Built"))
 
     result = log_read_item("A")
@@ -33,13 +33,13 @@ def test_other_target_excluded(bd_repo):
     assert result == []
 
 
-def test_none_empty(bd_repo):
+def test_none_empty(fake_bd):
     result = log_read_item("A")
 
     assert result == []
 
 
-def test_payload_merged(bd_repo):
+def test_payload_merged(fake_bd):
     log_append(_entry("A", "Built", tokens=42))
 
     result = log_read_item("A")

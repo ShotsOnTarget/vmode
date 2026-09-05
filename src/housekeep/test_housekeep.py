@@ -14,7 +14,7 @@ def _item(title, labels, parent=None, assignee=None):
     return record_run(args)["id"]
 
 
-def test_dead_claim_released(bd_repo):
+def test_dead_claim_released(fake_bd):
     subprocess.run(["git", "init", "-q"], check=True)
     job = _item("w code", "kind:code,state:in_progress", assignee="builder-99999")
     result = housekeep(".")
@@ -22,12 +22,12 @@ def test_dead_claim_released(bd_repo):
     assert record_graph()[job]["state"] == "ready"
 
 
-def test_leftover_raised_once(bd_repo):
+def test_leftover_raised_once(fake_bd):
     subprocess.run(["git", "init", "-q"], check=True)
     intent = _item("I", "kind:intent,state:done")
     job = _item("w code", "kind:code,state:done", parent=intent)
-    (bd_repo / "src" / "w").mkdir(parents=True)
-    (bd_repo / "src" / "w" / "w.py").write_text("def w():\n    pass\n")
+    (fake_bd / "src" / "w").mkdir(parents=True)
+    (fake_bd / "src" / "w" / "w.py").write_text("def w():\n    pass\n")
     first = housekeep(".")
     second = housekeep(".")
     notes = [

@@ -15,7 +15,6 @@ def _job_repo(tmp_path, folder, code, note, test=None):
     src = repo / "src" / folder
     src.mkdir(parents=True)
     (src / f"{folder}.py").write_text(code)
-    (src / f"{folder}.md").write_text(note)
     if test:
         (src / f"test_{folder}.py").write_text(test)
     return str(repo)
@@ -52,7 +51,14 @@ def _assignee(item_id):
     return row.get("assignee") or ""
 
 
-_GOOD_CODE = "def widget(x: int) -> int:" + chr(10) + "    return x + 1" + chr(10)
+_GOOD_CODE = (
+    "def widget(x: int) -> int:"
+    + chr(10)
+    + '    """Add one."""'
+    + chr(10)
+    + "    return x + 1"
+    + chr(10)
+)
 
 _GOOD_NOTE = "widget\nline two\nline three\nline four\nline five\nline six"
 
@@ -63,7 +69,7 @@ def _base_gathered(tmp_path, **overrides):
     note = overrides.get("note", _GOOD_NOTE)
     gathered = {
         "folder": folder,
-        "changed": [f"src/{folder}/{folder}.py", f"src/{folder}/{folder}.md"],
+        "changed": [f"src/{folder}/{folder}.py"],
         "code": code,
         "note": note,
         "fmt_out": "",
@@ -79,7 +85,7 @@ def _base_gathered(tmp_path, **overrides):
     return gathered
 
 
-def test_pass_moves_done(bd_repo, tmp_path):
+def test_pass_moves_done(fake_bd, tmp_path):
     item_id = _create("code")
     gathered = _base_gathered(tmp_path, usage={"tokens": 7, "seconds": 1.0})
 
@@ -95,7 +101,7 @@ def test_pass_moves_done(bd_repo, tmp_path):
     assert item_id in message
 
 
-def test_fail_bounces(bd_repo, tmp_path):
+def test_fail_bounces(fake_bd, tmp_path):
     item_id = _create("code")
     gathered = _base_gathered(tmp_path, code="import os" + chr(10) + _GOOD_CODE)
 
@@ -112,7 +118,7 @@ def test_fail_bounces(bd_repo, tmp_path):
     assert any(t.startswith("bounce:") for t in texts)
 
 
-def test_third_fail_blocks(bd_repo, tmp_path):
+def test_third_fail_blocks(fake_bd, tmp_path):
     item_id = _create("code")
     gathered = _base_gathered(
         tmp_path, code="import os" + chr(10) + _GOOD_CODE, retries=3
@@ -126,7 +132,7 @@ def test_third_fail_blocks(bd_repo, tmp_path):
     assert notes
 
 
-def test_usage_extra_keys_ignored(bd_repo, tmp_path):
+def test_usage_extra_keys_ignored(fake_bd, tmp_path):
     item_id = _create("code")
     gathered = _base_gathered(
         tmp_path,
@@ -143,7 +149,7 @@ def test_usage_extra_keys_ignored(bd_repo, tmp_path):
     assert "report" not in built[0]
 
 
-def test_test_kind_runs_proven(bd_repo, tmp_path):
+def test_test_kind_runs_proven(fake_bd, tmp_path):
     item_id = _create("test")
     gathered = _base_gathered(
         tmp_path,
@@ -161,7 +167,7 @@ def test_test_kind_runs_proven(bd_repo, tmp_path):
     assert "tests_failed" in proven[0]["rule"]
 
 
-def test_bounce_clears_claim(bd_repo, tmp_path):
+def test_bounce_clears_claim(fake_bd, tmp_path):
     item_id = _create("code")
     record_run(["update", item_id, "--claim", "--actor", "tester"])
     gathered = _base_gathered(tmp_path, code="import os" + chr(10) + _GOOD_CODE)

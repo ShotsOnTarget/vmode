@@ -8,7 +8,7 @@ def _item(title):
     return record_run(["create", title, "-t", "task", "--no-inherit-labels"])["id"]
 
 
-def test_note_added(bd_repo):
+def test_note_added(fake_bd):
     item_id = _item("a")
     record_add_note(item_id, "hello")
     show = record_run(["show", item_id])
@@ -18,13 +18,13 @@ def test_note_added(bd_repo):
     assert has_count or has_list
 
 
-def test_empty_text_rejected(bd_repo):
+def test_empty_text_rejected(fake_bd):
     item_id = _item("b")
     with pytest.raises(ValueError):
         record_add_note(item_id, "")
 
 
-def test_two_notes_two_ids(bd_repo):
+def test_two_notes_two_ids(fake_bd):
     item_id = _item("c")
     first = record_add_note(item_id, "one")
     second = record_add_note(item_id, "two")

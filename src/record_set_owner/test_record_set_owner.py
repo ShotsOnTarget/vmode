@@ -4,7 +4,7 @@ from record_run.record_run import RecordError, record_run
 from record_set_owner.record_set_owner import record_set_owner
 
 
-def test_owner_changes(bd_repo):
+def test_owner_changes(fake_bd):
     created = record_run(
         ["create", "hello", "-l", "owner:builder-1", "--no-inherit-labels"]
     )
@@ -22,7 +22,7 @@ def test_owner_changes(bd_repo):
     assert shown_item.get("assignee") == assignee_before
 
 
-def test_empty_owner_rejected(bd_repo):
+def test_empty_owner_rejected(fake_bd):
     created = record_run(["create", "hello", "--no-inherit-labels"])
     item = created[0] if isinstance(created, list) else created
 
@@ -30,6 +30,6 @@ def test_empty_owner_rejected(bd_repo):
         record_set_owner(item["id"], "")
 
 
-def test_unknown_raises(bd_repo):
+def test_unknown_raises(fake_bd):
     with pytest.raises(RecordError):
         record_set_owner("vm-none", "builder-2")

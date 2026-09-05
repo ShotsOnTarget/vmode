@@ -14,7 +14,7 @@ def _id(created):
     return created[0]["id"] if isinstance(created, list) else created["id"]
 
 
-def test_code_to_intent_order(bd_repo):
+def test_code_to_intent_order(fake_bd):
     intent = _id(
         record_run(
             ["create", "intent1", "-t", "epic", "-a", "me", "--no-inherit-labels"]
@@ -35,7 +35,7 @@ def test_code_to_intent_order(bd_repo):
     assert [r["id"] for r in result] == [code, story, intent]
 
 
-def test_intent_alone(bd_repo):
+def test_intent_alone(fake_bd):
     intent = _id(
         record_run(
             ["create", "intent1", "-t", "epic", "-a", "me", "--no-inherit-labels"]
@@ -46,7 +46,7 @@ def test_intent_alone(bd_repo):
     assert [r["id"] for r in result] == [intent]
 
 
-def test_unknown_id_raises(bd_repo):
+def test_unknown_id_raises(fake_bd):
     record_run(["create", "intent1", "-t", "epic", "-a", "me", "--no-inherit-labels"])
     with pytest.raises(ValueError):
         trace_back("vm-none", record_graph())

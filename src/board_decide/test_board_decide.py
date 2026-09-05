@@ -42,7 +42,7 @@ def _show(item_id):
     return record_run(["show", item_id])[0]
 
 
-def test_yes_closes_validation(bd_repo):
+def test_yes_closes_validation(fake_bd):
     iid = _intent()
     vid = _validation(iid)
     result = board_decide(iid, "yes", "")
@@ -52,7 +52,7 @@ def test_yes_closes_validation(bd_repo):
     assert "state:done" in record_run(["show", iid])[0]["labels"]
 
 
-def test_no_reopens_with_reason(bd_repo):
+def test_no_reopens_with_reason(fake_bd):
     iid = _intent()
     vid = _validation(iid)
     assert board_decide(iid, "no", "missing X")["state"] == "reopened"
@@ -61,20 +61,20 @@ def test_no_reopens_with_reason(bd_repo):
     assert shown.get("comment_count", len(shown.get("comments", []))) >= 1
 
 
-def test_no_without_reason_rejected(bd_repo):
+def test_no_without_reason_rejected(fake_bd):
     iid = _intent()
     _validation(iid)
     with pytest.raises(ValueError):
         board_decide(iid, "no", "")
 
 
-def test_bad_decision_rejected(bd_repo):
+def test_bad_decision_rejected(fake_bd):
     iid = _intent()
     _validation(iid)
     with pytest.raises(ValueError):
         board_decide(iid, "maybe", "")
 
 
-def test_no_validation_raises(bd_repo):
+def test_no_validation_raises(fake_bd):
     with pytest.raises(ValueError):
         board_decide(_intent(), "yes", "")

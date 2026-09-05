@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import subprocess
 
@@ -11,24 +12,33 @@ class RecordError(Exception):
 
 
 def record_run(args: list[str]) -> dict | list:
-    """Run the `bd` CLI with given arguments and return its parsed JSON output."""
+    """Run one record command and return its parsed JSON.
+
+    The record is the `bd` client on PATH, called with --json. When the
+    environment names VMODE_RECORD=fake the call goes to the in-memory fake
+    record instead, so unit tests never start a database; the fake answers
+    with the same shapes, captured from real runs. Raises RecordError when
+    the client is missing, exits non-zero, or prints something not JSON.
+    """
+    if os.environ.get("VMODE_RECORD") == "fake":
+        from fake_record.fake_record import fake_record
+
+        try:
+            return fake_record(list(args))
+        except (KeyError, LookupError, ValueError) as exc:
+            raise RecordError("fake record refused", str(exc)) from exc
+    return _run_bd(args)
+
+
+def _run_bd(args: list[str]) -> dict | list:
     if shutil.which("bd") is None:
         raise RecordError("bd is not on PATH", "")
-
-    full_args = ["bd"] + list(args) + ["--json"]
-
     try:
-        result = subprocess.run(
-            full_args,
-            capture_output=True,
-            text=True,
-        )
+        result = subprocess.run(["bd", *args, "--json"], capture_output=True, text=True)
     except OSError as exc:
         raise RecordError("failed to run bd", str(exc)) from exc
-
     if result.returncode != 0:
         raise RecordError("bd exited non-zero", result.stderr)
-
     try:
         return json.loads(result.stdout)
     except json.JSONDecodeError as exc:

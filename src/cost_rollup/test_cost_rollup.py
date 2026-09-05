@@ -30,7 +30,7 @@ def _event(item, tokens):
     )
 
 
-def test_sums_subtree(bd_repo):
+def test_sums_subtree(fake_bd):
     intent = _mk("intent1")
     story = _mk("story1", **{"--parent": intent})
     code = _mk("code1", **{"--parent": story})
@@ -43,7 +43,7 @@ def test_sums_subtree(bd_repo):
     assert result["runs"] == 2
 
 
-def test_negative_is_zero(bd_repo):
+def test_negative_is_zero(fake_bd):
     item = _mk("item1")
     _event(item, -1)
 
@@ -53,7 +53,7 @@ def test_negative_is_zero(bd_repo):
     assert result["runs"] == 1
 
 
-def test_no_events_zero(bd_repo):
+def test_no_events_zero(fake_bd):
     item = _mk("item1")
 
     result = cost_rollup(item, record_graph())

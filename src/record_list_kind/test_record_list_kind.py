@@ -4,7 +4,7 @@ from record_list_kind.record_list_kind import record_list_kind
 from record_run.record_run import record_run
 
 
-def test_filters_by_kind(bd_repo):
+def test_filters_by_kind(fake_bd):
     record_run(["create", "intent one", "-l", "kind:intent", "-t", "epic"])
     story_a = record_run(["create", "story a", "-l", "kind:story", "-t", "task"])
     story_b = record_run(["create", "story b", "-l", "kind:story", "-t", "task"])
@@ -18,7 +18,7 @@ def test_filters_by_kind(bd_repo):
         assert item["kind"] == "story"
 
 
-def test_includes_closed(bd_repo):
+def test_includes_closed(fake_bd):
     story = record_run(["create", "story c", "-l", "kind:story", "-t", "task"])
     record_run(["update", story["id"], "-s", "closed", "--add-label", "state:done"])
 
@@ -28,10 +28,10 @@ def test_includes_closed(bd_repo):
     assert story["id"] in ids
 
 
-def test_empty_kind_returns_empty(bd_repo):
+def test_empty_kind_returns_empty(fake_bd):
     assert record_list_kind("validation") == []
 
 
-def test_bad_kind_rejected(bd_repo):
+def test_bad_kind_rejected(fake_bd):
     with pytest.raises(ValueError):
         record_list_kind("bug")

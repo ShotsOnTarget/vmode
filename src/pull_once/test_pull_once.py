@@ -85,7 +85,7 @@ def _raising_invoke(item, column):
     raise RuntimeError("boom")
 
 
-def test_claims_within_wip(bd_repo, tmp_path):
+def test_claims_within_wip(fake_bd, tmp_path):
     _make_in_progress_item()
     ready_id = _make_item()
 
@@ -98,7 +98,7 @@ def test_claims_within_wip(bd_repo, tmp_path):
     assert claimed_at_2 == [ready_id]
 
 
-def test_invoke_result_recorded(bd_repo, tmp_path):
+def test_invoke_result_recorded(fake_bd, tmp_path):
     item_id = _make_item()
     config_path = _plain_config(tmp_path)
 
@@ -110,7 +110,7 @@ def test_invoke_result_recorded(bd_repo, tmp_path):
     assert _last_comment_text(item_id).startswith("usage:")
 
 
-def test_invoke_failure_releases(bd_repo, tmp_path):
+def test_invoke_failure_releases(fake_bd, tmp_path):
     item_id = _make_item()
     config_path = _plain_config(tmp_path)
 
@@ -127,7 +127,7 @@ def test_invoke_failure_releases(bd_repo, tmp_path):
     assert reclaimed == [item_id]
 
 
-def test_config_change_respected(bd_repo, tmp_path):
+def test_config_change_respected(fake_bd, tmp_path):
     first_ready = _make_item()
     config_path = _config_with_build_wip(tmp_path, 1)
 
@@ -145,14 +145,14 @@ def test_config_change_respected(bd_repo, tmp_path):
     assert claimed_second == []
 
 
-def test_unknown_role_raises(bd_repo, tmp_path):
+def test_unknown_role_raises(fake_bd, tmp_path):
     config_path = _plain_config(tmp_path)
 
     with pytest.raises(ValueError):
         pull_once("nobody", config_path, _ok_invoke)
 
 
-def test_label_column_adds_label(bd_repo, tmp_path):
+def test_label_column_adds_label(fake_bd, tmp_path):
     story_id = _make_done_story()
     config_path = _plain_config(tmp_path)
 
@@ -165,7 +165,7 @@ def test_label_column_adds_label(bd_repo, tmp_path):
     assert not row.get("assignee")
 
 
-def test_lost_claim_skipped(bd_repo, tmp_path):
+def test_lost_claim_skipped(fake_bd, tmp_path):
     ready_id = _make_item()
     record_run(["update", ready_id, "--claim", "--actor", "other"])
     config_path = _plain_config(tmp_path)

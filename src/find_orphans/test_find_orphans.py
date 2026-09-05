@@ -4,6 +4,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 from find_orphans.find_orphans import find_orphans
 from record_graph.record_graph import record_graph
 from record_run.record_run import record_run
@@ -26,14 +28,14 @@ def _val(a, b):
     record_run(["dep", "add", a, b, "-t", "validates"])
 
 
-def test_story_without_verification(bd_repo):
+def test_story_without_verification(fake_bd):
     intent = _mk("intent1", "intent")
     story = _mk("story1", "story", intent)
     _val(_mk("validation1", "validation"), intent)
     assert {"id": story, "rule": "unchecked"} in find_orphans(record_graph())
 
 
-def test_test_without_checks(bd_repo):
+def test_test_without_checks(fake_bd):
     intent = _mk("intent1", "intent")
     story = _mk("story1", "story", intent)
     verification = _mk("verification1", "verification")
@@ -54,7 +56,7 @@ def test_story_without_parent():
     assert {"id": "story1", "rule": "no_parent"} in find_orphans(graph)
 
 
-def test_clean_graph_empty(bd_repo):
+def test_clean_graph_empty(fake_bd):
     other = _mk("other_intent", "intent")
     intent = _mk("intent1", "intent")
     story = _mk("story1", "story", intent)
@@ -82,7 +84,7 @@ def test_proposal_unchecked():
     assert {"id": "proposal1", "rule": "unchecked"} in find_orphans(graph)
 
 
-def test_note_not_orphan(bd_repo):
+def test_note_not_orphan(fake_bd):
     intent = _mk("intent1", "intent")
     code = _mk("code1", "code", intent)
     record_set_state(code, "done")
@@ -90,6 +92,7 @@ def test_note_not_orphan(bd_repo):
     assert note not in [o["id"] for o in find_orphans(record_graph())]
 
 
+@pytest.mark.integration
 def test_script_exit_code(bd_repo):
     _mk("intent1", "intent")
     env = dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[1]))

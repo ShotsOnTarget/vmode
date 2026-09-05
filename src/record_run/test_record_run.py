@@ -2,6 +2,8 @@ import pytest
 
 from record_run.record_run import RecordError, record_run
 
+pytestmark = pytest.mark.integration
+
 
 def test_show_returns_item(bd_repo):
     created = record_run(["create", "hello"])

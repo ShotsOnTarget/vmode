@@ -35,7 +35,7 @@ def _raising_invoke(item, column):
     raise RuntimeError("boom")
 
 
-def test_success_sets_checking(bd_repo):
+def test_success_sets_checking(fake_bd):
     item_id = _make_item()
     item = _item_dict(item_id)
     options = {"config": _config(), "invoke": _ok_invoke}
@@ -49,7 +49,7 @@ def test_success_sets_checking(bd_repo):
     assert comments and comments[-1]["text"].startswith("usage:")
 
 
-def test_lost_claim_returns_false(bd_repo):
+def test_lost_claim_returns_false(fake_bd):
     item_id = _make_item()
     item = _item_dict(item_id)
     record_run(["update", item_id, "--claim", "--actor", "other"])
@@ -63,7 +63,7 @@ def test_lost_claim_returns_false(bd_repo):
     assert not row.get("comments")
 
 
-def test_failure_releases(bd_repo):
+def test_failure_releases(fake_bd):
     item_id = _make_item()
     item = _item_dict(item_id)
     options = {"config": _config(), "invoke": _raising_invoke}
@@ -78,7 +78,7 @@ def test_failure_releases(bd_repo):
     assert comments and comments[-1]["text"].startswith("release:")
 
 
-def test_label_column_adds_label(bd_repo):
+def test_label_column_adds_label(fake_bd):
     item_id = _make_item("kind:story,state:done")
     item = _item_dict(item_id)
     options = {"config": _config(), "invoke": _ok_invoke}

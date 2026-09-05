@@ -67,19 +67,19 @@ def test_root_is_page():
     assert body.lower().startswith("<!doctype html>")
 
 
-def test_intents_json(bd_repo):
+def test_intents_json(fake_bd):
     port, iid = _start(), _intent()
     data = _get(f"http://127.0.0.1:{port}/api/intents")
     assert any(x["id"] == iid and x["care"] == "high" for x in data)
 
 
-def test_tree_json(bd_repo):
+def test_tree_json(fake_bd):
     port, iid = _start(), _intent()
     data = _get(f"http://127.0.0.1:{port}/api/tree?id={iid}")
     assert "back" in data and "forward" in data
 
 
-def test_decide_roundtrip(bd_repo):
+def test_decide_roundtrip(fake_bd):
     port, iid = _start(), _intent()
     vid = _validation(iid)
     body = json.dumps({"intent": iid, "decision": "yes", "reason": ""}).encode()

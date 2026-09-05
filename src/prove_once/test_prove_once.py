@@ -23,7 +23,7 @@ def _create(title, labels, parent=None):
     return record_run(args)["id"]
 
 
-def test_empty_prove_noop(bd_repo, tmp_path):
+def test_empty_prove_noop(fake_bd, tmp_path):
     config_path = _config(tmp_path)
 
     result = prove_once(config_path)
@@ -32,14 +32,17 @@ def test_empty_prove_noop(bd_repo, tmp_path):
     assert record_run(["list", "--all", "--type", "event"]) == []
 
 
-def test_processes_checking_job(bd_repo, tmp_path):
+def test_processes_checking_job(fake_bd, tmp_path):
     config_path = _config(tmp_path)
     item_id = _create("widget code", "kind:code,state:checking")
     record_run(["comment", item_id, 'usage: {"tokens": 5, "seconds": 1.0}'])
 
     folder = pathlib.Path("src") / "widget"
     folder.mkdir(parents=True)
-    (folder / "widget.py").write_text("def widget(x: int) -> int:\n    return x + 1\n")
+    code = (
+        "def widget(x: int) -> int:\n    " + '"""Add one."""' + "\n    return x + 1\n"
+    )
+    (folder / "widget.py").write_text(code)
     (folder / "widget.md").write_text(
         f"widget note line 1\nJob id: {item_id}\nline 3\nline 4\nline 5\nline 6\n"
     )
@@ -52,7 +55,7 @@ def test_processes_checking_job(bd_repo, tmp_path):
     assert record_show_item(item_id)["state"] == "done"
 
 
-def test_story_moves_to_checking(bd_repo, tmp_path):
+def test_story_moves_to_checking(fake_bd, tmp_path):
     config_path = _config(tmp_path)
     story_id = _create("Story S", "kind:story,state:ready")
     code_id = _create("Story S code", "kind:code,state:done", parent=story_id)
@@ -64,7 +67,7 @@ def test_story_moves_to_checking(bd_repo, tmp_path):
     assert record_show_item(story_id)["state"] == "checking"
 
 
-def test_story_stays_when_test_open(bd_repo, tmp_path):
+def test_story_stays_when_test_open(fake_bd, tmp_path):
     config_path = _config(tmp_path)
     story_id = _create("Story S", "kind:story,state:ready")
     code_id = _create("Story S code", "kind:code,state:done", parent=story_id)

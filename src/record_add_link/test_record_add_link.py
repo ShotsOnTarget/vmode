@@ -8,7 +8,7 @@ def _item(title):
     return record_run(["create", title, "-t", "task"])["id"]
 
 
-def test_parent_of_reads_back(bd_repo):
+def test_parent_of_reads_back(fake_bd):
     src = _item("src")
     dst = _item("dst")
     record_add_link("parent_of", src, dst)
@@ -16,7 +16,7 @@ def test_parent_of_reads_back(bd_repo):
     assert any(d["id"] == src for d in deps)
 
 
-def test_needs_first_reads_back(bd_repo):
+def test_needs_first_reads_back(fake_bd):
     src = _item("src")
     dst = _item("dst")
     record_add_link("needs_first", src, dst)
@@ -24,7 +24,7 @@ def test_needs_first_reads_back(bd_repo):
     assert any(d["id"] == dst for d in deps)
 
 
-def test_checks_reads_back(bd_repo):
+def test_checks_reads_back(fake_bd):
     src = _item("src")
     dst = _item("dst")
     record_add_link("checks", src, dst)
@@ -32,6 +32,6 @@ def test_checks_reads_back(bd_repo):
     assert any(d["id"] == dst and d["dependency_type"] == "validates" for d in deps)
 
 
-def test_fourth_link_rejected(bd_repo):
+def test_fourth_link_rejected(fake_bd):
     with pytest.raises(ValueError):
         record_add_link("related", "vm-1", "vm-2")

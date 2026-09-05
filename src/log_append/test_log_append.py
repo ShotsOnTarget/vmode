@@ -27,7 +27,7 @@ def _entry(item, **overrides):
     return entry
 
 
-def test_creates_event(bd_repo):
+def test_creates_event(fake_bd):
     target = _target()
 
     event_id = log_append(_entry(target))
@@ -38,7 +38,7 @@ def test_creates_event(bd_repo):
     assert shown["event_kind"] == "built"
 
 
-def test_missing_key_rejected(bd_repo):
+def test_missing_key_rejected(fake_bd):
     target = _target()
     entry = _entry(target)
     del entry["actor"]
@@ -49,7 +49,7 @@ def test_missing_key_rejected(bd_repo):
     assert record_run(["list", "--type", "event"]) == []
 
 
-def test_extra_key_rejected(bd_repo):
+def test_extra_key_rejected(fake_bd):
     target = _target()
     entry = _entry(target, extra="nope")
 
@@ -57,7 +57,7 @@ def test_extra_key_rejected(bd_repo):
         log_append(entry)
 
 
-def test_payload_roundtrip(bd_repo):
+def test_payload_roundtrip(fake_bd):
     target = _target()
     entry = _entry(target, tokens=42)
 

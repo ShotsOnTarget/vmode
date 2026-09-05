@@ -30,7 +30,7 @@ def _state_labels(item_id):
     return [label for label in labels if label.startswith("state:")]
 
 
-def test_each_state_sets(bd_repo):
+def test_each_state_sets(fake_bd):
     item_id = _make_item()
     for state in _STATES:
         record_set_state(item_id, state)
@@ -38,26 +38,26 @@ def test_each_state_sets(bd_repo):
         assert state_labels == [f"state:{state}"]
 
 
-def test_eighth_state_rejected(bd_repo):
+def test_eighth_state_rejected(fake_bd):
     item_id = _make_item()
     with pytest.raises(ValueError):
         record_set_state(item_id, "paused")
 
 
-def test_done_closes(bd_repo):
+def test_done_closes(fake_bd):
     item_id = _make_item()
     record_set_state(item_id, "done")
     assert _show(item_id)["status"] == "closed"
 
 
-def test_reopened_opens(bd_repo):
+def test_reopened_opens(fake_bd):
     item_id = _make_item()
     record_set_state(item_id, "done")
     record_set_state(item_id, "reopened")
     assert _show(item_id)["status"] == "open"
 
 
-def test_ready_needs_checklist(bd_repo):
+def test_ready_needs_checklist(fake_bd):
     story = record_run(["create", "S", "-t", "task", "-l", "kind:story,state:waiting"])
     with pytest.raises(ValueError):
         record_set_state(story["id"], "ready")

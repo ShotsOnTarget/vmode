@@ -10,7 +10,7 @@ def _job(owner="supervisor"):
     return record_create_item("code", "job", owner, parent=intent["id"])["id"]
 
 
-def test_bounce_note(bd_repo):
+def test_bounce_note(fake_bd):
     job_id = _job()
     outcome = {"action": "bounce", "retries": 1, "rules": ["tests_failed"]}
 
@@ -22,7 +22,7 @@ def test_bounce_note(bd_repo):
     assert note["title"].startswith("bounce: tests_failed")
 
 
-def test_escalate_note_has_summary(bd_repo):
+def test_escalate_note_has_summary(fake_bd):
     job_id = _job()
     outcome = {"action": "escalate", "retries": 3, "rules": ["tests_failed"]}
 
@@ -33,7 +33,7 @@ def test_escalate_note_has_summary(bd_repo):
     assert "3" in note["sheet"]
 
 
-def test_bad_action_rejected(bd_repo):
+def test_bad_action_rejected(fake_bd):
     job_id = _job()
     outcome = {"action": "log_done", "retries": 0, "rules": []}
 

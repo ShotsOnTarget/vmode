@@ -27,7 +27,7 @@ def _line(item_id, **extra):
     return json.dumps({**base, **extra})
 
 
-def test_migrates_lines(bd_repo, tmp_path):
+def test_migrates_lines(fake_bd, tmp_path):
     item_id = _item()
     path = tmp_path / "log.jsonl"
     path.write_text(_line(item_id, tokens=5, seconds=1.0) + NL + _line(item_id) + NL)
@@ -37,7 +37,7 @@ def test_migrates_lines(bd_repo, tmp_path):
     assert all("ts_original" in e["inputs"] for e in events)
 
 
-def test_defaults_applied(bd_repo, tmp_path):
+def test_defaults_applied(fake_bd, tmp_path):
     item_id = _item()
     path = tmp_path / "log.jsonl"
     path.write_text(_line(item_id) + NL)
@@ -45,7 +45,7 @@ def test_defaults_applied(bd_repo, tmp_path):
     assert log_read_item(item_id)[0]["tokens"] == -1
 
 
-def test_bad_line_raises(bd_repo, tmp_path):
+def test_bad_line_raises(fake_bd, tmp_path):
     path = tmp_path / "log.jsonl"
     path.write_text("not json at all" + NL)
     with pytest.raises(ValueError):

@@ -10,12 +10,12 @@ def _mk(kind, owner="alice", parent=None):
     return record_create_item(kind, "t", owner, parent)
 
 
-def test_owner_is_label_not_assignee(bd_repo):
+def test_owner_is_label_not_assignee(fake_bd):
     shown = record_run(["show", _mk("intent")["id"]])[0]
     assert "owner:alice" in shown["labels"] and not shown.get("assignee")
 
 
-def test_each_kind_creates(bd_repo):
+def test_each_kind_creates(fake_bd):
     intent = _mk("intent")
     assert intent["kind"] == "intent" and intent["id"]
     for kind in _KINDS:
@@ -23,7 +23,7 @@ def test_each_kind_creates(bd_repo):
         assert item["kind"] == kind and item["id"]
 
 
-def test_bad_kind_rejected(bd_repo, monkeypatch):
+def test_bad_kind_rejected(fake_bd, monkeypatch):
     called = []
     monkeypatch.setattr(
         "record_create_item.record_create_item.record_run",
@@ -34,28 +34,28 @@ def test_bad_kind_rejected(bd_repo, monkeypatch):
     assert called == []
 
 
-def test_no_owner_rejected(bd_repo):
+def test_no_owner_rejected(fake_bd):
     with pytest.raises(ValueError):
         _mk("story", owner="", parent="p")
 
 
-def test_no_parent_rejected(bd_repo):
+def test_no_parent_rejected(fake_bd):
     with pytest.raises(ValueError):
         _mk("story")
 
 
-def test_intent_needs_no_parent(bd_repo):
+def test_intent_needs_no_parent(fake_bd):
     item = _mk("intent")
     assert item["kind"] == "intent" and item["id"]
 
 
-def test_child_does_not_inherit_kind(bd_repo):
+def test_child_does_not_inherit_kind(fake_bd):
     story = _mk("story", parent=_mk("intent")["id"])
     labels = record_run(["show", story["id"]])[0]["labels"]
     assert "kind:story" in labels and "kind:intent" not in labels
 
 
-def test_right_side_uses_validates(bd_repo):
+def test_right_side_uses_validates(fake_bd):
     story = _mk("story", parent=_mk("intent")["id"])
     code = _mk("code", parent=story["id"])
     shown = record_run(["show", _mk("test", parent=code["id"])["id"]])[0]
@@ -66,13 +66,13 @@ def test_right_side_uses_validates(bd_repo):
     )
 
 
-def test_proposal_is_left_side(bd_repo):
+def test_proposal_is_left_side(fake_bd):
     story = _mk("story", parent=_mk("intent")["id"])
     prop = _mk("proposal", parent=story["id"])
     assert record_run(["show", prop["id"]])[0]["parent"] == story["id"]
 
 
-def test_note_created_with_parent(bd_repo):
+def test_note_created_with_parent(fake_bd):
     parent_id = _mk("intent")["id"]
     item = record_create_item("note", "saw X", "supervisor", parent=parent_id)
     assert item["kind"] == "note"
@@ -82,6 +82,6 @@ def test_note_created_with_parent(bd_repo):
     assert "kind:note" in labels
 
 
-def test_note_without_parent_rejected(bd_repo):
+def test_note_without_parent_rejected(fake_bd):
     with pytest.raises(ValueError):
         record_create_item("note", "saw X", "supervisor", parent=None)

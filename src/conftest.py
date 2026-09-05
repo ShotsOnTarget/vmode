@@ -8,6 +8,20 @@ import pytest
 _COUNTER = itertools.count()
 
 
+@pytest.fixture
+def fake_bd(tmp_path, monkeypatch):
+    """The in-memory record: VMODE_RECORD=fake, reset per test, cwd a fresh git repo."""
+    from fake_record.fake_record import fake_record
+
+    fake_record(["__reset__"])
+    monkeypatch.setenv("VMODE_RECORD", "fake")
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+    monkeypatch.chdir(repo)
+    yield repo
+
+
 @pytest.fixture(scope="session")
 def dolt_server(tmp_path_factory):
     """One Dolt server for the whole test session; each test gets its own database."""
@@ -47,7 +61,8 @@ def dolt_server(tmp_path_factory):
 
 @pytest.fixture
 def bd_repo(tmp_path, monkeypatch, dolt_server):
-    """A fresh git repo with its own record database on the session's Dolt server."""
+    """Integration only: a fresh git repo with a real record database."""
+    monkeypatch.delenv("VMODE_RECORD", raising=False)
     repo = tmp_path / "repo"
     repo.mkdir()
     subprocess.run(["git", "init", "-q"], cwd=repo, check=True)

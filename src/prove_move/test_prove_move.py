@@ -43,7 +43,7 @@ def _note_children(job_id):
     return notes
 
 
-def test_bounce_raises_note(bd_repo):
+def test_bounce_raises_note(fake_bd):
     item_id = _create("checking")
     outcome = {
         "action": "bounce",
@@ -59,7 +59,7 @@ def test_bounce_raises_note(bd_repo):
     assert record_show_item(notes[0])["parent"] == item_id
 
 
-def test_escalate_raises_note_no_file(bd_repo):
+def test_escalate_raises_note_no_file(fake_bd):
     item_id = _create("checking")
     outcome = {
         "action": "escalate",
@@ -75,7 +75,7 @@ def test_escalate_raises_note_no_file(bd_repo):
     assert not summary_path.is_file()
 
 
-def test_bounce_clears_claim(bd_repo):
+def test_bounce_clears_claim(fake_bd):
     item_id = _create("checking")
     record_run(["update", item_id, "--claim", "--actor", "builder-x"])
     outcome = {
@@ -92,7 +92,7 @@ def test_bounce_clears_claim(bd_repo):
     assert not row.get("assignee")
 
 
-def test_retry_label_set(bd_repo):
+def test_retry_label_set(fake_bd):
     item_id = _create("checking")
     outcome = {
         "action": "bounce",
@@ -107,7 +107,7 @@ def test_retry_label_set(bd_repo):
     assert retry_labels == ["retry:2"]
 
 
-def test_bounce_sets_label_and_note(bd_repo):
+def test_bounce_sets_label_and_note(fake_bd):
     item_id = _create("checking")
     outcome = {
         "action": "bounce",
@@ -127,7 +127,7 @@ def test_bounce_sets_label_and_note(bd_repo):
     assert row.get("comment_count", len(comments)) >= 1
 
 
-def test_bounce_replaces_retry_label(bd_repo):
+def test_bounce_replaces_retry_label(fake_bd):
     item_id = _create("checking", extra_labels=["retry:1"])
     outcome = {
         "action": "bounce",
@@ -143,7 +143,7 @@ def test_bounce_replaces_retry_label(bd_repo):
     assert "retry:1" not in labels
 
 
-def test_done_sets_state(bd_repo):
+def test_done_sets_state(fake_bd):
     item_id = _create("checking")
     outcome = {
         "action": "log_done",
@@ -158,7 +158,7 @@ def test_done_sets_state(bd_repo):
     assert shown["state"] == "done"
 
 
-def test_missing_key_raises(bd_repo):
+def test_missing_key_raises(fake_bd):
     item_id = _create("checking")
     outcome = {
         "action": "bounce",

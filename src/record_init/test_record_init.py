@@ -6,6 +6,8 @@ import pytest
 from record_init.record_init import record_init
 from record_run.record_run import RecordError
 
+pytestmark = pytest.mark.integration
+
 
 def _set_port(monkeypatch, bd_repo):
     port = (bd_repo / ".beads" / "dolt-server.port").read_text().strip()

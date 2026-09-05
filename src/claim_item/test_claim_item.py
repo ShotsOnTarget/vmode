@@ -17,7 +17,7 @@ def _show(item_id):
     return shown[0] if isinstance(shown, list) else shown
 
 
-def test_claims_ready_item(bd_repo):
+def test_claims_ready_item(fake_bd):
     item_id = _make_item()
 
     result = claim_item(item_id, "builder-1")
@@ -28,7 +28,7 @@ def test_claims_ready_item(bd_repo):
     assert "state:in_progress" in shown["labels"]
 
 
-def test_second_claim_raises(bd_repo):
+def test_second_claim_raises(fake_bd):
     item_id = _make_item()
     claim_item(item_id, "builder-1")
 
@@ -36,7 +36,7 @@ def test_second_claim_raises(bd_repo):
         claim_item(item_id, "builder-2")
 
 
-def test_empty_actor_raises(bd_repo):
+def test_empty_actor_raises(fake_bd):
     item_id = _make_item()
 
     with pytest.raises(ValueError):

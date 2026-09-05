@@ -4,7 +4,7 @@ from record_run.record_run import RecordError, record_run
 from record_show_item.record_show_item import record_show_item
 
 
-def test_returns_fields(bd_repo):
+def test_returns_fields(fake_bd):
     item = record_run(
         [
             "create",
@@ -26,12 +26,12 @@ def test_returns_fields(bd_repo):
     assert result["sheet"] == "do x"
 
 
-def test_unknown_raises(bd_repo):
+def test_unknown_raises(fake_bd):
     with pytest.raises(RecordError):
         record_show_item("vm-none")
 
 
-def test_sheet_empty_when_no_description(bd_repo):
+def test_sheet_empty_when_no_description(fake_bd):
     item = record_run(
         [
             "create",

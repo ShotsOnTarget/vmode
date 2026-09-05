@@ -30,7 +30,7 @@ def _event(item, tokens=1):
     }
 
 
-def test_subtree_events_in_order(bd_repo):
+def test_subtree_events_in_order(fake_bd):
     intent = _mk("intent1")
     story = _mk("story1", **{"--parent": intent})
     code = _mk("code1", **{"--parent": story})
@@ -44,7 +44,7 @@ def test_subtree_events_in_order(bd_repo):
     assert [e["item"] for e in result] == [code, intent, story]
 
 
-def test_leaf_only_own(bd_repo):
+def test_leaf_only_own(fake_bd):
     intent = _mk("intent1")
     story = _mk("story1", **{"--parent": intent})
     code = _mk("code1", **{"--parent": story})
@@ -59,6 +59,6 @@ def test_leaf_only_own(bd_repo):
     assert result[0]["item"] == code
 
 
-def test_unknown_raises(bd_repo):
+def test_unknown_raises(fake_bd):
     with pytest.raises(ValueError):
         timeline("nope", record_graph())

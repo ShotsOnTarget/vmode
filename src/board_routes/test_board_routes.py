@@ -49,20 +49,20 @@ def test_columns_is_html():
     assert "/api/columns" in payload
 
 
-def test_intents_json(bd_repo):
+def test_intents_json(fake_bd):
     iid = _intent()
     status, content_type, payload = board_routes("GET", "/api/intents", {}, {})
     assert status == 200
     assert any(x["id"] == iid and x["care"] == "high" for x in payload)
 
 
-def test_columns_json(bd_repo):
+def test_columns_json(fake_bd):
     status, content_type, payload = board_routes("GET", "/api/columns", {}, {})
     assert status == 200
     assert {"name", "role", "wip", "in_progress", "items"} <= payload[0].keys()
 
 
-def test_decide_roundtrip(bd_repo):
+def test_decide_roundtrip(fake_bd):
     iid = _intent()
     _validation(iid)
     body = {"intent": iid, "decision": "yes", "reason": ""}
@@ -71,7 +71,7 @@ def test_decide_roundtrip(bd_repo):
     assert payload["state"] == "done"
 
 
-def test_item_json(bd_repo):
+def test_item_json(fake_bd):
     iid = _intent()
     status, content_type, payload = board_routes("GET", "/api/item", {"id": iid}, {})
     assert status == 200
@@ -86,7 +86,7 @@ def test_item_json(bd_repo):
     } <= payload.keys()
 
 
-def test_timeline_json(bd_repo):
+def test_timeline_json(fake_bd):
     iid = _intent()
     status, _, payload = board_routes("GET", "/api/timeline", {"id": iid}, {})
     assert status == 200 and payload == []
@@ -97,7 +97,7 @@ def test_unknown_404():
     assert status == 404
 
 
-def test_bad_request_400(bd_repo):
+def test_bad_request_400(fake_bd):
     status, content_type, payload = board_routes(
         "GET", "/api/tree", {"id": "vm-none"}, {}
     )

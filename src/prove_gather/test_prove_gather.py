@@ -24,7 +24,7 @@ def _create(title, sheet, extra_labels=None):
     )["id"]
 
 
-def test_gathers_files(bd_repo):
+def test_gathers_files(fake_bd):
     sheet = "- `test_a`:"
     item_id = _create("x code", sheet)
     folder = pathlib.Path("src") / "x"
@@ -39,7 +39,7 @@ def test_gathers_files(bd_repo):
     assert result["kind"] == "code"
 
 
-def test_changed_filtered(bd_repo):
+def test_changed_filtered(fake_bd):
     placeholder = pathlib.Path("src") / "placeholder.txt"
     placeholder.parent.mkdir(parents=True, exist_ok=True)
     placeholder.write_text("placeholder\n")
@@ -68,7 +68,7 @@ def test_changed_filtered(bd_repo):
         assert path.startswith("src/x/")
 
 
-def test_usage_from_note(bd_repo):
+def test_usage_from_note(fake_bd):
     sheet = "- `test_a`:"
     item_id = _create("x code", sheet)
     record_run(
@@ -80,7 +80,7 @@ def test_usage_from_note(bd_repo):
     assert result["usage"]["tokens"] == 5
 
 
-def test_retry_label(bd_repo):
+def test_retry_label(fake_bd):
     sheet = "- `test_a`:"
     item_id = _create("x code", sheet)
     record_run(["label", "add", item_id, "retry:2"])
@@ -90,7 +90,7 @@ def test_retry_label(bd_repo):
     assert result["retries"] == 2
 
 
-def test_no_usage_default(bd_repo):
+def test_no_usage_default(fake_bd):
     sheet = "- `test_a`:"
     item_id = _create("x code", sheet)
 

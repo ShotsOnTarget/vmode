@@ -16,7 +16,7 @@ def _mk(title, **kw):
     return _id(record_run(args))
 
 
-def test_full_tree(bd_repo):
+def test_full_tree(fake_bd):
     intent = _mk("intent1")
     story = _mk("story1", **{"--parent": intent})
     code = _mk("code1", **{"--parent": story})
@@ -29,12 +29,12 @@ def test_full_tree(bd_repo):
     assert {c["id"] for c in story_node["children"]} == {code, verification}
 
 
-def test_leaf_has_no_children(bd_repo):
+def test_leaf_has_no_children(fake_bd):
     code = _mk("code1")
     assert trace_forward(code, record_graph())["children"] == []
 
 
-def test_unknown_id_raises(bd_repo):
+def test_unknown_id_raises(fake_bd):
     with pytest.raises(ValueError):
         trace_forward("nope", record_graph())
 

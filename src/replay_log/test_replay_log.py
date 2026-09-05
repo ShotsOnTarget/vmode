@@ -1,70 +1,44 @@
-import json
-
+from log_append.log_append import log_append
+from record_run.record_run import record_run
 from replay_log.replay_log import replay_log
 
 
-def _write_log(path, lines):
-    with open(path, "w", encoding="utf-8") as f:
-        for line in lines:
-            record = {
-                "gate": "Proven",
-                "rule": "test",
-                "ts": "2026-09-04T00:00:00+00:00",
-                "inputs": {},
-            }
-            record.update(line)
-            f.write(json.dumps(record) + "\n")
+def _item():
+    return record_run(["create", "X", "-t", "task", "-l", "kind:code,state:waiting"])[
+        "id"
+    ]
 
 
-def test_retry_then_done(tmp_path):
-    path = tmp_path / "log.jsonl"
-    _write_log(
-        path,
-        [
-            {"item": "X", "state": "in_progress", "inputs": {"retry": 1}},
-            {"item": "X", "state": "done"},
-        ],
+def _event(item_id, state, action, retries):
+    inputs = {"action": action, "retries": retries}
+    log_append(
+        {
+            "item": item_id,
+            "gate": "Built",
+            "rule": "r",
+            "inputs": inputs,
+            "state": state,
+            "tokens": 0,
+            "seconds": 0.0,
+            "actor": "t",
+        }
     )
-    assert replay_log(str(path), "X") == "done"
 
 
-def test_three_fails_blocked(tmp_path):
-    path = tmp_path / "log.jsonl"
-    _write_log(
-        path,
-        [
-            {"item": "X", "state": "in_progress", "inputs": {"retry": 1}},
-            {"item": "X", "state": "in_progress", "inputs": {"retry": 2}},
-            {"item": "X", "state": "in_progress", "inputs": {"retry": 3}},
-            {"item": "X", "state": "blocked"},
-        ],
-    )
-    assert replay_log(str(path), "X") == "blocked"
+def test_retry_then_done(fake_bd):
+    item_id = _item()
+    _event(item_id, "ready", "bounce", 1)
+    _event(item_id, "done", "log_done", 1)
+    assert replay_log(item_id) == "done"
 
 
-def test_reopen_after_done(tmp_path):
-    path = tmp_path / "log.jsonl"
-    _write_log(
-        path,
-        [
-            {"item": "X", "state": "done"},
-            {"item": "X", "state": "reopened"},
-        ],
-    )
-    assert replay_log(str(path), "X") == "reopened"
+def test_three_fails_blocked(fake_bd):
+    item_id = _item()
+    for n in (1, 2, 3):
+        _event(item_id, "ready", "bounce", n)
+    _event(item_id, "blocked", "escalate", 3)
+    assert replay_log(item_id) == "blocked"
 
 
-def test_other_item_ignored(tmp_path):
-    path = tmp_path / "log.jsonl"
-    _write_log(
-        path,
-        [
-            {"item": "Y", "state": "in_progress", "inputs": {"retry": 1}},
-            {"item": "Y", "state": "done"},
-        ],
-    )
-    assert replay_log(str(path), "X") == "waiting"
-
-
-def test_real_log_item():
-    assert replay_log("work/supervisor-log.jsonl", "0001-1-record_run") == "done"
+def test_no_events_waiting(fake_bd):
+    assert replay_log(_item()) == "waiting"

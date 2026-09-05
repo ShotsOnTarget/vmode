@@ -49,7 +49,7 @@ Standard rules, every job:
 - The public function has a docstring: what it does, its inputs and outputs, its side effects. There is no note file; the folder holds the code file and the test file, nothing else.
 - Import only what the sheet allows. Nothing else.
 - Out of scope, always: tests on a code job, the code file on a test job, any other folder, any case or behaviour the sheet did not name.
-- Test job: import with `from <name>.<name> import <name>`; use the shared `bd_repo` fixture when the sheet says the record is involved.
+- Test job: import with `from <name>.<name> import <name>`. When the record is involved use the `fake_bd` fixture (an in-memory record, milliseconds per test); `bd_repo` is for the few integration tests marked `integration` and needs a sheet that says so.
 
 ## Before you report done
 

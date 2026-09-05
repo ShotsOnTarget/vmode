@@ -39,13 +39,13 @@ def _validation(iid):
     return vid
 
 
-def test_intents_has_care(bd_repo):
+def test_intents_has_care(fake_bd):
     iid = _intent()
     payload = board_api("intents", {}, {})
     assert any(x["id"] == iid and x["care"] == "high" for x in payload)
 
 
-def test_item_fields(bd_repo):
+def test_item_fields(fake_bd):
     iid = _intent()
     payload = board_api("item", {"id": iid}, {})
     assert {
@@ -59,12 +59,12 @@ def test_item_fields(bd_repo):
     } <= payload.keys()
 
 
-def test_columns_shape(bd_repo):
+def test_columns_shape(fake_bd):
     payload = board_api("columns", {}, {})
     assert {"name", "role", "wip", "in_progress", "items"} <= payload[0].keys()
 
 
-def test_decide_roundtrip(bd_repo):
+def test_decide_roundtrip(fake_bd):
     iid = _intent()
     _validation(iid)
     body = {"intent": iid, "decision": "yes", "reason": ""}
@@ -88,20 +88,20 @@ def _story():
     )["id"]
 
 
-def test_release_moves_ready(bd_repo):
+def test_release_moves_ready(fake_bd):
     iid = _intent()
     board_api("release", {}, {"id": iid})
     labels = record_run(["show", iid])[0]["labels"]
     assert "state:ready" in labels
 
 
-def test_release_rejects_non_intent(bd_repo):
+def test_release_rejects_non_intent(fake_bd):
     sid = _story()
     with pytest.raises(ValueError):
         board_api("release", {}, {"id": sid})
 
 
-def test_timeline_json(bd_repo):
+def test_timeline_json(fake_bd):
     iid = _intent()
     log_append(
         {
@@ -120,6 +120,6 @@ def test_timeline_json(bd_repo):
     assert payload[0]["item"] == iid
 
 
-def test_unknown_name_raises(bd_repo):
+def test_unknown_name_raises(fake_bd):
     with pytest.raises(KeyError):
         board_api("nope", {}, {})
