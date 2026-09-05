@@ -1,17 +1,31 @@
 import json
 
-_REQUIRED_KEYS = {"ts", "item", "gate", "rule", "inputs", "state", "tokens", "seconds"}
+from log_entry_check.log_entry_check import log_entry_check
+from record_run.record_run import record_run
 
 
-def log_append(path: str, entry: dict) -> None:
-    if set(entry.keys()) != _REQUIRED_KEYS:
-        raise ValueError(
-            "entry must contain exactly the keys: "
-            "ts, item, gate, rule, inputs, state, tokens, seconds"
-        )
-    if not isinstance(entry["tokens"], int) or isinstance(entry["tokens"], bool):
-        raise ValueError("tokens must be an int")
-    if entry["seconds"] < 0:
-        raise ValueError("seconds must be >= 0")
-    with open(path, "a") as f:
-        f.write(json.dumps(entry, sort_keys=True) + "\n")
+def log_append(entry: dict) -> str:
+    log_entry_check(entry)
+
+    gate = entry["gate"]
+    payload = json.dumps(
+        {key: entry[key] for key in ("rule", "inputs", "state", "tokens", "seconds")},
+        sort_keys=True,
+    )
+    result = record_run(
+        [
+            "create",
+            f"{gate}: {entry['rule'][:60]}",
+            "--type",
+            "event",
+            "--event-actor",
+            entry["actor"],
+            "--event-category",
+            gate.lower(),
+            "--event-target",
+            entry["item"],
+            "--event-payload",
+            payload,
+        ]
+    )
+    return result["id"]

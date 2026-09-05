@@ -1,6 +1,6 @@
-purpose: append one JSON log entry as a line to a log file
-signature: log_append(path: str, entry: dict) -> None
-inputs: path: log file, created if missing. entry: dict with exactly the keys ts, item, gate, rule, inputs, state, tokens, seconds.
-outputs: nothing
-side effects: opens path in append mode and writes one line: json.dumps(entry, sort_keys=True) plus newline
-work item id: 0002-1-log_append-code
+purpose: record one gate event against a work item as an event bead
+signature: log_append(entry: dict) -> str
+inputs: entry: dict with exactly the keys item, gate, rule, inputs, state, tokens, seconds, actor. item: the target item id. gate: Built, Proven, Verified, Validated, Ready, Board, Lesson, Correction or Backfill. tokens: int (-1 unknown). seconds: float >= 0. actor: non-empty str.
+outputs: the id of the event bead created via record_run
+side effects: creates an event bead in the record through the `bd` CLI
+work item id: 0005-1-log_append-code
