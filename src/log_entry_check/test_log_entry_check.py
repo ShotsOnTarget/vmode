@@ -43,3 +43,12 @@ def test_bool_tokens_raises():
 def test_negative_seconds_raises():
     with pytest.raises(ValueError):
         log_entry_check(_entry(seconds=-1))
+
+
+def test_optional_usd_turns():
+    entry = _entry(usd=0.42, turns=17)
+    assert log_entry_check(entry) is None
+    with pytest.raises(ValueError):
+        log_entry_check(_entry(usd="0.42"))
+    with pytest.raises(ValueError):
+        log_entry_check(_entry(turns=1.5))
