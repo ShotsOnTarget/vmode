@@ -94,6 +94,14 @@ def test_decide_roundtrip(bd_repo):
     assert data["back"][0]["kind"] == "validation"
 
 
+def test_columns_routes():
+    port = _start()
+    body = urllib.request.urlopen(f"http://127.0.0.1:{port}/columns").read().decode()
+    assert "/api/columns" in body
+    data = _get(f"http://127.0.0.1:{port}/api/columns")
+    assert {"name", "role", "wip", "in_progress", "items"} <= data[0].keys()
+
+
 def test_unknown_404():
     port = _start()
     try:
