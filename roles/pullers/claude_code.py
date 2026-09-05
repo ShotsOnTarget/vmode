@@ -41,4 +41,5 @@ def invoke(item: dict, column: str) -> dict:
         "seconds": time.time() - start,
         "report": out.get("result", ""),
         "cost_usd": out.get("total_cost_usd"),
+        "turns": out.get("num_turns"),
     }
