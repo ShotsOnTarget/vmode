@@ -18,6 +18,7 @@
   - `test_has_endpoint`: contains '/api/columns'
   - `test_no_external`: does not contain 'http://' or 'https://'
   - `test_side_by_side`: contains 'display:flex' or 'display: flex'
+  - `test_no_overflow_rules`: contains 'text-overflow' and 'word-break' and 'overflow-x'
   - `test_no_dialogs`: contains none of 'alert(', 'confirm(', 'prompt('
 - **Checks to run before reporting**:
   - `ruff format src/columns_page` then `ruff check src/columns_page` (both clean)

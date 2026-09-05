@@ -8,11 +8,11 @@
 - **Files you may change**: `src/columns_page/columns_page.py`, `src/columns_page/columns_page.md`
 - **Signature**: `columns_page() -> str`
 - **Inputs**: none.
-- **Outputs**: a complete HTML document as a string: fetches GET /api/columns, laid out as a kanban board: one vertical column per config column, side by side left to right in config order inside a horizontally scrolling flex container (display:flex; each column a fixed width around 220px; the page never wraps columns onto a second row); each column has a heading '<name> (<role>) <in_progress>/<wip>' and one card per item showing the id (as a link to /?id=<id>), kind, title and state; a paused column (wip 0) is greyed.
+- **Outputs**: a complete HTML document as a string: fetches GET /api/columns and renders a kanban board. Visual rules, all in one inline style block: system font stack (system-ui, sans-serif) at 14px; page padding 16px; the board is a horizontally scrolling flex row (display:flex; gap 12px; overflow-x:auto; align-items:flex-start); each column is a flex item with width 240px, flex 0 0 240px, background #f4f5f7, border-radius 8px, padding 10px; the column heading is a single line of 13px bold text that never overflows (white-space:nowrap; overflow:hidden; text-overflow:ellipsis) showing '<name>' with the role in lighter grey after it, and the count '<in_progress>/<wip>' right-aligned on the same line (use a flex row with justify-content:space-between); a paused column (wip 0) has opacity 0.5; each item is a card: white background, 1px solid #d0d4da border, border-radius 6px, padding 8px, margin-bottom 8px, word-break:break-word; the card shows the id as a link on the first line with the kind in small grey text after it, the title on the second line, and the state on the third line as a small pill (inline-block, padding 1px 6px, border-radius 10px, background #e6e8eb); an empty column shows a single muted line 'nothing here'. No text anywhere may overflow its column.
 - **Errors**: none.
 - **Allowed imports**: none. Nothing else.
 - **Checklist items this job serves**: Story 0001-6 items 3
-- **How**: One triple-quoted string, vanilla JS, a small inline style block, no external resources, no alert/confirm/prompt. Under 50 lines.
+- **How**: One triple-quoted string, vanilla JS, a small inline style block, no external resources, no alert/confirm/prompt. Under 50 lines; keep the CSS on few dense lines inside the string, which is not Python code and the formatter leaves alone.
 - **Checks to run before reporting**:
   - `ruff format src/columns_page` then `ruff check src/columns_page` (both clean; a noqa comment fails the shape check)
   - `python tools/lint.py`   (no findings for your folder)
