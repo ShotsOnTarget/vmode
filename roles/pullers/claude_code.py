@@ -24,6 +24,7 @@ def invoke(item: dict, column: str) -> dict:
         "board": ROOT / "roles/board.toml",
         "manifest": ROOT / "roles/manifest.json",
         "root": str(ROOT),
+        "mcp": ROOT / "roles/pullers/empty-mcp.json",
     }
     cmd = adapter_command(item, column, roots)
     start = time.time()

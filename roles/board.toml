@@ -37,6 +37,7 @@ role = "builder"
 tier = "cheap"
 wip = 4
 poll_seconds = 30
+adapter = "claude_code"   # or opencode; the file in roles/pullers
 
 [columns.test]              # Builder pulls one test job
 kinds = ["test"]
@@ -45,6 +46,7 @@ role = "builder"
 tier = "cheap"
 wip = 4
 poll_seconds = 30
+adapter = "claude_code"   # or opencode; the file in roles/pullers
 
 [columns.prove]             # Supervisor gates a finished job, no model
 kinds = ["code", "test"]

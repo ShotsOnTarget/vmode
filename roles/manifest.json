@@ -25,5 +25,10 @@
     "human": null,
     "frontier": "anthropic/claude-fable-5-1",
     "cheap": "anthropic/claude-sonnet-5"
+  },
+  "opencode_models": {
+    "human": null,
+    "frontier": null,
+    "cheap": null
   }
 }

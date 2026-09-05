@@ -32,6 +32,8 @@ The Supervisor runs from a git worktree at a released commit, never from the wor
 
 | File | Harness | Notes |
 |---|---|---|
+| `by_column.py` | picks per column | reads `adapter` from the column in roles/board.toml; the runner's default |
+| `opencode.py` | opencode CLI | `opencode run --format json`; model per tier from `opencode_models` in roles/manifest.json; needs a provider with credit |
 | `claude_code.py` | Claude Code CLI | `claude -p` with the role's model from the manifest and JSON output for usage |
 | `pi.py` | pi | not written |
 | `opencode.py` | opencode | not written |
