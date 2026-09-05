@@ -1,32 +1,48 @@
 from prune.prune import prune
 from puller_pids.puller_pids import puller_pids
+from record_add_note.record_add_note import record_add_note
 from record_create_item.record_create_item import record_create_item
 from record_graph.record_graph import record_graph
+from record_set_state.record_set_state import record_set_state
 from release_dead_claims.release_dead_claims import release_dead_claims
+
+_OWN = ("leftover_files: ", "no_record_item: ")
+
+
+def _open_findings(graph: dict) -> dict:
+    notes = (i for i in graph.values() if i["kind"] == "note" and i["state"] != "done")
+    own = (
+        i for i in notes if i["owner"] == "supervisor" and i["title"].startswith(_OWN)
+    )
+    return {(i["parent"], i["title"]): i["id"] for i in own}
 
 
 def housekeep(repo: str) -> dict:
-    """One housekeeping pass for the Supervisor: release dead claims, raise notes.
+    """One housekeeping pass for the Supervisor.
 
     Claims held by pullers that no longer run are released. Every prune
-    finding with a parent becomes a note under it, unless a note with the
-    same title already sits there, so a standing problem is raised once.
-    Returns {'released': [ids], 'notes': [ids], 'unraised': [findings]}.
+    finding with a parent becomes a note under it, once. A finding note the
+    Supervisor raised earlier whose condition is gone is closed by the
+    Supervisor itself, so nobody pays to dismiss a stale finding.
+    Returns {'released', 'notes', 'cleared', 'unraised'}.
     """
     graph = record_graph()
     released = release_dead_claims(graph, puller_pids())
-    existing = {
-        (item["parent"], item["title"])
-        for item in graph.values()
-        if item["kind"] == "note"
-    }
+    seen = {(i["parent"], i["title"]) for i in graph.values() if i["kind"] == "note"}
+    own, current = _open_findings(graph), set()
     notes, unraised = [], []
     for finding in prune(graph, repo):
-        title = f"{finding['rule']}: {finding['target']}"
-        parent = finding["parent"]
-        if parent is None:
+        key = (finding["parent"], f"{finding['rule']}: {finding['target']}")
+        current.add(key)
+        if key[0] is None:
             unraised.append(finding)
-        elif (parent, title) not in existing:
-            notes.append(record_create_item("note", title, "supervisor", parent)["id"])
-            existing.add((parent, title))
-    return {"released": released, "notes": notes, "unraised": unraised}
+        elif key not in seen:
+            notes.append(record_create_item("note", key[1], "supervisor", key[0])["id"])
+            seen.add(key)
+    cleared = [note_id for key, note_id in own.items() if key not in current]
+    for note_id in cleared:
+        record_add_note(
+            note_id, "cleared by the Supervisor: the finding no longer holds"
+        )
+        record_set_state(note_id, "done")
+    return dict(released=released, notes=notes, cleared=cleared, unraised=unraised)

@@ -39,3 +39,22 @@ def test_leftover_raised_once(fake_bd):
     ]
     assert len(first["notes"]) >= 1 and second["notes"] == []
     assert len(notes) == 1
+
+
+def test_stale_finding_cleared(fake_bd):
+    subprocess.run(["git", "init", "-q"], check=True)
+    intent = _item("I", "kind:intent,state:done")
+    _item("w code", "kind:code,state:done", parent=intent)
+    (fake_bd / "src" / "w").mkdir(parents=True)
+    (fake_bd / "src" / "w" / "w.py").write_text(
+        "def w():" + chr(10) + "    pass" + chr(10)
+    )
+    first = housekeep(".")
+    subprocess.run(["git", "add", "-A"], check=True)
+    who = ["-c", "user.email=t@t", "-c", "user.name=t"]
+    subprocess.run(["git", *who, "commit", "-q", "-m", "w"], check=True)
+    second = housekeep(".")
+    graph = record_graph()
+    leftover = [n for n in first["notes"] if graph[n]["title"].startswith("leftover")]
+    assert leftover and second["cleared"] == leftover
+    assert graph[leftover[0]]["state"] == "done"
