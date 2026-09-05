@@ -1,10 +1,6 @@
 from modal_timeline.modal_timeline import modal_timeline
 
-
-def columns_modal() -> str:
-    return (
-        modal_timeline()
-        + """
+_HTML = """
 <div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4)"
 onclick="if(event.target.id==='modal')closeModal()">
 <div style="background:#fff;max-width:640px;margin:5vh auto;padding:20px;
@@ -47,4 +43,8 @@ var r=g('modalReason');if(r.style.display==='none'){r.style.display='';r.focus()
   post('/api/decide',{intent:window.currentItemId,decision:decision,reason:reason});}
 function modalRelease(){post('/api/release',{id:window.currentItemId});}
 </script>"""
-    )
+
+
+def columns_modal() -> str:
+    """The board modal: item details, the decision line, Release and Yes/No."""
+    return modal_timeline() + _HTML

@@ -4,6 +4,7 @@ from log_append.log_append import log_append
 
 
 def log_migrate(path: str) -> int:
+    """Replay an old JSON-lines gate log into the record as event beads."""
     with open(path) as f:
         raw_lines = f.readlines()
 

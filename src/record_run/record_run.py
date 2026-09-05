@@ -11,6 +11,7 @@ class RecordError(Exception):
 
 
 def record_run(args: list[str]) -> dict | list:
+    """Run the `bd` CLI with given arguments and return its parsed JSON output."""
     if shutil.which("bd") is None:
         raise RecordError("bd is not on PATH", "")
 

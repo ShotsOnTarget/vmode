@@ -11,6 +11,7 @@ _REQUIRED_KEYS = {
 
 
 def log_entry_check(entry: dict) -> None:
+    """Validate a log entry dict before it is appended to the record."""
     if set(entry.keys()) != _REQUIRED_KEYS:
         raise ValueError(
             "entry must contain exactly the keys: "

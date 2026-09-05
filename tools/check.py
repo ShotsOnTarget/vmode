@@ -6,12 +6,12 @@ sheet's cases are checked too; without one only tests_failed is reported
 from the tests. Same function the gates call: they cannot disagree.
 """
 
-import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from check_folder.check_folder import check_folder  # noqa: E402
+from sheet_cases.sheet_cases import sheet_cases  # noqa: E402
 
 
 def main(argv: list[str]) -> int:
@@ -27,7 +27,7 @@ def main(argv: list[str]) -> int:
             from record_show_item.record_show_item import record_show_item
 
             sheet = record_show_item(argv[2])["sheet"]
-            options["cases"] = re.findall(r"- `test_(\w+)`", sheet)
+            options["cases"] = sheet_cases(sheet)
     except Exception as exc:  # record not reachable: shape, lint, tests still run
         print(f"(record unavailable: {str(exc)[:80]})", file=sys.stderr)
     rules = check_folder(folder, options)

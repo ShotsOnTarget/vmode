@@ -24,6 +24,7 @@ def _care(labels: dict) -> dict:
 
 
 def board_api(name: str, query: dict, body: dict) -> object:
+    """Dispatch one board API call by name to its handler."""
     handlers = {
         "intents": lambda: board_rollup(record_graph(), _care(record_labels())),
         "tree": lambda: board_tree(query["id"], record_graph()),

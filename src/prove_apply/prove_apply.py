@@ -10,6 +10,9 @@ def _log_gate(job_id, gate, base):
 
 
 def prove_apply(job_id: str, gathered: dict) -> str:
+    """Compose gate rules, step the state machine, apply the move, and log one line per
+    gate that ran.
+    """
     rules = prove_rules(gathered)
     event = "gate_pass" if rules == [] else "gate_fail"
     action, state, retries = step("checking", event, gathered["retries"])

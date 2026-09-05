@@ -32,6 +32,7 @@ def _check_file_match(diff: list[str], target: str | None) -> str | None:
 
 
 def proposal_check(item: dict) -> list[str]:
+    """Check a proposal work item's sheet against the proposal format rules."""
     header, diff = _split_header_diff(item.get("sheet") or "")
     target = _find_target(header)
     checks = (

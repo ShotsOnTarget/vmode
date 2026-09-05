@@ -1,4 +1,5 @@
 def wip_headroom(name: str, graph: dict, config: dict) -> int:
+    """Compute remaining WIP capacity for a board column."""
     if name not in config["columns"]:
         raise ValueError(f"not a column: {name}")
     kinds = config["columns"][name]["kinds"]

@@ -21,6 +21,9 @@ def _summary_lines(job_id: str, action: str, retries: int, rules: list) -> list:
 
 
 def raise_note(job_id: str, outcome: dict) -> str:
+    """Create a note item under a job, with the Supervisor's escalation summary as its
+    description, for a bounce or an escalate.
+    """
     action, rules = outcome["action"], outcome["rules"]
     if action not in _ACTIONS:
         raise ValueError(f"action must be one of {_ACTIONS}, got {action!r}")

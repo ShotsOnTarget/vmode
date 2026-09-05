@@ -1,10 +1,10 @@
 import json
-import re
 
 from changed_paths.changed_paths import changed_paths
 from record_graph.record_graph import record_graph
 from record_run.record_run import RecordError, record_run
 from record_show_item.record_show_item import record_show_item
+from sheet_cases.sheet_cases import sheet_cases
 
 
 def _usage(job_id: str) -> dict:
@@ -30,7 +30,7 @@ def prove_gather(job_id: str, folder: str) -> dict:
     labels = record_run(["show", job_id])[0].get("labels", [])
     return {
         "changed": changed_paths(folder, record_graph()),
-        "cases": re.findall(r"- `test_(\w+)`", info["sheet"]),
+        "cases": sheet_cases(info["sheet"]),
         "kind": info["kind"],
         "usage": _usage(job_id),
         "retries": next((int(x[6:]) for x in labels if x.startswith("retry:")), 0),

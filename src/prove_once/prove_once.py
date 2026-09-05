@@ -15,6 +15,9 @@ def _folder_of(title: str) -> str:
 
 
 def prove_once(config_path: str) -> list[str]:
+    """Run one pass of the prove step, gathering and applying gate checks for every job
+    in the 'prove' column, then advance any story whose jobs are all done.
+    """
     config = board_config(config_path)
     graph = record_graph()
     labels = record_labels()

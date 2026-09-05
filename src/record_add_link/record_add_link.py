@@ -2,6 +2,7 @@ from record_run.record_run import record_run
 
 
 def record_add_link(link: str, src: str, dst: str) -> dict:
+    """Create a link (parent_of, needs_first, checks) between two existing ids."""
     if link not in ("parent_of", "needs_first", "checks"):
         raise ValueError("link must be one of parent_of, needs_first, checks")
 

@@ -24,6 +24,7 @@ def _case_extra(pytest_output: str, cases: list[str]) -> bool:
 
 
 def gate_proven(job_id: str, pytest_output: str, cases: list[str]) -> list[str]:
+    """Check pytest output and case list against the proven gate rules."""
     rules = []
     lines = pytest_output.splitlines()
     if _tests_failed(lines):

@@ -4,6 +4,7 @@ from record_run.record_run import record_run
 
 
 def log_read_item(item_id: str) -> list[dict]:
+    """Read every gate event recorded against a work item, in order."""
     events = record_run(["list", "--all", "--type", "event"])
     matches = sorted(
         (event for event in events if event.get("target") == item_id),

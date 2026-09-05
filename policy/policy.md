@@ -135,15 +135,14 @@ src/
   add_numbers/
     add_numbers.<ext>        the code
     test_add_numbers.<ext>   the tests
-    add_numbers.md           one short note
 ```
 
 Rules:
 
 - One public function per folder. The folder name, the file name, and the function name are the same.
 - Nothing nested below the function folder.
-- Exactly three files in the folder. Never a fourth.
-- The note says only: what the function is for, its signature, what goes in, what comes out, what else it touches, and which work item asked for it.
+- Exactly two files in the folder: the code and its tests. Never a third.
+- The public function carries a docstring saying what it is for, what goes in, what comes out, and what else it touches. Which work item asked for it is in the record and the commit, not in the code.
 
 Whether a piece is small enough, simple enough, and tidy enough is decided by tools at the Built gate, never by a person, and never by suppressing the tool. The numbers those tools use live in their own settings, not here. A file that the formatter would change, or the linter or shape checker would flag, fails the gate. If a function cannot meet the tools, the Architect splits the job. The Builder never decides that.
 

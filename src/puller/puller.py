@@ -13,6 +13,7 @@ def _default_once(role, config_path, invoke):
 
 
 def puller(role: str, config_path: str, invoke, options: dict) -> int:
+    """Loop calling once() for a role until a stop file appears."""
     config = board_config(config_path)
     intervals = [
         r["poll_seconds"]

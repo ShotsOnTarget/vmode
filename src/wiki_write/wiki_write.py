@@ -32,6 +32,7 @@ def _render_lines(page: dict) -> list[str]:
 
 
 def wiki_write(root: str, page: dict) -> str:
+    """Write a wiki page dict to `<root>/<id>.md` in the wiki's front-matter format."""
     _validate_page(page)
     os.makedirs(root, exist_ok=True)
     path = os.path.join(root, f"{page['id']}.md")

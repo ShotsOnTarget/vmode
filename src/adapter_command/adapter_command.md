@@ -1,6 +1,0 @@
-- purpose: build the argv for one Builder run on the Claude Code harness
-- signature: adapter_command(item: dict, column: str, roots: dict) -> list[str]
-- inputs: item: graph entry with id and kind. column: column name. roots: {'board': path to board.toml, 'manifest': path to manifest.json, 'root': repo root path as str}.
-- outputs: [exe, '-p', prompt, '--output-format', 'json'] plus ['--model', name] when the column's tier maps to a model in the manifest
-- side effects: reads roots['board'] and roots['manifest']; calls shutil.which('claude')
-- work item id 0003-4-adapter_command-code

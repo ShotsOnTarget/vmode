@@ -31,7 +31,6 @@ def check_folder(folder: str, options: dict) -> list[str]:
     inputs = {
         "changed": options.get("changed", []),
         "code": _read(base + ".py"),
-        "note": _read(base + ".md"),
         "fmt_out": _run(["ruff", "format", "--check", "--diff", src], repo, True),
         "lint_out": _run(["ruff", "check", src, "--output-format", "concise"], repo),
     }

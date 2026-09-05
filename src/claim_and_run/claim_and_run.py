@@ -8,6 +8,9 @@ from record_set_state.record_set_state import record_set_state
 
 
 def claim_and_run(item: dict, column: str, role: str, options: dict) -> bool:
+    """Claim an item and run invoke on it, handling the checking/label/release
+    transitions.
+    """
     item_id = item["id"]
     prior_state = item["state"]
     try:

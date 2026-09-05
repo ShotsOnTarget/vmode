@@ -10,6 +10,7 @@ def _flatten(node: dict) -> list[str]:
 
 
 def timeline(item_id: str, graph: dict) -> list[dict]:
+    """Return the log events for an item and everything under it, in time order."""
     ids = _flatten(trace_forward(item_id, graph))
     events = []
     for id_ in ids:

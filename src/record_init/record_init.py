@@ -5,6 +5,9 @@ from record_run.record_run import RecordError
 
 
 def record_init(path: str) -> dict:
+    """Initialize a bd store rooted at a directory using the vm prefix, running bd's
+    server on the port given by BD_SERVER_PORT.
+    """
     if not os.path.isdir(path):
         raise RecordError("directory does not exist", "")
 

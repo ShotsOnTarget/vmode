@@ -32,6 +32,7 @@ def _model(tier: str, manifest: dict) -> str | None:
 
 
 def adapter_command(item: dict, column: str, roots: dict) -> list[str]:
+    """- purpose: build the argv for one Builder run on the Claude Code harness."""
     exe = shutil.which("claude")
     if exe is None:
         raise RuntimeError("claude not found on PATH")

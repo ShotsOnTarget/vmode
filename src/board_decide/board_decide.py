@@ -5,6 +5,9 @@ from record_set_state.record_set_state import record_set_state
 
 
 def board_decide(intent_id: str, decision: str, reason: str) -> dict:
+    """Record the board's yes/no decision on an intent by updating the validation item
+    that checks it.
+    """
     if decision not in ("yes", "no"):
         raise ValueError(f"invalid decision: {decision}")
     if decision == "no" and not reason:

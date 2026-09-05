@@ -25,7 +25,6 @@ def _folder(root, n, code=CODE, note=NOTE, test=TEST, v=2):
     d = root / "src" / n
     d.mkdir()
     (d / f"{n}.py").write_text(code.format(n=n))
-    (d / f"{n}.md").write_text(note.format(n=n))
     if test:
         (d / f"test_{n}.py").write_text(test.format(n=n, v=v))
     return d
@@ -65,7 +64,6 @@ def test_rule_names_are_the_gates(repo):
         {
             "changed": ["src/elsewhere/x.py"],
             "code": (repo / "src/gated/gated.py").read_text(),
-            "note": NOTE.format(n="gated"),
             "fmt_out": "",
             "lint_out": "",
         },

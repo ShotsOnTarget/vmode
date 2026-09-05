@@ -1,4 +1,5 @@
 def board_page() -> str:
+    """Return the board HTML page as a string."""
     return (
         """<!doctype html><html><head><meta charset="utf-8"><title>Board</title>
 <style>body{font-family:sans-serif}table{border-collapse:collapse}"""

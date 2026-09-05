@@ -24,6 +24,7 @@ API_NAMES = ("intents", "tree", "item", "columns", "timeline")
 def board_routes(
     method: str, path: str, query: dict, body: dict
 ) -> tuple[int, str, object]:
+    """Dispatch HTTP requests to the board's route handlers."""
     name = path[len("/api/") :] if path.startswith("/api/") else ""
     try:
         if (method, path) in ROUTES:

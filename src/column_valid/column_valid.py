@@ -34,6 +34,7 @@ CHECKERS = (
 
 
 def column_valid(name: str, column: dict) -> list[str]:
+    """Validate one column table from the TOML config and list its problems."""
     missing = [
         f"{f}: required key missing in '{name}'" for f in REQUIRED if f not in column
     ]

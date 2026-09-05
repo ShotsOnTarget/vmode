@@ -8,6 +8,7 @@ def _fits(item: dict, labels: list[str], rules: dict) -> bool:
 
 
 def column_of(item: dict, labels: list[str], config: dict) -> str | None:
+    """Determine which board column a graph item belongs in."""
     matches = [
         name for name, rules in config["columns"].items() if _fits(item, labels, rules)
     ]

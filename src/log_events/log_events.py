@@ -18,6 +18,7 @@ _RULES = (
 
 
 def log_events(path: str, item_id: str) -> list[tuple[str, str]]:
+    """Derive (from_state, event) transitions for one item from a JSON-lines log."""
     results = []
     for entry in log_read_item(path, item_id):
         if "state" not in entry:

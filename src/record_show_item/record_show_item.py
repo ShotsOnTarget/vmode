@@ -2,6 +2,7 @@ from record_run.record_run import record_run
 
 
 def record_show_item(item_id: str) -> dict:
+    """Get one record item by id, with kind and state decoded from its labels."""
     items = record_run(["show", item_id])
     item = items[0]
 

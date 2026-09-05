@@ -31,6 +31,7 @@ def _check_ready(item_id: str, labels: list[str]) -> None:
 
 
 def record_set_state(item_id: str, state: str) -> dict:
+    """Set an item's workflow state label and matching bd status."""
     if state not in _VALID_STATES:
         raise ValueError(f"invalid state: {state}")
     labels = record_run(["label", "list", item_id])

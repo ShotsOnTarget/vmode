@@ -24,6 +24,9 @@ def _parse_porcelain(output):
 
 
 def changed_paths(folder: str, graph: dict, repo: str = ".") -> list[str]:
+    """List changed src paths for this job's folder from git status, excluding paths
+    claimed by other in-progress or checking jobs.
+    """
     result = subprocess.run(
         ["git", "status", "--porcelain", "--untracked-files=all"],
         cwd=repo,

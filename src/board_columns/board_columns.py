@@ -15,6 +15,7 @@ def _empty_columns(config: dict) -> dict:
 
 
 def board_columns(graph: dict, labels: dict, config: dict) -> list[dict]:
+    """Place every graph item into its board column."""
     columns = _empty_columns(config)
     for item_id, item in graph.items():
         name = column_of(item, labels.get(item_id, []), config)

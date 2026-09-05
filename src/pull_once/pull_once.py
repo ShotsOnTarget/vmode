@@ -16,6 +16,7 @@ def _global_headroom(graph: dict, config: dict) -> int:
 
 
 def pull_once(role: str, config_path: str, invoke) -> list[str]:
+    """Pull ready items into a role's columns and invoke work on them."""
     config = board_config(config_path)
     columns = [n for n, r in config["columns"].items() if r["role"] == role]
     if not columns:

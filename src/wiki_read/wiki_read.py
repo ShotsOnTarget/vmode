@@ -37,6 +37,7 @@ def _extract_sections(rest: str) -> tuple[str, str]:
 
 
 def wiki_read(root: str, page_id: str) -> dict:
+    """Read a wiki page written by wiki_write and return it as a dict."""
     path = os.path.join(root, f"{page_id}.md")
     if not os.path.isfile(path):
         raise FileNotFoundError(path)

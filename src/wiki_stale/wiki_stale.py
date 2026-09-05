@@ -5,6 +5,7 @@ from wiki_read.wiki_read import wiki_read
 
 
 def wiki_stale(root: str, days: int, now: str) -> list[str]:
+    """Find wiki page ids whose last_used is older than a day threshold."""
     if not root or not os.path.isdir(root):
         return []
 

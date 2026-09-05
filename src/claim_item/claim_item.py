@@ -3,6 +3,7 @@ from record_set_state.record_set_state import record_set_state
 
 
 def claim_item(item_id: str, actor: str) -> dict:
+    """Claim a ready, unassigned item in the record for an actor, atomically."""
     if not actor:
         raise ValueError("actor must not be empty")
 

@@ -5,6 +5,7 @@ from record_run.record_run import record_run
 
 
 def log_append(entry: dict) -> str:
+    """Record one gate event against a work item as an event bead."""
     log_entry_check(entry)
 
     gate = entry["gate"]

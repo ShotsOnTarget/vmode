@@ -1,4 +1,5 @@
 def board_rollup(graph: dict[str, dict], care: dict[str, str]) -> list[dict]:
+    """Roll up each intent with its care label and story completion counts."""
     intents = [item for item in graph.values() if item.get("kind") == "intent"]
     intents.sort(key=lambda item: item["id"])
 

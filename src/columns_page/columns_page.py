@@ -2,6 +2,7 @@ from columns_modal.columns_modal import columns_modal
 
 
 def columns_page() -> str:
+    """Return the columns board HTML page as a string."""
     return (
         """<!doctype html><html><head><meta charset="utf-8"><title>Columns</title>
 <style>body{font-family:system-ui,sans-serif;font-size:14px;padding:16px;margin:0}"""

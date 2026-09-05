@@ -1,4 +1,5 @@
 def trace_forward(item_id: str, graph: dict[str, dict]) -> dict:
+    """Build the forward-trace tree of items descending from a given item id."""
     if item_id not in graph:
         raise ValueError(f"item_id not in graph: {item_id}")
     return _build(item_id, graph, set())

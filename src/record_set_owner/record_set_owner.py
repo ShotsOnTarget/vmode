@@ -2,6 +2,7 @@ from record_run.record_run import record_run
 
 
 def record_set_owner(item_id: str, owner: str) -> dict:
+    """Set the owner of an existing record item."""
     if not owner:
         raise ValueError("owner must not be empty")
 

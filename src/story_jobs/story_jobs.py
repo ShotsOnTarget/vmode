@@ -1,4 +1,7 @@
 def story_jobs(story_id: str, graph: dict) -> dict:
+    """Find the code and test items belonging to a story, and whether it has an intent
+    ancestor.
+    """
     if story_id not in graph:
         raise ValueError(story_id)
 

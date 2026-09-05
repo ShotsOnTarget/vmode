@@ -1,8 +1,9 @@
 """Shape rules ruff cannot express. Exit 1 on any violation.
 
 Rules for code files: <= 50 lines; every function <= 50 lines; one public
-function. Test files and conftest are exempt from length (Board decision
-2026-09-04). Every folder: exactly three files; note has six lines.
+function, with a docstring. Test files and conftest are exempt from length
+(Board decision 2026-09-04). Every folder: exactly two files, the code file
+and its test file (Board decision 2026-09-05: the note file is retired).
 """
 
 import ast
@@ -26,29 +27,23 @@ def check_file(path: Path) -> list[str]:
             span = node.end_lineno - node.lineno + 1
             if span > MAX:
                 out.append(f"{path}:{node.lineno} {node.name} is {span} lines")
-    if not path.name.startswith("test_") and path.name != "conftest.py":
-        public = [
-            n
-            for n in tree.body
-            if isinstance(n, ast.FunctionDef) and not n.name.startswith("_")
-        ]
-        if len(public) != 1:
-            out.append(f"{path}: {len(public)} public functions")
+    public = [
+        n
+        for n in tree.body
+        if isinstance(n, ast.FunctionDef) and not n.name.startswith("_")
+    ]
+    if len(public) != 1:
+        out.append(f"{path}: {len(public)} public functions")
+    elif ast.get_docstring(public[0]) is None:
+        out.append(f"{path}: {public[0].name} has no docstring")
     return out
 
 
 def check_folder(folder: Path) -> list[str]:
     name = folder.name
     files = sorted(p.name for p in folder.iterdir() if p.name != "__pycache__")
-    want = [f"{name}.md", f"{name}.py", f"test_{name}.py"]
-    out = [] if sorted(files) == sorted(want) else [f"{folder}: files {files}"]
-    note = folder / f"{name}.md"
-    if (
-        note.exists()
-        and len(note.read_text(encoding="utf-8").strip().splitlines()) != 6
-    ):
-        out.append(f"{note}: not six lines")
-    return out
+    want = sorted([f"{name}.py", f"test_{name}.py"])
+    return [] if files == want else [f"{folder}: files {files}"]
 
 
 def main() -> int:

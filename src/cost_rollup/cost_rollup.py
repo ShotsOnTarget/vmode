@@ -2,6 +2,7 @@ from timeline.timeline import timeline
 
 
 def cost_rollup(item_id: str, graph: dict) -> dict:
+    """Roll up token, second, and run counts over an item's full timeline."""
     result = {"item": item_id, "tokens": 0, "seconds": 0.0, "runs": 0}
     for entry in timeline(item_id, graph):
         result["tokens"] += max(entry["tokens"], 0)

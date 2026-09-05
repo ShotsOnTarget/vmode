@@ -27,6 +27,9 @@ def _rules_for_item(item_id: str, item: dict, checked_ids: set) -> list[dict]:
 
 
 def find_orphans(graph: dict[str, dict]) -> list[dict]:
+    """Find graph items that break structural rules (missing parent, unchecked, or
+    checking nothing).
+    """
     checked_ids = _collect_checked_ids(graph)
 
     results = []

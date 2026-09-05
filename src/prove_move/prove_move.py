@@ -27,6 +27,10 @@ def _escalate(job_id, outcome):
 
 
 def prove_move(job_id: str, outcome: dict) -> None:
+    """Apply a Supervisor step outcome to a job's record: set its state, and for
+    'bounce' add a comment plus swap the retry label, or for 'escalate' just clear
+    the claim; both call raise_note.
+    """
     for key in _REQUIRED:
         if key not in outcome:
             raise ValueError(f"outcome missing key: {key}")

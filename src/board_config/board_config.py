@@ -24,6 +24,7 @@ def _check_conflicts(columns):
 
 
 def board_config(path: str) -> dict:
+    """Parse and validate a board configuration TOML file."""
     with open(path, "rb") as handle:
         config = tomllib.load(handle)
     columns = config.get("columns", {})

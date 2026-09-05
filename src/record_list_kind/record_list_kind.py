@@ -18,6 +18,7 @@ def _label_value(labels: list, prefix: str) -> str | None:
 
 
 def record_list_kind(kind: str) -> list[dict]:
+    """List every record item of a given kind, including closed ones."""
     if kind not in VALID_KINDS:
         raise ValueError(f"invalid kind: {kind}")
 

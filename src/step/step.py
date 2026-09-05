@@ -11,6 +11,7 @@ TABLE = {
 
 
 def step(state: str, event: str, retries: int) -> tuple[str, str, int]:
+    """Compute the next policy transition for a work item."""
     if state == "checking" and event == "gate_fail":
         if retries < 3:
             return ("bounce", "ready", retries + 1)

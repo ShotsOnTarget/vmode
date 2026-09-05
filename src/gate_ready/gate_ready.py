@@ -27,6 +27,7 @@ _RULES = (_no_intent, _code_without_test, _test_without_code, _sheet_missing, _o
 
 
 def gate_ready(story_id: str, graph: dict, sheets: dict[str, str]) -> list[str]:
+    """Check whether a story's items satisfy the graph rules needed to close it."""
     if story_id not in graph or graph[story_id].get("kind") != "story":
         raise ValueError("story_id not in graph or not a story")
 

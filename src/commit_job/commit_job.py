@@ -6,6 +6,7 @@ def _run(repo, *args):
 
 
 def commit_job(job_id: str, folder: str, repo: str = ".") -> str | None:
+    """Stage and commit exactly one function folder after it passes Built and Proven."""
     add = _run(repo, "git", "add", "--", f"src/{folder}")
     if add.returncode != 0:
         raise RuntimeError(add.stderr)
