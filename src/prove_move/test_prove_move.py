@@ -31,6 +31,82 @@ def _labels(item_id):
     return names
 
 
+def _note_children(job_id):
+    row = record_run(["show", job_id])
+    row = row[0] if isinstance(row, list) else row
+    notes = []
+    for dep in row.get("dependents", []):
+        if dep.get("dependency_type") != "parent-child":
+            continue
+        if "kind:note" in dep.get("labels", []):
+            notes.append(dep["id"])
+    return notes
+
+
+def test_bounce_raises_note(bd_repo):
+    item_id = _create("checking")
+    outcome = {
+        "action": "bounce",
+        "state": "ready",
+        "retries": 1,
+        "rules": ["lint_findings"],
+    }
+
+    prove_move(item_id, outcome)
+
+    notes = _note_children(item_id)
+    assert len(notes) == 1
+    assert record_show_item(notes[0])["parent"] == item_id
+
+
+def test_escalate_raises_note_no_file(bd_repo):
+    item_id = _create("checking")
+    outcome = {
+        "action": "escalate",
+        "state": "blocked",
+        "retries": 3,
+        "rules": ["over_50_lines"],
+    }
+    summary_path = pathlib.Path("work/summaries") / f"{item_id}.md"
+
+    prove_move(item_id, outcome)
+
+    assert len(_note_children(item_id)) == 1
+    assert not summary_path.is_file()
+
+
+def test_bounce_clears_claim(bd_repo):
+    item_id = _create("checking")
+    record_run(["update", item_id, "--claim", "--actor", "builder-x"])
+    outcome = {
+        "action": "bounce",
+        "state": "ready",
+        "retries": 1,
+        "rules": ["lint_findings"],
+    }
+
+    prove_move(item_id, outcome)
+
+    row = record_run(["show", item_id])
+    row = row[0] if isinstance(row, list) else row
+    assert not row.get("assignee")
+
+
+def test_retry_label_set(bd_repo):
+    item_id = _create("checking")
+    outcome = {
+        "action": "bounce",
+        "state": "ready",
+        "retries": 2,
+        "rules": ["lint_findings"],
+    }
+
+    prove_move(item_id, outcome)
+
+    retry_labels = [label for label in _labels(item_id) if label.startswith("retry:")]
+    assert retry_labels == ["retry:2"]
+
+
 def test_bounce_sets_label_and_note(bd_repo):
     item_id = _create("checking")
     outcome = {
@@ -65,29 +141,6 @@ def test_bounce_replaces_retry_label(bd_repo):
     labels = _labels(item_id)
     assert "retry:2" in labels
     assert "retry:1" not in labels
-
-
-def test_escalate_writes_summary(bd_repo):
-    item_id = _create("checking")
-    outcome = {
-        "action": "escalate",
-        "state": "blocked",
-        "retries": 3,
-        "rules": ["over_50_lines"],
-    }
-    summary_path = pathlib.Path("work/summaries") / f"{item_id}.md"
-    summary_path.parent.mkdir(parents=True, exist_ok=True)
-
-    try:
-        prove_move(item_id, outcome)
-
-        shown = record_show_item(item_id)
-        assert shown["state"] == "blocked"
-        assert summary_path.is_file()
-        assert "over_50_lines" in summary_path.read_text()
-    finally:
-        if summary_path.is_file():
-            summary_path.unlink()
 
 
 def test_done_sets_state(bd_repo):
