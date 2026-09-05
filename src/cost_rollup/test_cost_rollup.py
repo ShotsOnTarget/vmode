@@ -58,4 +58,16 @@ def test_no_events_zero(fake_bd):
 
     result = cost_rollup(item, record_graph())
 
-    assert result == {"item": item, "tokens": 0, "seconds": 0.0, "runs": 0}
+    expected = {"item": item, "tokens": 0, "seconds": 0.0, "usd": 0.0, "turns": 0}
+    assert result == {**expected, "runs": 0}
+
+
+def test_usd_turns_and_proven_not_double(fake_bd):
+    code = _mk("code1")
+    base = {"item": code, "rule": "r", "inputs": "i", "state": "s", "seconds": 1.0}
+    base.update(actor="builder", tokens=5, usd=0.25, turns=4)
+    log_append({**base, "gate": "Built"})
+    log_append({**base, "gate": "Proven"})
+    result = cost_rollup(code, record_graph())
+    assert result["runs"] == 1 and result["tokens"] == 5
+    assert result["usd"] == 0.25 and result["turns"] == 4
