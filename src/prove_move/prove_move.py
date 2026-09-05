@@ -7,7 +7,12 @@ from record_set_state.record_set_state import record_set_state
 _REQUIRED = ("action", "state", "retries", "rules")
 
 
+def _release(job_id):
+    record_run(["update", job_id, "-a", ""])
+
+
 def _bounce(job_id, rules, retries):
+    _release(job_id)
     record_add_note(job_id, "bounce: " + ",".join(rules))
     for label in record_run(["label", "list", job_id]):
         name = label if isinstance(label, str) else label.get("name", "")
@@ -17,6 +22,7 @@ def _bounce(job_id, rules, retries):
 
 
 def _escalate(job_id, rules, retries):
+    _release(job_id)
     lines = [
         f"- **Work item id**: {job_id}",
         "- **From**: Supervisor",

@@ -98,7 +98,7 @@ def test_pass_moves_done(bd_repo, tmp_path):
     assert result == "done"
     assert "state:done" in _labels(item_id)
     entries = log_read_item(item_id)
-    built = [e for e in entries if e["gate"] == "Built"]
+    built = [e for e in entries if e["gate"] == "built"]
     assert built
     assert built[0]["tokens"] == 7
     message = _last_commit_message(gathered["repo"])
@@ -143,7 +143,7 @@ def test_usage_extra_keys_ignored(bd_repo, tmp_path):
 
     assert result == "done"
     entries = log_read_item(item_id)
-    built = [e for e in entries if e["gate"] == "Built"]
+    built = [e for e in entries if e["gate"] == "built"]
     assert built
     assert built[0]["tokens"] == 5
     assert "report" not in built[0]
@@ -162,7 +162,7 @@ def test_test_kind_runs_proven(bd_repo, tmp_path):
 
     assert result == "ready"
     entries = log_read_item(item_id)
-    proven = [e for e in entries if e["gate"] == "Proven"]
+    proven = [e for e in entries if e["gate"] == "proven"]
     assert proven
     assert "tests_failed" in proven[0]["rule"]
 
