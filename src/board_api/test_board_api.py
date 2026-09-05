@@ -71,6 +71,35 @@ def test_decide_roundtrip(bd_repo):
     assert payload["state"] == "done"
 
 
+def _story():
+    return record_run(
+        [
+            "create",
+            "S",
+            "-t",
+            "epic",
+            "-l",
+            "kind:story,state:waiting",
+            "-a",
+            "board",
+            "--no-inherit-labels",
+        ]
+    )["id"]
+
+
+def test_release_moves_ready(bd_repo):
+    iid = _intent()
+    board_api("release", {}, {"id": iid})
+    labels = record_run(["show", iid])[0]["labels"]
+    assert "state:ready" in labels
+
+
+def test_release_rejects_non_intent(bd_repo):
+    sid = _story()
+    with pytest.raises(ValueError):
+        board_api("release", {}, {"id": sid})
+
+
 def test_unknown_name_raises(bd_repo):
     with pytest.raises(KeyError):
         board_api("nope", {}, {})
