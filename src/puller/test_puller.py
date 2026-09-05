@@ -102,3 +102,15 @@ def test_human_role_raises(tmp_path):
             None,
             {"stop_file": str(stop_file), "once": once},
         )
+
+
+def test_config_error_releases(tmp_path, monkeypatch):
+    stop = tmp_path / "stop"
+
+    def broken(role, config_path, invoke):
+        raise ValueError("patterns: kinds: must be a non-empty list of allowed kinds")
+
+    monkeypatch.setattr("puller_pass.puller_pass.release_supervisor", lambda *a: True)
+    monkeypatch.setattr("puller_pass.puller_pass.record_graph", lambda: {})
+    options = {"stop_file": str(stop), "once": broken, "worktree": "C:/wt"}
+    assert puller("supervisor", "roles/board.toml", None, options) == -1
