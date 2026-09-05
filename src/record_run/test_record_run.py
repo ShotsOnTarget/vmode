@@ -27,3 +27,10 @@ def test_missing_binary_raises(bd_repo, monkeypatch):
 def test_json_flag_added(bd_repo):
     result = record_run(["list"])
     assert isinstance(result, list)
+
+
+def test_client_from_env(bd_repo, monkeypatch):
+    monkeypatch.setenv("VMODE_BD", "C:/nowhere/bd-missing.exe")
+    with pytest.raises(RecordError) as info:
+        record_run(["list"])
+    assert "bd-missing" in str(info.value)

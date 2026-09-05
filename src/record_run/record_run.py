@@ -14,7 +14,9 @@ class RecordError(Exception):
 def record_run(args: list[str]) -> dict | list:
     """Run one record command and return its parsed JSON.
 
-    The record is the `bd` client on PATH, called with --json. When the
+    The record is the `bd` client, called with --json: the path in VMODE_BD
+    when set (so every shell resolves the same client), else `bd` on PATH.
+    When the
     environment names VMODE_RECORD=fake the call goes to the in-memory fake
     record instead, so unit tests never start a database; the fake answers
     with the same shapes, captured from real runs. Raises RecordError when
@@ -31,10 +33,13 @@ def record_run(args: list[str]) -> dict | list:
 
 
 def _run_bd(args: list[str]) -> dict | list:
-    if shutil.which("bd") is None:
-        raise RecordError("bd is not on PATH", "")
+    client = os.environ.get("VMODE_BD") or "bd"
+    if shutil.which(client) is None:
+        raise RecordError(f"record client not found: {client}", "")
     try:
-        result = subprocess.run(["bd", *args, "--json"], capture_output=True, text=True)
+        result = subprocess.run(
+            [client, *args, "--json"], capture_output=True, text=True
+        )
     except OSError as exc:
         raise RecordError("failed to run bd", str(exc)) from exc
     if result.returncode != 0:
