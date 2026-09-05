@@ -1,76 +1,61 @@
-import json
-
 from cost_rollup.cost_rollup import cost_rollup
+from log_append.log_append import log_append
+from record_graph.record_graph import record_graph
+from record_run.record_run import record_run
 
 
-def _write(path, lines):
-    with open(path, "w") as f:
-        for line in lines:
-            f.write(json.dumps(line) + "\n")
+def _id(created):
+    return created[0]["id"] if isinstance(created, list) else created["id"]
 
 
-def test_intent_equals_sum_of_stories(tmp_path):
-    path = tmp_path / "log.jsonl"
-    _write(
-        path,
-        [
-            {"item": "0001-1-a-code", "tokens": 10, "seconds": 1.0},
-            {"item": "0001-1-b-code", "tokens": 20, "seconds": 2.0},
-            {"item": "0001-2-c-code", "tokens": 30, "seconds": 3.0},
-        ],
+def _mk(title, **kw):
+    args = ["create", title, "-a", "me", "--no-inherit-labels"]
+    for k, v in kw.items():
+        args += [k, v]
+    return _id(record_run(args))
+
+
+def _event(item, tokens):
+    log_append(
+        {
+            "item": item,
+            "gate": "Built",
+            "rule": "r",
+            "inputs": "i",
+            "state": "s",
+            "tokens": tokens,
+            "seconds": 0,
+            "actor": "builder",
+        }
     )
-    assert cost_rollup(str(path), "0001") == {
-        "item": "0001",
-        "tokens": 60,
-        "seconds": 6.0,
-        "runs": 3,
-    }
-    assert cost_rollup(str(path), "0001-1") == {
-        "item": "0001-1",
-        "tokens": 30,
-        "seconds": 3.0,
-        "runs": 2,
-    }
 
 
-def test_prefix_is_exact(tmp_path):
-    path = tmp_path / "log.jsonl"
-    _write(path, [{"item": "00011-x", "tokens": 5, "seconds": 1.0}])
-    assert cost_rollup(str(path), "0001") == {
-        "item": "0001",
-        "tokens": 0,
-        "seconds": 0.0,
-        "runs": 0,
-    }
+def test_sums_subtree(bd_repo):
+    intent = _mk("intent1")
+    story = _mk("story1", **{"--parent": intent})
+    code = _mk("code1", **{"--parent": story})
+    _event(code, 10)
+    _event(story, 20)
+
+    result = cost_rollup(intent, record_graph())
+
+    assert result["tokens"] == 30
+    assert result["runs"] == 2
 
 
-def test_missing_fields_zero(tmp_path):
-    path = tmp_path / "log.jsonl"
-    _write(path, [{"item": "0001-1-a-code"}])
-    assert cost_rollup(str(path), "0001") == {
-        "item": "0001",
-        "tokens": 0,
-        "seconds": 0.0,
-        "runs": 1,
-    }
+def test_negative_is_zero(bd_repo):
+    item = _mk("item1")
+    _event(item, -1)
+
+    result = cost_rollup(item, record_graph())
+
+    assert result["tokens"] == 0
+    assert result["runs"] == 1
 
 
-def test_negative_one_is_zero(tmp_path):
-    path = tmp_path / "log.jsonl"
-    _write(path, [{"item": "0001-1-a-code", "tokens": -1, "seconds": 1.0}])
-    assert cost_rollup(str(path), "0001") == {
-        "item": "0001",
-        "tokens": 0,
-        "seconds": 1.0,
-        "runs": 1,
-    }
+def test_no_events_zero(bd_repo):
+    item = _mk("item1")
 
+    result = cost_rollup(item, record_graph())
 
-def test_missing_file_zeros(tmp_path):
-    path = tmp_path / "does_not_exist.jsonl"
-    assert cost_rollup(str(path), "0001") == {
-        "item": "0001",
-        "tokens": 0,
-        "seconds": 0.0,
-        "runs": 0,
-    }
+    assert result == {"item": item, "tokens": 0, "seconds": 0.0, "runs": 0}
