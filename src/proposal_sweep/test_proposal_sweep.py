@@ -39,3 +39,14 @@ def test_non_proposals_untouched(fake_bd):
     story = _story()
     proposal_sweep(record_graph())
     assert record_graph()[story]["state"] == "waiting"
+
+
+def test_blocked_recovers_when_sheet_arrives(fake_bd, tmp_path):
+    pid = _proposal(_story(), "", tmp_path)
+    proposal_sweep(record_graph())
+    assert record_graph()[pid]["state"] == "blocked"
+    path = tmp_path / "good.md"
+    path.write_text(GOOD, encoding="utf-8")
+    record_run(["update", pid, "--body-file", str(path)])
+    assert proposal_sweep(record_graph()) == [pid]
+    assert record_graph()[pid]["state"] == "checking"
