@@ -22,7 +22,7 @@ def test_returns_in_order(bd_repo):
 
     result = log_read_item("A")
 
-    assert [r["gate"] for r in result] == ["Built", "Proven", "Verified"]
+    assert [r["gate"] for r in result] == ["built", "proven", "verified"]
 
 
 def test_other_target_excluded(bd_repo):
