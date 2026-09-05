@@ -71,6 +71,21 @@ def test_decide_roundtrip(bd_repo):
     assert payload["state"] == "done"
 
 
+def test_item_json(bd_repo):
+    iid = _intent()
+    status, content_type, payload = board_routes("GET", "/api/item", {"id": iid}, {})
+    assert status == 200
+    assert {
+        "id",
+        "kind",
+        "title",
+        "owner",
+        "state",
+        "parent",
+        "sheet",
+    } <= payload.keys()
+
+
 def test_unknown_404():
     status, content_type, payload = board_routes("GET", "/nope", {}, {})
     assert status == 404
