@@ -18,6 +18,7 @@
   - `test_intents_json`: after creating an intent with care:high label in bd_repo, GET /api/intents returns a list with that id and care 'high'
   - `test_tree_json`: GET /api/tree?id=<intent> returns dict with keys back and forward
   - `test_decide_roundtrip`: create intent + validation; POST /api/decide {intent, 'yes', ''} -> 200 and then GET /api/tree?id=<validation> back[0] has kind validation
+  - `test_columns_routes`: GET /columns returns 200 with a body containing '/api/columns'; GET /api/columns returns a JSON list whose first entry has keys name, role, wip, in_progress, items
   - `test_unknown_404`: GET /nope returns 404
 - **Checks to run before reporting**:
   - `python -m pytest src/board_serve -q`

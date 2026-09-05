@@ -173,4 +173,4 @@ Runs count log lines under the item, including gate decisions with zero cost. 00
 | 0002-4 | 0 | 72 | 0 | 8 |
 | 0001-6 (unattended) | 8,541,367 | 149 | 57,325 | 4 Builder runs |
 
-Intent 0001 average: 4,251 tokens per line. Target for the next Story: at most 3,826. Note: 0001-3 board_page and board_serve retries were logged with tokens -1 (unreported), so 0001 is understated; 0002 rows are complete.
+Intent 0001 average: 4,251 tokens per line. Superseded 2026-09-05: the Board adopted the harness figure as the only cost basis. Baseline is Story 0001-6 at 57,325 tokens per line; target for the next unattended Story is at most 51,593. Note: 0001-3 board_page and board_serve retries were logged with tokens -1 (unreported), so 0001 is understated; 0002 rows are complete.
