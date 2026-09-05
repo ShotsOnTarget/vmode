@@ -65,3 +65,10 @@ def test_payload_roundtrip(fake_bd):
 
     shown = record_run(["show", event_id])[0]
     assert json.loads(shown["payload"])["tokens"] == 42
+
+
+def test_usd_turns_roundtrip(fake_bd):
+    item_id = _target()
+    event_id = log_append(dict(_entry(item_id), usd=0.5, turns=9))
+    payload = json.loads(record_run(["show", event_id])[0]["payload"])
+    assert payload["usd"] == 0.5 and payload["turns"] == 9
