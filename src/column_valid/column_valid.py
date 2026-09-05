@@ -1,4 +1,5 @@
-KINDS = {"intent", "story", "code", "test", "verification", "validation", "proposal"}
+_LEFT = {"intent", "story", "code", "proposal", "note"}
+KINDS = _LEFT | {"test", "verification", "validation"}
 STATES = {"waiting", "ready", "in_progress", "blocked", "checking", "done", "reopened"}
 TIERS = {"human", "frontier", "cheap", "none"}
 REQUIRED = {"kinds", "states", "role", "tier", "wip", "poll_seconds"}
