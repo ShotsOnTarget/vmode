@@ -43,7 +43,8 @@ def check_folder(folder: Path) -> list[str]:
     name = folder.name
     files = sorted(p.name for p in folder.iterdir() if p.name != "__pycache__")
     want = sorted([f"{name}.py", f"test_{name}.py"])
-    return [] if files == want else [f"{folder}: files {files}"]
+    tests_first = files == [f"test_{name}.py"]  # the code job has not landed yet
+    return [] if files == want or tests_first else [f"{folder}: files {files}"]
 
 
 def main() -> int:

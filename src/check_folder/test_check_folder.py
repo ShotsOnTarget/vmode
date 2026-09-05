@@ -74,3 +74,12 @@ def test_rule_names_are_the_gates(repo):
 
 def test_pathlib_unused_guard():
     assert pathlib.Path(".").exists()
+
+
+def test_test_job_without_code_uses_test_gate(repo):
+    d = repo / "src" / "early"
+    d.mkdir()
+    (d / "test_early.py").write_text(
+        "def test_adds():" + chr(10) + "    assert True" + chr(10)
+    )
+    assert check_folder("early", {"kind": "test", "cases": ["adds"]}) == []

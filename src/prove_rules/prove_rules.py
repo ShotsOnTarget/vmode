@@ -9,6 +9,7 @@ def prove_rules(gathered: dict) -> list[str]:
     the folder has a test file, so a code job is proven against its tests.
     """
     options = {"changed": gathered["changed"], "repo": gathered.get("repo", ".")}
+    options["kind"] = gathered["kind"]
     if gathered["kind"] == "test":
         options["cases"] = gathered["cases"]
     return check_folder(gathered["folder"], options)

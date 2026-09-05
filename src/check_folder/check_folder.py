@@ -1,6 +1,7 @@
 import os
 import subprocess
 
+from check_test_only.check_test_only import check_test_only
 from gate_built.gate_built import gate_built
 from gate_proven.gate_proven import gate_proven
 
@@ -24,10 +25,13 @@ def check_folder(folder: str, options: dict) -> list[str]:
     (test names the sheet requires; None skips the case rules), repo (the
     tree to check, default '.'). Returns the failed rule names exactly as
     the Built and Proven gates name them; [] when clean. Tests run whenever
-    a test file exists, so a code job is checked against its tests too.
+    a test file exists, so a code job is checked against its tests too. A
+    test job whose code does not exist yet gets the test-only gate.
     """
     repo = options.get("repo", ".")
     src, base = f"src/{folder}", os.path.join(repo, "src", folder, folder)
+    if options.get("kind") == "test" and not os.path.exists(base + ".py"):
+        return check_test_only(folder, options)
     inputs = {
         "changed": options.get("changed", []),
         "code": _read(base + ".py"),

@@ -1,0 +1,42 @@
+import pytest
+
+from check_test_only.check_test_only import check_test_only
+
+TEST = "from {n}.{n} import {n}\n\n\ndef test_adds():\n    assert {n}(1) == 2\n"
+
+
+@pytest.fixture
+def repo(tmp_path, monkeypatch):
+    (tmp_path / "src").mkdir()
+    monkeypatch.chdir(tmp_path)
+    return tmp_path
+
+
+def _folder(root, n, text=TEST):
+    d = root / "src" / n
+    d.mkdir()
+    (d / f"test_{n}.py").write_text(text.format(n=n))
+
+
+def test_clean_without_code(repo):
+    _folder(repo, "clean")
+    assert check_test_only("clean", {"cases": ["adds"]}) == []
+
+
+def test_missing_file(repo):
+    (repo / "src" / "gone").mkdir()
+    assert check_test_only("gone", {}) == ["test_file_missing"]
+
+
+def test_case_rules(repo):
+    _folder(repo, "cased")
+    assert check_test_only("cased", {"cases": ["other"]}) == [
+        "case_missing",
+        "case_extra",
+    ]
+    assert check_test_only("cased", {}) == []
+
+
+def test_lint_named(repo):
+    _folder(repo, "bad", text="import os\n\n\ndef test_adds():\n    assert True\n")
+    assert "lint_findings" in check_test_only("bad", {"cases": ["adds"]})
