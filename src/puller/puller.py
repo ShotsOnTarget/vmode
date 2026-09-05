@@ -8,7 +8,7 @@ from pull_once.pull_once import pull_once
 
 def _default_once(role, config_path, invoke):
     if role == "supervisor":
-        return prove_once(config_path, "work/supervisor-log.jsonl")
+        return prove_once(config_path)
     return pull_once(role, config_path, invoke)
 
 
