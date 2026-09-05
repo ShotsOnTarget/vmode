@@ -36,9 +36,9 @@ def test_clean_folder_empty(repo):
 
 
 def test_long_file_named(repo):
-    long = CODE + "".join(f"\n\ndef _h{i}():\n    return {i}\n" for i in range(12))
+    long = CODE + "".join(f"\n\ndef _h{i}():\n    return {i}\n" for i in range(22))
     _folder(repo, "long", code=long)
-    assert "over_50_lines" in check_folder("long", {})
+    assert "over_80_lines" in check_folder("long", {})
 
 
 def test_failing_test_named(repo):

@@ -21,9 +21,9 @@ def test_outside_folder():
     assert "file_outside_folder" in gate_built(JOB, _inputs(changed=["src/other/x.py"]))
 
 
-def test_over_50():
-    lines = "\n".join(f"x{i} = {i}" for i in range(51))
-    assert "over_50_lines" in gate_built(JOB, _inputs(code=lines))
+def test_over_80():
+    lines = "\n".join(f"x{i} = {i}" for i in range(81))
+    assert "over_80_lines" in gate_built(JOB, _inputs(code=lines))
 
 
 def test_not_formatted():

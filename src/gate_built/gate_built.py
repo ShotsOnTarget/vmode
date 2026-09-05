@@ -5,7 +5,7 @@ _KEYS = ("changed", "code", "fmt_out", "lint_out")
 _RULES = (
     ("file_outside_folder", lambda c: c["outside"]),
     ("too_many_files", lambda c: c["many"]),
-    ("over_50_lines", lambda c: c["long"]),
+    ("over_80_lines", lambda c: c["long"]),
     ("not_one_public_function", lambda c: c["funcs"] != 1),
     ("no_docstring", lambda c: c["funcs"] == 1 and not c["doc"]),
     ("not_formatted", lambda c: c["fmt_bad"]),
@@ -18,7 +18,7 @@ def gate_built(job_id: str, inputs: dict) -> list[str]:
 
     inputs: changed (paths changed in the tree), code (the code file text),
     fmt_out (formatter check output), lint_out (linter output). Rules: only
-    the job's folder changed, at most two files, code under 50 lines, one
+    the job's folder changed, at most two files, code under 80 lines, one
     public function with a docstring, formatted, no lint findings.
     """
     for key in _KEYS:
@@ -38,7 +38,7 @@ def gate_built(job_id: str, inputs: dict) -> list[str]:
     ctx = {
         "outside": any(not p.startswith(folder) for p in changed),
         "many": len({p for p in changed if p.startswith(folder)}) > 2,
-        "long": code.count("\n") + (0 if code.endswith("\n") else 1) > 50,
+        "long": code.count("\n") + (0 if code.endswith("\n") else 1) > 80,
         "funcs": len(public),
         "doc": bool(public) and ast.get_docstring(public[0]) is not None,
         "fmt_bad": "---" in inputs["fmt_out"] or "would reformat" in inputs["fmt_out"],

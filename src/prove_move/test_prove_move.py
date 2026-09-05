@@ -65,7 +65,7 @@ def test_escalate_raises_note_no_file(fake_bd):
         "action": "escalate",
         "state": "blocked",
         "retries": 3,
-        "rules": ["over_50_lines"],
+        "rules": ["over_80_lines"],
     }
     summary_path = pathlib.Path("work/summaries") / f"{item_id}.md"
 

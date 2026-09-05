@@ -13,12 +13,29 @@ def _state(item_id: str) -> str:
     return next((n[6:] for n in names if n.startswith("state:")), "")
 
 
+def _release(item_id: str, exc: Exception) -> None:
+    record_run(["update", item_id, "-a", ""])
+    record_set_state(item_id, "ready")
+    record_add_note(item_id, "release: " + str(exc)[:200])
+
+
+def _finish(item_id: str, prior_state: str, absent: list | None) -> None:
+    """After a run: a label column adds its label and clears the claim, keeping
+    a state the role set; any other column moves the item to checking."""
+    if not absent:
+        record_set_state(item_id, "checking")
+        return
+    record_run(["label", "add", item_id, absent[0]])
+    record_run(["update", item_id, "-a", ""])
+    if _state(item_id) == "in_progress":  # the role left the state alone
+        record_set_state(item_id, prior_state)
+
+
 def claim_and_run(item: dict, column: str, role: str, options: dict) -> bool:
-    """Claim an item and run invoke on it, handling the checking/label/release
-    transitions.
-    """
+    """Claim an item and run invoke on it; False when another puller won the
+    claim. A failed run releases the item back to ready with the error noted;
+    a finished run records usage and moves the item on (see _finish)."""
     item_id = item["id"]
-    prior_state = item["state"]
     try:
         claim_item(item_id, role + "-" + str(os.getpid()))
     except RecordError:
@@ -26,17 +43,12 @@ def claim_and_run(item: dict, column: str, role: str, options: dict) -> bool:
     try:
         usage = options["invoke"](item, column)
     except Exception as exc:
-        record_run(["update", item_id, "-a", ""])
-        record_set_state(item_id, "ready")
-        record_add_note(item_id, "release: " + str(exc)[:200])
+        _release(item_id, exc)
         return True
     record_add_note(item_id, "usage: " + json.dumps(usage))
-    absent = options["config"]["columns"][column].get("labels_absent")
-    if absent:
-        record_run(["label", "add", item_id, absent[0]])
-        record_run(["update", item_id, "-a", ""])
-        if _state(item_id) == "in_progress":  # the role left the state alone
-            record_set_state(item_id, prior_state)
-    else:
-        record_set_state(item_id, "checking")
+    _finish(
+        item_id,
+        item["state"],
+        options["config"]["columns"][column].get("labels_absent"),
+    )
     return True
