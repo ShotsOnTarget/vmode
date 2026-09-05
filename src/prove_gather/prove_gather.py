@@ -1,23 +1,10 @@
 import json
 import re
-import subprocess
 
 from changed_paths.changed_paths import changed_paths
 from record_graph.record_graph import record_graph
 from record_run.record_run import RecordError, record_run
 from record_show_item.record_show_item import record_show_item
-
-
-def _read(path: str) -> str:
-    try:
-        return open(path, encoding="utf-8").read()
-    except OSError:
-        return ""
-
-
-def _run(cmd: list, both: bool = False) -> str:
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    return proc.stdout + proc.stderr if both else proc.stdout
 
 
 def _usage(job_id: str) -> dict:
@@ -32,16 +19,17 @@ def _usage(job_id: str) -> dict:
 
 
 def prove_gather(job_id: str, folder: str) -> dict:
+    """What the gate needs from the record for one job.
+
+    Returns changed (working-tree paths this job owns), cases (test names
+    the sheet requires), kind, usage (from the last usage comment) and
+    retries (from the retry label). File contents and tool output are no
+    longer gathered here: check_folder reads and runs them.
+    """
     info = record_show_item(job_id)
     labels = record_run(["show", job_id])[0].get("labels", [])
-    src, base = f"src/{folder}", f"src/{folder}/{folder}"
     return {
         "changed": changed_paths(folder, record_graph()),
-        "code": _read(base + ".py"),
-        "note": _read(base + ".md"),
-        "fmt_out": _run(["ruff", "format", "--check", "--diff", src], True),
-        "lint_out": _run(["ruff", "check", src, "--output-format", "concise"]),
-        "pytest_out": _run(["python", "-m", "pytest", src, "-q", "-rA"]),
         "cases": re.findall(r"- `test_(\w+)`", info["sheet"]),
         "kind": info["kind"],
         "usage": _usage(job_id),

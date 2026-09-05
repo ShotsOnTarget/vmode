@@ -34,8 +34,7 @@ def test_gathers_files(bd_repo):
 
     result = prove_gather(item_id, "x")
 
-    assert result["code"] == "def x():\n    pass\n"
-    assert result["note"] == "# x\n"
+    assert "code" not in result and "note" not in result
     assert result["cases"] == ["a"]
     assert result["kind"] == "code"
 
