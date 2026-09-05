@@ -1,6 +1,7 @@
 import pytest
 
 from board_api.board_api import board_api
+from log_append.log_append import log_append
 from record_run.record_run import record_run
 
 
@@ -98,6 +99,25 @@ def test_release_rejects_non_intent(bd_repo):
     sid = _story()
     with pytest.raises(ValueError):
         board_api("release", {}, {"id": sid})
+
+
+def test_timeline_json(bd_repo):
+    iid = _intent()
+    log_append(
+        {
+            "item": iid,
+            "gate": "Board",
+            "rule": "released",
+            "inputs": {},
+            "state": "ready",
+            "tokens": 0,
+            "seconds": 0.0,
+            "actor": "board",
+        }
+    )
+    payload = board_api("timeline", {"id": iid}, {})
+    assert isinstance(payload, list) and len(payload) == 1
+    assert payload[0]["item"] == iid
 
 
 def test_unknown_name_raises(bd_repo):
