@@ -1,6 +1,6 @@
-purpose: roll up token, second, and run counts for an item id and its descendants from a log file
-signature: cost_rollup(path: str, item_id: str) -> dict
-inputs: path: log file. item_id: an id such as '0001', '0001-1', or '0001-1-record_run-code'.
-outputs: {'item': item_id, 'tokens': int, 'seconds': float, 'runs': int}
-side effects: none, pure read
-work item id: 0002-1-cost_rollup-code
+purpose: roll up token, second, and run counts over an item's full timeline
+signature: cost_rollup(item_id: str, graph: dict) -> dict
+inputs: item_id in graph; graph from record_graph.
+outputs: {'item': item_id, 'tokens': int, 'seconds': float, 'runs': int} summed over timeline(item_id, graph)
+side effects: none, pure read (via timeline, reads work/supervisor-log.jsonl)
+work item id: 0005-1-cost_rollup-code
