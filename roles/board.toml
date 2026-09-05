@@ -75,6 +75,7 @@ poll_seconds = 0
 [columns.triage]            # Analyst disposes of notes raised by any role or the Supervisor
 kinds = ["note"]
 states = ["waiting", "ready"]
+labels_absent = ["triaged"] # leaves the column when the Analyst has disposed of it
 role = "analyst"
 tier = "cheap"
 wip = 1

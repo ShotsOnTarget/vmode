@@ -7,6 +7,12 @@ from record_run.record_run import RecordError, record_run
 from record_set_state.record_set_state import record_set_state
 
 
+def _state(item_id: str) -> str:
+    labels = record_run(["label", "list", item_id])
+    names = [x if isinstance(x, str) else x.get("name", "") for x in labels]
+    return next((n[6:] for n in names if n.startswith("state:")), "")
+
+
 def claim_and_run(item: dict, column: str, role: str, options: dict) -> bool:
     """Claim an item and run invoke on it, handling the checking/label/release
     transitions.
@@ -29,7 +35,8 @@ def claim_and_run(item: dict, column: str, role: str, options: dict) -> bool:
     if absent:
         record_run(["label", "add", item_id, absent[0]])
         record_run(["update", item_id, "-a", ""])
-        record_set_state(item_id, prior_state)
+        if _state(item_id) == "in_progress":  # the role left the state alone
+            record_set_state(item_id, prior_state)
     else:
         record_set_state(item_id, "checking")
     return True

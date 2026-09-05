@@ -90,3 +90,31 @@ def test_label_column_adds_label(fake_bd):
     assert "learned" in row["labels"]
     assert "state:done" in row["labels"]
     assert not row.get("assignee")
+
+
+def test_label_column_keeps_role_state(fake_bd):
+    from record_set_state.record_set_state import record_set_state
+
+    item_id = record_run(
+        [
+            "create",
+            "N",
+            "-t",
+            "task",
+            "-l",
+            "kind:note,state:waiting",
+            "--no-inherit-labels",
+        ]
+    )["id"]
+    config = _config()
+    item = record_graph()[item_id]
+
+    def dispose(item, column):
+        record_set_state(item["id"], "done")
+        return {"tokens": 1, "seconds": 0.1}
+
+    assert claim_and_run(
+        item, "triage", "analyst", {"config": config, "invoke": dispose}
+    )
+    shown = record_run(["show", item_id])[0]
+    assert "state:done" in shown["labels"] and "triaged" in shown["labels"]
