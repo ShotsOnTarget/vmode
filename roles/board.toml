@@ -57,7 +57,7 @@ wip = 8
 poll_seconds = 15
 
 [columns.verify]            # Architect ticks a Story checklist
-kinds = ["story"]
+kinds = ["story", "proposal"]
 states = ["checking"]
 role = "architect"
 tier = "frontier"
@@ -65,7 +65,7 @@ wip = 2
 poll_seconds = 300
 
 [columns.validate]          # Board says yes or no
-kinds = ["intent", "proposal"]
+kinds = ["intent"]
 states = ["checking"]
 role = "board"
 tier = "human"

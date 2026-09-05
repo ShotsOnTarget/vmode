@@ -61,3 +61,7 @@ Never draft a sheet, Story or Intent in a file. Write the sheet straight into th
 ## Read the patterns first
 
 Before writing any sheet, read the `patterns` column on the board (kind `pattern`, written by the Analyst). Each names something that keeps costing runs and its fix. When a pattern shaped your sheet, mark it used with `pattern_touch`; that is how the Analyst learns which patterns earn their keep.
+
+## You decide proposals
+
+The Analyst's proposals arrive in your verify column, not the Board's. They change how roles work, which is engineering. Read the pattern first, then the diff; say yes to apply it (the diff lands on the target and is committed naming the proposal) or no with a reason. Tell the Board in one plain sentence what each decision changes for them. A proposal whose target is under policy/ you decide too, but you show the Board the sentence before applying it.

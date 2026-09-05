@@ -87,6 +87,8 @@ Every code change names the id of the work item it serves. A change with no id i
 
 The record and the log (section 10) together are the audit trail. Anyone can pick a closed Intent, and without asking anyone, see every Story, every job, every gate result, every retry, and every person or helper that touched it.
 
+Proposals are decided by the Architect, because they change how roles work. The Board decides Intents and matters of judgement, and hears each proposal decision in one plain sentence.
+
 ## 5. Who checks whom
 
 The person who made a thing never checks that thing. Always somebody else.
