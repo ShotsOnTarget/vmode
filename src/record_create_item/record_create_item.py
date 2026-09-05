@@ -1,7 +1,7 @@
 from record_run.record_run import record_run
 
 _RIGHT_SIDE_KINDS = ("test", "verification", "validation")
-_KINDS = ("intent", "story", "code", "proposal", "note") + _RIGHT_SIDE_KINDS
+_KINDS = ("intent", "story", "code", "proposal", "note", "pattern") + _RIGHT_SIDE_KINDS
 
 
 def _validate(kind: str, owner: str, parent: str | None) -> None:

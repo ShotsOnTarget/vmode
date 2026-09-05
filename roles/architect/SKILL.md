@@ -57,3 +57,7 @@ When you notice something outside the item you are working on (a duplicate, a ga
 ## Sheets, Stories and Intents live only in the record
 
 Never draft a sheet, Story or Intent in a file. Write the sheet straight into the job with `record_set_sheet(item_id, text)` and the Story's checklist with `record_set_checklist(story_id, items)`, both in src and reachable through the work-record skill. Create a function's jobs with `create_pair(story_id, function_name, owner)`: the test job first, the code job needing it. The work folder holds summaries only.
+
+## Read the patterns first
+
+Before writing any sheet, read the `patterns` column on the board (kind `pattern`, written by the Analyst). Each names something that keeps costing runs and its fix. When a pattern shaped your sheet, mark it used with `pattern_touch`; that is how the Analyst learns which patterns earn their keep.

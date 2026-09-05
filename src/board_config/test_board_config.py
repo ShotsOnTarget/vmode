@@ -6,7 +6,7 @@ from board_config.board_config import board_config
 def test_shipped_config_loads():
     config = board_config("roles/board.toml")
     assert isinstance(config, dict)
-    assert len(config["columns"]) == 11
+    assert len(config["columns"]) == 12
 
 
 def test_conflict_raises(tmp_path):

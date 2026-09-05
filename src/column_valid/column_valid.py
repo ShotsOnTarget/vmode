@@ -1,4 +1,4 @@
-_LEFT = {"intent", "story", "code", "proposal", "note"}
+_LEFT = {"intent", "story", "code", "proposal", "note", "pattern"}
 KINDS = _LEFT | {"test", "verification", "validation"}
 STATES = {"waiting", "ready", "in_progress", "blocked", "checking", "done", "reopened"}
 TIERS = {"human", "frontier", "cheap", "none"}
