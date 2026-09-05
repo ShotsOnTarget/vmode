@@ -14,7 +14,8 @@ def column_items(
     An item is listed when column_of places it in the column and, for a
     pulling column (tier not 'none'), every item it needs is done. Gating
     columns list everything in their states: needs gate pulling, never
-    gating. Ordering between code and test is a needs link, nothing more.
+    gating. A claimed (in_progress) item is never offered to a puller.
+    Ordering between code and test is a needs link, nothing more.
     """
     if name not in config["columns"]:
         raise ValueError(f"not a column: {name}")
@@ -23,6 +24,8 @@ def column_items(
         item
         for item_id, item in graph.items()
         if column_of(item, labels.get(item_id, []), config) == name
-        and not (filtered and _needs_unmet(item, graph))
+        and not (
+            filtered and (item["state"] == "in_progress" or _needs_unmet(item, graph))
+        )
     ]
     return sorted(items, key=lambda i: i["id"])
