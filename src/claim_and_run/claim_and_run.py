@@ -9,6 +9,7 @@ from record_set_state.record_set_state import record_set_state
 
 def claim_and_run(item: dict, column: str, role: str, options: dict) -> bool:
     item_id = item["id"]
+    prior_state = item["state"]
     try:
         claim_item(item_id, role + "-" + str(os.getpid()))
     except RecordError:
@@ -25,6 +26,7 @@ def claim_and_run(item: dict, column: str, role: str, options: dict) -> bool:
     if absent:
         record_run(["label", "add", item_id, absent[0]])
         record_run(["update", item_id, "-a", ""])
+        record_set_state(item_id, prior_state)
     else:
         record_set_state(item_id, "checking")
     return True
