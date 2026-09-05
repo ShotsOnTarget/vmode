@@ -22,14 +22,13 @@ def test_ready_job_in_build():
 
 
 def test_in_progress_counted():
-    # No column in the shipped config lists "in_progress" in its states, so
-    # an in_progress item matches no column and build stays empty.
+    # A claimed item stays in the column it was pulled from (Board, 2026-09-05).
     config = board_config("roles/board.toml")
     graph = {"vm-1": _item("vm-1", "code", "in_progress")}
     columns = board_columns(graph, {}, config)
     build = _by_name(columns, "build")
-    assert build["items"] == []
-    assert build["in_progress"] == 0
+    assert [i["id"] for i in build["items"]] == ["vm-1"]
+    assert build["in_progress"] == 1
 
 
 def test_config_order_and_paused(tmp_path):

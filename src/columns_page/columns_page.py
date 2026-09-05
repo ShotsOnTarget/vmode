@@ -15,6 +15,7 @@ def columns_page() -> str:
         """.hd .ct{flex:0 0 auto;margin-left:6px}"""
         """.card{background:#fff;border:1px solid #d0d4da;border-radius:6px;"""
         """padding:8px;margin-bottom:8px;word-break:break-word;cursor:pointer}"""
+        """.card.reopened{background:#fff6bf}.card.in_progress{background:#bfe9e6}"""
         """.card .l1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}"""
         """.card .l1 .k{color:#888;font-size:12px;margin-left:4px}"""
         """.pill{display:inline-block;padding:1px 6px;border-radius:10px;"""
@@ -25,7 +26,7 @@ def columns_page() -> str:
 function esc(s){const d=document.createElement('div');d.textContent=s;"""
         """return d.innerHTML;}
 function cardHtml(it){
-  return `<div class="card" onclick="openItem('${esc(it.id)}')">"""
+  return `<div class="card ${esc(it.state)}" onclick="openItem('${esc(it.id)}')">"""
         """<div class="l1"><a href="/?id=${esc(it.id)}" """
         """onclick="event.stopPropagation()">${esc(it.id)}</a>"""
         """<span class="k">${esc(it.kind)}</span></div>"""
