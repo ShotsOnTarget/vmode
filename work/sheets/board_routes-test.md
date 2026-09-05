@@ -1,0 +1,27 @@
+# Instruction sheet
+
+- **Job id**: 0001-3-board_routes-test
+- **Kind**: test
+- **Parent Story**: 0001-3
+- **Function name**: `board_routes`
+- **Folder**: `src/board_routes/`
+- **Files you may change**: `src/board_routes/test_board_routes.py` and nothing else. You never create or edit the code file.
+- **Signature under test**: `board_routes(method: str, path: str, query: dict, body: dict) -> tuple[int, str, object]`
+- **Inputs**: as stated. Import with `from board_routes.board_routes import board_routes`.
+- **Outputs**: (status, content_type, payload)
+- **Errors**: none escape
+- **Allowed imports**: pytest, json, record_run, and the function under test. Nothing else.
+- **Checklist items this job serves**: Story 0001-3 items 2, 3, 4, 5 and Story 0001-6
+- **Setup**: use the shared bd_repo fixture; create an intent with labels kind:intent,state:waiting,owner:board,care:high and a validation with a validates link to it, per roles/work-record/CONVENTIONS.md.
+- **Cases**, one test function each, exactly these names, nothing more:
+  - `test_root_is_html`: GET / -> 200, 'text/html', payload starts with '<!doctype html>' case-insensitive
+  - `test_columns_is_html`: GET /columns -> 200 and payload contains '/api/columns'
+  - `test_intents_json`: GET /api/intents -> 200 and a list containing the created intent id with care 'high'
+  - `test_columns_json`: GET /api/columns -> 200 and a list whose first entry has keys name, role, wip, in_progress, items
+  - `test_decide_roundtrip`: POST /api/decide {intent, 'yes', ''} -> 200 and payload state 'done'
+  - `test_unknown_404`: GET /nope -> 404
+  - `test_bad_request_400`: GET /api/tree with id 'vm-none' -> 400 with an error key
+- **Checks to run before reporting**:
+  - `ruff format src/board_routes` then `ruff check src/board_routes` (both clean)
+  - `python -m pytest src/board_routes -q`
+- **Out of scope**: the code file, any other folder, any case not listed.

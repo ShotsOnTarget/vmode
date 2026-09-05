@@ -1,0 +1,21 @@
+# Instruction sheet
+
+- **Job id**: 0001-3-board_routes-code
+- **Kind**: code
+- **Parent Story**: 0001-3
+- **Function name**: `board_routes`
+- **Folder**: `src/board_routes/`
+- **Files you may change**: `src/board_routes/board_routes.py`, `src/board_routes/board_routes.md`
+- **Signature**: `board_routes(method: str, path: str, query: dict, body: dict) -> tuple[int, str, object]`
+- **Inputs**: method: 'GET' or 'POST'. path: the URL path without query. query: parsed query parameters, single values. body: parsed JSON body for POST, {} otherwise.
+- **Outputs**: (status, content_type, payload). Routes: GET / -> (200, 'text/html', board_page()); GET /columns -> (200, 'text/html', columns_page()); GET /api/intents -> (200, 'application/json', board_rollup(record_graph(), care)) where care maps intent id -> the value after 'care:' in that item's labels from record_labels(); GET /api/tree with id -> (200, 'application/json', board_tree(id, record_graph())); GET /api/columns -> (200, 'application/json', board_columns(record_graph(), record_labels(), board_config('roles/board.toml'))); POST /api/decide with body keys intent, decision, reason -> (200, 'application/json', board_decide(...)). Anything else -> (404, 'application/json', {'error': 'not found'}). ValueError or RecordError from a handler -> (400, 'application/json', {'error': str(exc)}). The record is read fresh on every call.
+- **Errors**: none escape; they become 400 or 404 responses.
+- **Allowed imports**: from board_page.board_page import board_page; from columns_page.columns_page import columns_page; from board_rollup.board_rollup import board_rollup; from board_tree.board_tree import board_tree; from board_columns.board_columns import board_columns; from board_decide.board_decide import board_decide; from board_config.board_config import board_config; from record_graph.record_graph import record_graph; from record_labels.record_labels import record_labels; from record_run.record_run import RecordError. Nothing else.
+- **Checklist items this job serves**: Story 0001-3 items 2, 3, 4, 5 and Story 0001-6
+- **How**: a dict from (method, path) to a small handler function taking (query, body); one try/except around the dispatch. Under 50 lines; if not possible report blocked.
+- **Checks to run before reporting**:
+  - `ruff format src/board_routes` then `ruff check src/board_routes` (both clean; a noqa comment fails the shape check)
+  - `python tools/lint.py`   (no findings for your folder)
+  - `python -c "import ast,sys; t=ast.parse(open('src/board_routes/board_routes.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)
+- **Note file** `src/board_routes/board_routes.md` has exactly these six lines: purpose, signature, inputs, outputs, side effects, work item id 0001-3-board_routes-code.
+- **Out of scope**: tests, any other folder, any import not listed, the HTTP server itself.
