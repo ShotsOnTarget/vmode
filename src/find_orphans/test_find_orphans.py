@@ -7,6 +7,7 @@ from pathlib import Path
 from find_orphans.find_orphans import find_orphans
 from record_graph.record_graph import record_graph
 from record_run.record_run import record_run
+from record_set_state.record_set_state import record_set_state
 
 
 def _id(c):
@@ -79,6 +80,14 @@ def test_proposal_unchecked():
         },
     }
     assert {"id": "proposal1", "rule": "unchecked"} in find_orphans(graph)
+
+
+def test_note_not_orphan(bd_repo):
+    intent = _mk("intent1", "intent")
+    code = _mk("code1", "code", intent)
+    record_set_state(code, "done")
+    note = _mk("saw X", "note", code)
+    assert note not in [o["id"] for o in find_orphans(record_graph())]
 
 
 def test_script_exit_code(bd_repo):

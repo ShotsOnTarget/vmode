@@ -14,7 +14,7 @@ def _rules_for_item(item_id: str, item: dict, checked_ids: set) -> list[dict]:
     kind = item.get("kind")
     rules = []
 
-    if kind != "intent" and item.get("parent") is None:
+    if kind not in ("intent", "note") and item.get("parent") is None:
         rules.append({"id": item_id, "rule": "no_parent"})
 
     if kind in ("intent", "story", "code", "proposal") and item_id not in checked_ids:
