@@ -11,6 +11,11 @@ ROUTES = {
         "application/json",
         board_api("decide", q, b),
     ),
+    ("POST", "/api/release"): lambda q, b: (
+        200,
+        "application/json",
+        board_api("release", q, b),
+    ),
 }
 
 API_NAMES = ("intents", "tree", "item", "columns")
