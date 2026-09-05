@@ -19,6 +19,7 @@
   - `test_intents_json`: GET /api/intents -> 200 and a list containing the created intent id with care 'high'
   - `test_columns_json`: GET /api/columns -> 200 and a list whose first entry has keys name, role, wip, in_progress, items
   - `test_decide_roundtrip`: POST /api/decide {intent, 'yes', ''} -> 200 and payload state 'done'
+  - `test_item_json`: GET /api/item with the created intent id -> 200 and payload has keys id, kind, title, owner, state, parent, sheet
   - `test_unknown_404`: GET /nope -> 404
   - `test_bad_request_400`: GET /api/tree with id 'vm-none' -> 400 with an error key
 - **Checks to run before reporting**:
