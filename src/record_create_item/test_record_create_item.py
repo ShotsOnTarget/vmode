@@ -56,10 +56,11 @@ def test_child_does_not_inherit_kind(bd_repo):
 
 
 def test_right_side_uses_validates(bd_repo):
-    code = _mk("code", parent=_mk("intent")["id"])
+    story = _mk("story", parent=_mk("intent")["id"])
+    code = _mk("code", parent=story["id"])
     shown = record_run(["show", _mk("test", parent=code["id"])["id"]])[0]
     deps = shown["dependencies"]
-    assert shown.get("parent") is None
+    assert shown.get("parent") == story["id"]
     assert any(
         d["id"] == code["id"] and d["dependency_type"] == "validates" for d in deps
     )
