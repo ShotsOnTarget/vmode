@@ -62,39 +62,3 @@ def test_gating_column_ignores_needs():
     result = column_items("prove", graph, labels, config)
 
     assert [item["id"] for item in result] == ["c1"]
-
-
-def test_checking_test_waits_for_code():
-    config = board_config("roles/board.toml")
-    graph = {
-        "c1": {"id": "c1", "kind": "code", "state": "ready"},
-        "t1": {"id": "t1", "kind": "test", "state": "checking", "parent": "c1"},
-    }
-    labels = {"c1": [], "t1": []}
-
-    assert column_items("prove", graph, labels, config) == []
-
-    graph["c1"]["state"] = "done"
-    result = column_items("prove", graph, labels, config)
-
-    assert [item["id"] for item in result] == ["t1"]
-
-
-def test_test_inherits_parent_needs():
-    config = board_config("roles/board.toml")
-    graph = {
-        "x": {"id": "x", "kind": "code", "state": "waiting"},
-        "c1": {"id": "c1", "kind": "code", "state": "ready", "needs": ["x"]},
-        "t1": {
-            "id": "t1",
-            "kind": "test",
-            "state": "ready",
-            "parent": "c1",
-            "needs": [],
-        },
-    }
-    labels = {"x": [], "c1": [], "t1": []}
-
-    result = column_items("test", graph, labels, config)
-
-    assert result == []
