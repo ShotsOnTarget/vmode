@@ -1,0 +1,21 @@
+# Instruction sheet
+
+- **Job id**: 0001-3-board_api-code
+- **Kind**: code
+- **Parent Story**: 0001-3
+- **Function name**: `board_api`
+- **Folder**: `src/board_api/`
+- **Files you may change**: `src/board_api/board_api.py`, `src/board_api/board_api.md`
+- **Signature**: `board_api(name: str, query: dict, body: dict) -> object`
+- **Inputs**: name: one of intents, tree, item, columns, decide. query and body as parsed by the caller.
+- **Outputs**: the JSON payload for one API name: 'intents' -> board_rollup(record_graph(), care) where care maps intent id -> the value after 'care:' in that item's labels from record_labels(); 'tree' -> board_tree(query['id'], record_graph()); 'item' -> record_show_item(query['id']); 'columns' -> board_columns(record_graph(), record_labels(), board_config(CONFIG)) with CONFIG = pathlib.Path(__file__).resolve().parents[2] / 'roles' / 'board.toml'; 'decide' -> board_decide(body.get('intent',''), body.get('decision',''), body.get('reason','')).
+- **Errors**: KeyError for an unknown name. ValueError and RecordError from handlers propagate (board_routes turns them into 400).
+- **Allowed imports**: pathlib; from board_rollup.board_rollup import board_rollup; from board_tree.board_tree import board_tree; from board_columns.board_columns import board_columns; from board_decide.board_decide import board_decide; from board_config.board_config import board_config; from record_graph.record_graph import record_graph; from record_labels.record_labels import record_labels; from record_show_item.record_show_item import record_show_item. Nothing else.
+- **Checklist items this job serves**: Story 0001-3 items 2, 3, 4, 5
+- **How**: a dict from name to a small handler; one private helper for care. The record is read fresh on every call. Under 45 lines.
+- **Checks to run before reporting**:
+  - `ruff format src/board_api` then `ruff check src/board_api` (both clean; a noqa comment fails the shape check)
+  - `python tools/lint.py`   (no findings for your folder)
+  - `python -c "import ast,sys; t=ast.parse(open('src/board_api/board_api.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)
+- **Note file** `src/board_api/board_api.md` has exactly these six lines: purpose, signature, inputs, outputs, side effects, work item id 0001-3-board_api-code.
+- **Out of scope**: tests, any other folder, any import not listed. If the formatted file exceeds 50 lines, report blocked.
