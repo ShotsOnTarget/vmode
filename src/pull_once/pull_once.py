@@ -7,10 +7,15 @@ from wip_headroom.wip_headroom import wip_headroom
 
 
 def _global_headroom(graph: dict, config: dict) -> int:
-    tiers = {k: r["tier"] for r in config["columns"].values() for k in r["kinds"]}
+    modelled = {
+        kind
+        for rules in config["columns"].values()
+        if rules["tier"] not in ("none", "human")
+        for kind in rules["kinds"]
+    }
     busy = sum(
-        i["state"] == "in_progress" and tiers.get(i["kind"]) not in ("none", "human")
-        for i in graph.values()
+        item["state"] == "in_progress" and item["kind"] in modelled
+        for item in graph.values()
     )
     return max(0, config["limits"]["max_parallel_model_runs"] - busy)
 
