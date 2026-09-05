@@ -71,19 +71,6 @@ def test_clean_graph_empty(fake_bd):
     assert find_orphans(record_graph()) == []
 
 
-def test_proposal_unchecked():
-    graph = {
-        "story1": {"id": "story1", "kind": "story", "parent": None, "checks": []},
-        "proposal1": {
-            "id": "proposal1",
-            "kind": "proposal",
-            "parent": "story1",
-            "checks": [],
-        },
-    }
-    assert {"id": "proposal1", "rule": "unchecked"} in find_orphans(graph)
-
-
 def test_note_not_orphan(fake_bd):
     intent = _mk("intent1", "intent")
     code = _mk("code1", "code", intent)
@@ -105,3 +92,14 @@ def test_script_exit_code(bd_repo):
     )
     assert proc.returncode == 1
     json.loads(proc.stdout)
+
+
+def test_proposal_not_unchecked():
+    graph = {
+        "s": {"id": "s", "kind": "story", "parent": "i", "checks": []},
+        "i": {"id": "i", "kind": "intent", "parent": None, "checks": []},
+        "v": {"id": "v", "kind": "verification", "parent": "s", "checks": ["s"]},
+        "w": {"id": "w", "kind": "validation", "parent": "i", "checks": ["i"]},
+        "p": {"id": "p", "kind": "proposal", "parent": "s", "checks": []},
+    }
+    assert [o["id"] for o in find_orphans(graph)] == []
