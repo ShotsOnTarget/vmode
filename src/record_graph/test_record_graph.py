@@ -68,3 +68,14 @@ def test_events_not_in_graph(bd_repo):
     graph = record_graph()
     assert event_id not in graph
     assert item in graph
+
+
+def test_test_keeps_its_parent(bd_repo):
+    story = _create("story1")
+    code = _create("code1", "--parent", story)
+    test = _create("test1", "--parent", story)
+    record_run(["label", "add", test, "kind:test"])
+    record_run(["dep", "add", test, code, "-t", "validates"])
+    graph = record_graph()
+    assert graph[test]["parent"] == story
+    assert graph[test]["checks"] == [code]
