@@ -8,11 +8,11 @@
 - **Files you may change**: `src/columns_page/columns_page.py`, `src/columns_page/columns_page.md`
 - **Signature**: `columns_page() -> str`
 - **Inputs**: none.
-- **Outputs**: a complete HTML document as a string: fetches GET /api/columns, and for each column renders a heading '<name> (<role>) <in_progress>/<wip>' and a table of items with id (as a link to /?id=<id>), kind, title, state.
+- **Outputs**: a complete HTML document as a string: fetches GET /api/columns, laid out as a kanban board: one vertical column per config column, side by side left to right in config order inside a horizontally scrolling flex container (display:flex; each column a fixed width around 220px; the page never wraps columns onto a second row); each column has a heading '<name> (<role>) <in_progress>/<wip>' and one card per item showing the id (as a link to /?id=<id>), kind, title and state; a paused column (wip 0) is greyed.
 - **Errors**: none.
 - **Allowed imports**: none. Nothing else.
 - **Checklist items this job serves**: Story 0001-6 items 3
-- **How**: One triple-quoted string, vanilla JS, no external resources, no alert/confirm/prompt. Under 45 lines.
+- **How**: One triple-quoted string, vanilla JS, a small inline style block, no external resources, no alert/confirm/prompt. Under 50 lines.
 - **Checks to run before reporting**:
   - `ruff format src/columns_page` then `ruff check src/columns_page` (both clean; a noqa comment fails the shape check)
   - `python tools/lint.py`   (no findings for your folder)
