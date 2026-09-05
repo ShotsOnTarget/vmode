@@ -40,9 +40,27 @@ For a test job:
 
 Then a report, in `../shared/report-format.md`.
 
+## Standard checks, every job, in this order
+
+Sheets do not repeat these. Run them from the repo root with `<name>` as your folder.
+
+1. `ruff format src/<name>`
+2. `ruff check src/<name>`   (clean; a `noqa` comment is a shape failure, never write one)
+3. `python tools/lint.py`   (no findings for your folder)
+4. Code job only: `python -c "import ast; t=ast.parse(open('src/<name>/<name>.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)
+5. Test job only: `python -m pytest src/<name> -q`   (every named case passes)
+
+Standard rules, every job:
+
+- Code file and function each stay under 50 lines after formatting. If the formatted file is over, report blocked so the Architect splits the job.
+- The note file `src/<name>/<name>.md` has exactly six lines: purpose, signature, inputs, outputs, side effects, work item id.
+- Import only what the sheet allows. Nothing else.
+- Out of scope, always: tests on a code job, the code file on a test job, any other folder, any case or behaviour the sheet did not name.
+- Test job: import with `from <name>.<name> import <name>`; use the shared `bd_repo` fixture when the sheet says the record is involved.
+
 ## Before you report done
 
-- Run the formatter on your folder first, then the linter, then the shape checker, then the tests, exactly as the sheet names them. All four clean. Never shorten lines by hand to fit; the formatter decides layout, and if the formatted file is over the limit, report blocked so the Architect splits the job.
+- The standard checks above are clean, in order. Never shorten lines by hand to fit; the formatter decides layout.
 - Only the files named on the sheet changed.
 - For a test job: every named case exists and passes.
 - The report names the work item id.

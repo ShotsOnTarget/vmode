@@ -5,6 +5,8 @@ def _claimed_folders(folder, graph):
     claimed = set()
     for item in graph.values():
         active = item.get("kind") in ("code", "test") and item.get("state") in (
+            "ready",
+            "reopened",
             "in_progress",
             "checking",
         )

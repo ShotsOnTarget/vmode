@@ -16,7 +16,7 @@ poll_seconds = 0            # humans are not polled
 
 [columns.story_todo]        # Architect decomposes an Intent into Stories
 kinds = ["intent"]
-states = ["ready"]
+states = ["ready", "reopened"]
 role = "architect"
 tier = "frontier"
 wip = 1
@@ -32,7 +32,7 @@ poll_seconds = 300
 
 [columns.build]             # Builder pulls one code job
 kinds = ["code"]
-states = ["ready"]
+states = ["ready", "reopened"]
 role = "builder"
 tier = "cheap"
 wip = 4
@@ -40,7 +40,7 @@ poll_seconds = 30
 
 [columns.test]              # Builder pulls one test job
 kinds = ["test"]
-states = ["ready"]
+states = ["ready", "reopened"]
 role = "builder"
 tier = "cheap"
 wip = 4

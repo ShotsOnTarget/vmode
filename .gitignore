@@ -1,7 +1,6 @@
-
-# Beads / Dolt files (added by bd init)
-.dolt/
-*.db
-.beads-credential-key
-.dolt-data/
 __pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+work/*.log
+work/stop
