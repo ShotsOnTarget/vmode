@@ -8,6 +8,7 @@ ROOTS = {
     "board": "roles/board.toml",
     "manifest": "roles/manifest.json",
     "root": ".",
+    "mcp": "roles/pullers/empty-mcp.json",
 }
 
 
@@ -49,3 +50,12 @@ def test_test_kind_wording(monkeypatch):
     argv = adapter_command(item, "test", ROOTS)
     prompt = argv[2]
     assert "never create or edit the code file" in prompt
+
+
+def test_stripped_configuration(monkeypatch):
+    monkeypatch.setattr("shutil.which", lambda name: "C:/x/claude.cmd")
+    item = {"id": "vm-1", "kind": "code", "title": "x code"}
+    argv = adapter_command(item, "build", ROOTS)
+    assert "--strict-mcp-config" in argv
+    assert argv[argv.index("--mcp-config") + 1] == str(ROOTS["mcp"])
+    assert "Read,Edit,Write,Bash,Glob,Grep" in argv

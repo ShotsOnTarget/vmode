@@ -2,26 +2,10 @@ import json
 import shutil
 import tomllib
 
+from builder_prompt.builder_prompt import builder_prompt
 
-def _prompt(item: dict, role: str, root: str) -> str:
-    kind_note = (
-        "You write your tests from the sheet; you never create or edit the code file. "
-        if item["kind"] == "test"
-        else "Do not write tests. "
-    )
-    fetch_note = (
-        "Fetch it from the record with the work-record skill "
-        "(roles/work-record/SKILL.md). "
-    )
-    return (
-        f"You are the {role}. Working directory: {root}. "
-        f"Read roles/{role}/SKILL.md and follow it exactly. "
-        f"Your work item id is {item['id']}. "
-        f"{fetch_note}"
-        "Do only that item. "
-        f"{kind_note}"
-        "Report in roles/shared/report-format.md and nothing else."
-    )
+_TOOLS = ("Read", "Edit", "Write", "Bash", "Glob", "Grep")
+_NO_TOOLS = ("Task", "Agent", "WebSearch", "WebFetch", "NotebookEdit", "TodoWrite")
 
 
 def _model(tier: str, manifest: dict) -> str | None:
@@ -32,7 +16,13 @@ def _model(tier: str, manifest: dict) -> str | None:
 
 
 def adapter_command(item: dict, column: str, roots: dict) -> list[str]:
-    """- purpose: build the argv for one Builder run on the Claude Code harness."""
+    """The argv for one Builder run on the Claude Code harness.
+
+    roots: board (roles/board.toml), manifest (roles/manifest.json), root
+    (working directory), mcp (a JSON file declaring no MCP servers). The run
+    is stripped: no MCP servers, six tools, so the per-turn baseline is the
+    harness prompt and those tools only (measured 2026-09-05: 44k vs 105k).
+    """
     exe = shutil.which("claude")
     if exe is None:
         raise RuntimeError("claude not found on PATH")
@@ -41,8 +31,15 @@ def adapter_command(item: dict, column: str, roots: dict) -> list[str]:
     with open(roots["manifest"]) as f:
         manifest = json.load(f)
     column_config = board["columns"][column]
-    prompt = _prompt(item, column_config["role"], roots["root"])
+    prompt = builder_prompt(item, column_config["role"], roots["root"])
     argv = [exe, "-p", prompt, "--output-format", "json"]
+    argv += ["--strict-mcp-config", "--mcp-config", str(roots["mcp"])]
+    argv += [
+        "--allowedTools",
+        ",".join(_TOOLS),
+        "--disallowedTools",
+        ",".join(_NO_TOOLS),
+    ]
     model = _model(column_config["tier"], manifest)
     if model is not None:
         argv += ["--model", model]
