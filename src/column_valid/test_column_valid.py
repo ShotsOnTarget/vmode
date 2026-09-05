@@ -55,3 +55,10 @@ def test_wip_negative_reported():
     column["wip"] = -1
     problems = column_valid("intent", column)
     assert any(p.startswith("wip:") for p in problems)
+
+
+def test_note_kind_valid():
+    column = _valid_column()
+    column["kinds"] = ["note"]
+    column["states"] = ["waiting", "ready"]
+    assert column_valid("intent", column) == []
