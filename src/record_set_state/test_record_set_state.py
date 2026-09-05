@@ -55,3 +55,11 @@ def test_reopened_opens(bd_repo):
     record_set_state(item_id, "done")
     record_set_state(item_id, "reopened")
     assert _show(item_id)["status"] == "open"
+
+
+def test_ready_needs_checklist(bd_repo):
+    story = record_run(["create", "S", "-t", "task", "-l", "kind:story,state:waiting"])
+    with pytest.raises(ValueError):
+        record_set_state(story["id"], "ready")
+    record_run(["update", story["id"], "--acceptance", "1. it works [testing]"])
+    assert record_set_state(story["id"], "ready")["state"] == "ready"
