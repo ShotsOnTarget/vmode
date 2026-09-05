@@ -46,3 +46,7 @@ Cost fields: `tokens` is the total tokens the harness reports for the Builder ru
 ## What the Supervisor never does
 
 Decide scope. Write or edit an instruction sheet. Read code for meaning. Summarise with judgement. Skip a gate. Delete a log line.
+
+## Notes
+
+On every bounce and every escalate the Supervisor raises a `note` item under the job, titled with the action and the failed rules, whose description is the escalation summary (what failed, how many times, which rule, what was tried, decision needed). The summary file under work/summaries is retired. Notes wait in the triage column for the Analyst.
