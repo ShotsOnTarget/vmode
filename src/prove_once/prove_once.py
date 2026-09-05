@@ -32,9 +32,11 @@ def prove_once(config_path: str) -> list[str]:
     for item in graph.values():
         if item["kind"] != "story" or item["state"] in ("done", "checking"):
             continue
-        codes = [i for i in graph.values() if i["parent"] == item["id"]]
-        tests = [i for i in graph.values() if i["parent"] in {c["id"] for c in codes}]
-        jobs = codes + tests
+        jobs = [
+            i
+            for i in graph.values()
+            if i["parent"] == item["id"] and i["kind"] in ("code", "test")
+        ]
         if jobs and all(job["state"] == "done" for job in jobs):
             record_set_state(item["id"], "checking")
 

@@ -56,7 +56,8 @@ def test_story_moves_to_checking(bd_repo, tmp_path):
     config_path = _config(tmp_path)
     story_id = _create("Story S", "kind:story,state:ready")
     code_id = _create("Story S code", "kind:code,state:done", parent=story_id)
-    _create("Story S test", "kind:test,state:done", parent=code_id)
+    test_id = _create("Story S test", "kind:test,state:done", parent=story_id)
+    record_run(["dep", "add", test_id, code_id, "-t", "validates"])
 
     prove_once(config_path)
 
@@ -67,7 +68,8 @@ def test_story_stays_when_test_open(bd_repo, tmp_path):
     config_path = _config(tmp_path)
     story_id = _create("Story S", "kind:story,state:ready")
     code_id = _create("Story S code", "kind:code,state:done", parent=story_id)
-    _create("Story S test", "kind:test,state:ready", parent=code_id)
+    test_id = _create("Story S test", "kind:test,state:ready", parent=story_id)
+    record_run(["dep", "add", test_id, code_id, "-t", "validates"])
 
     prove_once(config_path)
 
