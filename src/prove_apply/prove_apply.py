@@ -27,6 +27,8 @@ def prove_apply(job_id: str, gathered: dict) -> str:
         "state": state,
         "tokens": int(usage.get("tokens", -1)),
         "seconds": float(usage.get("seconds", 0.0)),
+        "usd": usage.get("cost_usd"),
+        "turns": usage.get("turns"),
     }
     _log_gate(job_id, "Built", base)
     if gathered["kind"] == "test":
