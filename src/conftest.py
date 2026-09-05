@@ -1,21 +1,20 @@
+import itertools
 import socket
 import subprocess
 import time
 
 import pytest
 
+_COUNTER = itertools.count()
 
-@pytest.fixture
-def bd_repo(tmp_path, monkeypatch):
+
+@pytest.fixture(scope="session")
+def dolt_server(tmp_path_factory):
+    """One Dolt server for the whole test session; each test gets its own database."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(("127.0.0.1", 0))
         port = s.getsockname()[1]
-
-    dolt_dir = tmp_path / "dolt"
-    repo = tmp_path / "repo"
-    dolt_dir.mkdir()
-    repo.mkdir()
-
+    dolt_dir = tmp_path_factory.mktemp("dolt")
     server = subprocess.Popen(
         [
             "dolt",
@@ -30,44 +29,45 @@ def bd_repo(tmp_path, monkeypatch):
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
-
     deadline = time.time() + 15
-    connected = False
     while time.time() < deadline:
         try:
             with socket.create_connection(("127.0.0.1", port), timeout=0.5):
-                connected = True
                 break
         except OSError:
             time.sleep(0.1)
-
-    if not connected:
+    else:
         server.terminate()
         server.wait()
-        message = (
-            f"dolt sql-server did not accept connections on port {port} "
-            "within 15 seconds"
-        )
-        raise RuntimeError(message)
+        raise RuntimeError(f"dolt sql-server did not accept connections on port {port}")
+    yield port
+    server.terminate()
+    server.wait()
 
-    try:
-        subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
-        subprocess.run(
-            [
-                "bd",
-                "init",
-                "--prefix",
-                "vm",
-                "--non-interactive",
-                "--server",
-                "--server-port",
-                str(port),
-            ],
-            cwd=repo,
-            check=True,
-        )
-        monkeypatch.chdir(repo)
-        yield repo
-    finally:
-        server.terminate()
-        server.wait()
+
+@pytest.fixture
+def bd_repo(tmp_path, monkeypatch, dolt_server):
+    """A fresh git repo with its own record database on the session's Dolt server."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+    name = f"t{next(_COUNTER)}_{tmp_path.name.replace('-', '_')}"[:40]
+    subprocess.run(
+        [
+            "bd",
+            "init",
+            "--prefix",
+            "vm",
+            "--non-interactive",
+            "--server",
+            "--server-port",
+            str(dolt_server),
+            "--database",
+            name,
+        ],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+    )
+    monkeypatch.chdir(repo)
+    yield repo
