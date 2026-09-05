@@ -7,6 +7,13 @@ def test_has_endpoints():
     assert "/api/decide" in html
 
 
+def test_has_release_and_decision():
+    html = columns_modal()
+    assert "/api/release" in html
+    assert "Release" in html
+    assert "Decision" in html
+
+
 def test_has_open_function():
     html = columns_modal()
     assert "openItem" in html

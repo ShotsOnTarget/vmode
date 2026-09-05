@@ -1,4 +1,4 @@
-purpose: HTML fragment for a modal that shows item details and, for checking intents/proposals, lets a user decide yes/no.
+purpose: HTML fragment for a modal showing item details, a Decision line by kind/state, Release for waiting intents, and Yes/No for checking intents/proposals.
 signature: columns_modal() -> str
 inputs: none.
 outputs: an HTML fragment string containing the modal markup, styles, and script (window.openItem).
