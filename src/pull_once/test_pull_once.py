@@ -28,6 +28,15 @@ def _make_in_progress_item():
         ]
     )
     item = created[0] if isinstance(created, list) else created
+    record_run(["update", item["id"], "--claim", "--actor", "someone-else"])
+    return item["id"]
+
+
+def _make_done_story():
+    created = record_run(
+        ["create", "-l", "kind:story,state:done", "--no-inherit-labels", "Item"]
+    )
+    item = created[0] if isinstance(created, list) else created
     return item["id"]
 
 
@@ -141,3 +150,28 @@ def test_unknown_role_raises(bd_repo, tmp_path):
 
     with pytest.raises(ValueError):
         pull_once("nobody", config_path, _ok_invoke)
+
+
+def test_label_column_adds_label(bd_repo, tmp_path):
+    story_id = _make_done_story()
+    config_path = _plain_config(tmp_path)
+
+    claimed = pull_once("analyst", config_path, _ok_invoke)
+
+    assert claimed == [story_id]
+    row = _show(story_id)
+    assert "learned" in row["labels"]
+    assert "state:done" in row["labels"]
+    assert not row.get("assignee")
+
+
+def test_lost_claim_skipped(bd_repo, tmp_path):
+    ready_id = _make_item()
+    record_run(["update", ready_id, "--claim", "--actor", "other"])
+    config_path = _plain_config(tmp_path)
+
+    claimed = pull_once("builder", config_path, _ok_invoke)
+
+    assert claimed == []
+    row = _show(ready_id)
+    assert row.get("assignee") == "other"
