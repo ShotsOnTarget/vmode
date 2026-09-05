@@ -43,6 +43,8 @@ The record runs on a local Dolt server. Start it once per machine session from t
 dolt sql-server --host 127.0.0.1 --port 3306 --data-dir .dolt-data
 ```
 
+The client is bd 1.0. Set `VMODE_BD` to its full path (on this machine `C:/Users/steve/code/bin/bd.exe`; the justfile does it) so every shell and harness resolves the same client; a different bd on PATH cannot read this record and every call fails.
+
 First time only, in the repo root: `bd init --prefix vm --non-interactive --server --server-port 3306`.
 
 ## Never
