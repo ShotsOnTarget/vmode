@@ -79,7 +79,7 @@ labels_absent = ["triaged"] # leaves the column when the Analyst has disposed of
 role = "analyst"
 tier = "cheap"
 wip = 1
-poll_seconds = 600
+poll_seconds = 60
 
 [columns.patterns]          # Analyst writes, Architect reads before writing sheets; never claimed
 kinds = ["pattern"]
@@ -96,7 +96,7 @@ labels_absent = ["learned"] # leaves the column when the Analyst adds this label
 role = "analyst"
 tier = "cheap"
 wip = 1
-poll_seconds = 600
+poll_seconds = 60
 
 [columns.blocked]           # awaiting a person; nobody pulls, everyone sees
 kinds = ["intent", "story", "code", "test", "proposal"]
