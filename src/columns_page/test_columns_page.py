@@ -18,6 +18,11 @@ def test_no_external():
     assert "https://" not in html
 
 
+def test_side_by_side():
+    html = columns_page()
+    assert "display:flex" in html or "display: flex" in html
+
+
 def test_no_dialogs():
     html = columns_page()
     assert "alert(" not in html
