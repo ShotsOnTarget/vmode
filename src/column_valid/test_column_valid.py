@@ -62,3 +62,18 @@ def test_note_kind_valid():
     column["kinds"] = ["note"]
     column["states"] = ["waiting", "ready"]
     assert column_valid("intent", column) == []
+
+
+def test_adapter_key_allowed():
+    column = {
+        "kinds": ["code"],
+        "states": ["ready"],
+        "role": "builder",
+        "tier": "cheap",
+        "wip": 1,
+        "poll_seconds": 1,
+        "adapter": "opencode",
+    }
+    assert column_valid("build", column) == []
+    column["adapter"] = ""
+    assert column_valid("build", column) != []

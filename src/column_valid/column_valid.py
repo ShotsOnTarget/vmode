@@ -3,7 +3,7 @@ KINDS = _LEFT | {"test", "verification", "validation"}
 STATES = {"waiting", "ready", "in_progress", "blocked", "checking", "done", "reopened"}
 TIERS = {"human", "frontier", "cheap", "none"}
 REQUIRED = {"kinds", "states", "role", "tier", "wip", "poll_seconds"}
-ALLOWED = REQUIRED | {"labels_absent"}
+ALLOWED = REQUIRED | {"labels_absent", "adapter"}
 
 
 def _is_kind_list(value):
@@ -30,6 +30,7 @@ CHECKERS = (
     ("wip", lambda v: _is_int_at_least(v, 0), "must be an int >= 0"),
     ("poll_seconds", lambda v: _is_int_at_least(v, 0), "must be an int >= 0"),
     ("labels_absent", _is_str_list, "must be a list of str"),
+    ("adapter", lambda v: isinstance(v, str) and v, "must be a non-empty str"),
 )
 
 
