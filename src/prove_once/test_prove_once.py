@@ -25,17 +25,15 @@ def _create(title, labels, parent=None):
 
 def test_empty_prove_noop(bd_repo, tmp_path):
     config_path = _config(tmp_path)
-    log_path = str(tmp_path / "log.jsonl")
 
-    result = prove_once(config_path, log_path)
+    result = prove_once(config_path)
 
     assert result == []
-    assert not os.path.exists(log_path)
+    assert record_run(["list", "--all", "--type", "event"]) == []
 
 
 def test_processes_checking_job(bd_repo, tmp_path):
     config_path = _config(tmp_path)
-    log_path = str(tmp_path / "log.jsonl")
     item_id = _create("widget code", "kind:code,state:checking")
     record_run(["comment", item_id, 'usage: {"tokens": 5, "seconds": 1.0}'])
 
@@ -48,7 +46,7 @@ def test_processes_checking_job(bd_repo, tmp_path):
     os.system("git add -A")
     os.system("git commit -q -m widget")
 
-    result = prove_once(config_path, log_path)
+    result = prove_once(config_path)
 
     assert result == [item_id]
     assert record_show_item(item_id)["state"] == "done"
@@ -56,25 +54,21 @@ def test_processes_checking_job(bd_repo, tmp_path):
 
 def test_story_moves_to_checking(bd_repo, tmp_path):
     config_path = _config(tmp_path)
-    log_path = str(tmp_path / "log.jsonl")
     story_id = _create("Story S", "kind:story,state:ready")
     code_id = _create("Story S code", "kind:code,state:done", parent=story_id)
-    test_id = _create("Story S test", "kind:test,state:done")
-    record_run(["dep", "add", test_id, code_id, "-t", "validates"])
+    _create("Story S test", "kind:test,state:done", parent=code_id)
 
-    prove_once(config_path, log_path)
+    prove_once(config_path)
 
     assert record_show_item(story_id)["state"] == "checking"
 
 
 def test_story_stays_when_test_open(bd_repo, tmp_path):
     config_path = _config(tmp_path)
-    log_path = str(tmp_path / "log.jsonl")
     story_id = _create("Story S", "kind:story,state:ready")
     code_id = _create("Story S code", "kind:code,state:done", parent=story_id)
-    test_id = _create("Story S test", "kind:test,state:ready")
-    record_run(["dep", "add", test_id, code_id, "-t", "validates"])
+    _create("Story S test", "kind:test,state:ready", parent=code_id)
 
-    prove_once(config_path, log_path)
+    prove_once(config_path)
 
     assert record_show_item(story_id)["state"] == "ready"
