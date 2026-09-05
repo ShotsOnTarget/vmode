@@ -45,6 +45,12 @@ def _labels(item_id):
     return names
 
 
+def _assignee(item_id):
+    row = record_run(["show", item_id])
+    row = row[0] if isinstance(row, list) else row
+    return row.get("assignee") or ""
+
+
 _GOOD_CODE = (
     "def x():\n"
     "    a = 1\n"
@@ -85,14 +91,13 @@ def _base_gathered(tmp_path, **overrides):
 
 def test_pass_moves_done(bd_repo, tmp_path):
     item_id = _create("code")
-    log_path = str(tmp_path / "log.jsonl")
     gathered = _base_gathered(tmp_path, usage={"tokens": 7, "seconds": 1.0})
 
-    result = prove_apply(item_id, gathered, log_path)
+    result = prove_apply(item_id, gathered)
 
     assert result == "done"
     assert "state:done" in _labels(item_id)
-    entries = log_read_item(log_path, item_id)
+    entries = log_read_item(item_id)
     built = [e for e in entries if e["gate"] == "Built"]
     assert built
     assert built[0]["tokens"] == 7
@@ -102,10 +107,9 @@ def test_pass_moves_done(bd_repo, tmp_path):
 
 def test_fail_bounces(bd_repo, tmp_path):
     item_id = _create("code")
-    log_path = str(tmp_path / "log.jsonl")
     gathered = _base_gathered(tmp_path, lint_out="x.py:1:1: E501")
 
-    result = prove_apply(item_id, gathered, log_path)
+    result = prove_apply(item_id, gathered)
 
     assert result == "ready"
     assert "retry:1" in _labels(item_id)
@@ -120,10 +124,9 @@ def test_fail_bounces(bd_repo, tmp_path):
 
 def test_third_fail_blocks(bd_repo, tmp_path):
     item_id = _create("code")
-    log_path = "log.jsonl"
     gathered = _base_gathered(tmp_path, lint_out="x.py:1:1: E501", retries=3)
 
-    result = prove_apply(item_id, gathered, log_path)
+    result = prove_apply(item_id, gathered)
 
     assert result == "blocked"
     assert pathlib.Path(f"work/summaries/{item_id}.md").is_file()
@@ -131,16 +134,15 @@ def test_third_fail_blocks(bd_repo, tmp_path):
 
 def test_usage_extra_keys_ignored(bd_repo, tmp_path):
     item_id = _create("code")
-    log_path = str(tmp_path / "log.jsonl")
     gathered = _base_gathered(
         tmp_path,
         usage={"tokens": 5, "seconds": 1.0, "report": "x", "cost_usd": 0.2},
     )
 
-    result = prove_apply(item_id, gathered, log_path)
+    result = prove_apply(item_id, gathered)
 
     assert result == "done"
-    entries = log_read_item(log_path, item_id)
+    entries = log_read_item(item_id)
     built = [e for e in entries if e["gate"] == "Built"]
     assert built
     assert built[0]["tokens"] == 5
@@ -149,7 +151,6 @@ def test_usage_extra_keys_ignored(bd_repo, tmp_path):
 
 def test_test_kind_runs_proven(bd_repo, tmp_path):
     item_id = _create("test")
-    log_path = str(tmp_path / "log.jsonl")
     gathered = _base_gathered(
         tmp_path,
         kind="test",
@@ -157,10 +158,21 @@ def test_test_kind_runs_proven(bd_repo, tmp_path):
         cases=["a"],
     )
 
-    result = prove_apply(item_id, gathered, log_path)
+    result = prove_apply(item_id, gathered)
 
     assert result == "ready"
-    entries = log_read_item(log_path, item_id)
+    entries = log_read_item(item_id)
     proven = [e for e in entries if e["gate"] == "Proven"]
     assert proven
     assert "tests_failed" in proven[0]["rule"]
+
+
+def test_bounce_clears_claim(bd_repo, tmp_path):
+    item_id = _create("code")
+    record_run(["update", item_id, "--claim", "--actor", "tester"])
+    gathered = _base_gathered(tmp_path, lint_out="x.py:1:1: E501")
+
+    result = prove_apply(item_id, gathered)
+
+    assert result == "ready"
+    assert _assignee(item_id) == ""
