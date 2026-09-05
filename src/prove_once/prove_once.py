@@ -1,5 +1,6 @@
 from board_config.board_config import board_config
 from column_items.column_items import column_items
+from proposal_sweep.proposal_sweep import proposal_sweep
 from prove_apply.prove_apply import prove_apply
 from prove_gather.prove_gather import prove_gather
 from record_graph.record_graph import record_graph
@@ -32,6 +33,7 @@ def prove_once(config_path: str) -> list[str]:
         processed.append(job_id)
 
     graph = record_graph()
+    proposal_sweep(graph)
     for item in graph.values():
         if item["kind"] != "story" or item["state"] in ("done", "checking"):
             continue
