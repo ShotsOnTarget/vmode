@@ -18,6 +18,8 @@
   - `test_item_fields`: 'item' with the intent id -> keys id, kind, title, owner, state, parent, sheet
   - `test_columns_shape`: 'columns' -> list whose first entry has keys name, role, wip, in_progress, items
   - `test_decide_roundtrip`: 'decide' with body {intent, 'yes', ''} -> payload state 'done'
+  - `test_release_moves_ready`: 'release' with body {id: intent} on a waiting intent -> the intent's state label becomes state:ready
+  - `test_release_rejects_non_intent`: 'release' on a story -> ValueError
   - `test_unknown_name_raises`: 'nope' -> KeyError
 - **Checks to run before reporting**:
   - `ruff format src/board_api` then `ruff check src/board_api` (both clean)

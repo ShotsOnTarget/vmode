@@ -15,6 +15,7 @@
 - **Setup**: none needed.
 - **Cases**, one test function each, exactly these names, nothing more:
   - `test_has_endpoints`: contains '/api/item' and '/api/decide'
+  - `test_has_release_and_decision`: contains '/api/release', 'Release' and 'Decision'
   - `test_has_open_function`: contains 'openItem'
   - `test_has_escape_and_close`: contains 'Escape' and 'Close'
   - `test_no_dialogs_no_external`: contains none of 'alert(', 'confirm(', 'prompt(', 'http://', 'https://'
