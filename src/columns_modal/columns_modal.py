@@ -1,3 +1,4 @@
+from modal_proposal.modal_proposal import modal_proposal
 from modal_timeline.modal_timeline import modal_timeline
 
 _HTML = """
@@ -23,7 +24,9 @@ function decisionFor(k,t){
   var html=row('id',d.id)+row('kind',d.kind)+row('title',d.title)+row('owner',d.owner);
   html+=row('state',d.state)+row('parent',d.parent);var s=d.sheet==null?'':d.sheet;
   html+='<pre style="max-height:50vh;overflow:auto;white-space:pre-wrap">'+s+'</pre>';
-  g('modalDetails').innerHTML=html;var dec=decisionFor(d.kind,d.state);
+  var box=g('modalDetails');
+  if(d.kind==='proposal')showProposal(d,box);else box.innerHTML=html;
+  var dec=decisionFor(d.kind,d.state);
   var t=dec.text==null?'No decision for the Board on this item':dec.text;
   g('modalDecision').innerHTML='<strong>Decision:</strong> '+t;
   g('modalRelease').style.display=dec.mode==='release'?'':'none';
@@ -47,4 +50,4 @@ function modalRelease(){post('/api/release',{id:window.currentItemId});}
 
 def columns_modal() -> str:
     """The board modal: item details, the decision line, Release and Yes/No."""
-    return modal_timeline() + _HTML
+    return modal_timeline() + modal_proposal() + _HTML
