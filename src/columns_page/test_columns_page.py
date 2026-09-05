@@ -23,6 +23,13 @@ def test_side_by_side():
     assert "display:flex" in html or "display: flex" in html
 
 
+def test_no_overflow_rules():
+    html = columns_page()
+    assert "text-overflow" in html
+    assert "word-break" in html
+    assert "overflow-x" in html
+
+
 def test_no_dialogs():
     html = columns_page()
     assert "alert(" not in html

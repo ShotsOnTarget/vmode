@@ -1,22 +1,38 @@
 def columns_page() -> str:
     return (
         """<!doctype html><html><head><meta charset="utf-8"><title>Columns</title>
-<style>body{font-family:sans-serif}#columns{display:flex;flex-direction:row;"""
-        """overflow-x:auto;white-space:nowrap}.col{display:inline-block;"""
-        """vertical-align:top;width:220px;flex:0 0 220px;margin-right:8px}"""
-        """.col.paused{background:#ddd;color:#888}.card{border:1px solid #ccc;"""
-        """border-radius:4px;padding:6px;margin-bottom:6px}</style>
+<style>body{font-family:system-ui,sans-serif;font-size:14px;padding:16px;margin:0}"""
+        """#columns{display:flex;gap:12px;overflow-x:auto;align-items:flex-start}"""
+        """.col{width:240px;flex:0 0 240px;background:#f4f5f7;border-radius:8px;"""
+        """padding:10px;box-sizing:border-box}.col.paused{opacity:0.5}"""
+        """.hd{display:flex;justify-content:space-between;align-items:baseline;"""
+        """font-size:13px;font-weight:bold;white-space:nowrap;overflow:hidden;"""
+        """margin-bottom:8px}.hd .nm{overflow:hidden;text-overflow:ellipsis;"""
+        """white-space:nowrap}.hd .rl{font-weight:normal;color:#888;margin-left:4px}"""
+        """.hd .ct{flex:0 0 auto;margin-left:6px}"""
+        """.card{background:#fff;border:1px solid #d0d4da;border-radius:6px;"""
+        """padding:8px;margin-bottom:8px;word-break:break-word}"""
+        """.card .l1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}"""
+        """.card .l1 .k{color:#888;font-size:12px;margin-left:4px}"""
+        """.pill{display:inline-block;padding:1px 6px;border-radius:10px;"""
+        """background:#e6e8eb;font-size:12px}.empty{color:#888}</style>
 </head><body>
 <div id="columns"></div>
 <script>
+function esc(s){const d=document.createElement('div');d.textContent=s;"""
+        """return d.innerHTML;}
 function cardHtml(it){
-  return `<div class="card"><a href="/?id=${it.id}">${it.id}</a> """
-        """${it.kind}<br>${it.title}<br>${it.state}</div>`;}
+  return `<div class="card"><div class="l1"><a href="/?id=${esc(it.id)}">"""
+        """${esc(it.id)}</a><span class="k">${esc(it.kind)}</span></div>"""
+        """<div>${esc(it.title)}</div><div><span class="pill">${esc(it.state)}"""
+        """</span></div></div>`;}
 function columnHtml(col){
   const cls=col.wip===0?'col paused':'col';
-  return `<div class="${cls}"><h2>${col.name} (${col.role}) """
-        """${col.in_progress}/${col.wip}</h2>${col.items.map(cardHtml)"""
-        """.join('')}</div>`;}
+  const body=col.items.length?col.items.map(cardHtml).join('')"""
+        """:'<div class="empty">nothing here</div>';
+  return `<div class="${cls}"><div class="hd"><span class="nm">${esc(col.name)}"""
+        """<span class="rl">${esc(col.role)}</span></span><span class="ct">"""
+        """${col.in_progress}/${col.wip}</span></div>${body}</div>`;}
 fetch('/api/columns').then(r=>r.json()).then(cols=>{
   document.getElementById('columns').innerHTML=cols.map(columnHtml).join('');});
 </script>
