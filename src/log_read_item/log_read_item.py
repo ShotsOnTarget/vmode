@@ -1,24 +1,27 @@
 import json
-import os
+
+from record_run.record_run import record_run
 
 
-def _parse_line(path: str, line: str) -> dict:
-    try:
-        return json.loads(line)
-    except json.JSONDecodeError as err:
-        raise ValueError(f"invalid JSON line in {path}: {line}") from err
-
-
-def log_read_item(path: str, item_id: str) -> list[dict]:
-    if not os.path.isfile(path):
-        return []
+def log_read_item(item_id: str) -> list[dict]:
+    events = record_run(["list", "--all", "--type", "event"])
+    matches = sorted(
+        (event for event in events if event.get("target") == item_id),
+        key=lambda event: event["created_at"],
+    )
     results = []
-    with open(path) as f:
-        for raw_line in f:
-            line = raw_line.strip()
-            if not line:
-                continue
-            entry = _parse_line(path, line)
-            if entry.get("item") == item_id:
-                results.append(entry)
+    for event in matches:
+        try:
+            payload = json.loads(event["payload"])
+        except json.JSONDecodeError as err:
+            raise ValueError(f"invalid JSON payload for event {event['id']}") from err
+        entry = {
+            "id": event["id"],
+            "ts": event["created_at"],
+            "actor": event["actor"],
+            "gate": event["event_kind"],
+            "item": event["target"],
+        }
+        entry.update(payload)
+        results.append(entry)
     return results

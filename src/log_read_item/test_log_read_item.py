@@ -1,43 +1,47 @@
-import json
-
-import pytest
-
+from log_append.log_append import log_append
 from log_read_item.log_read_item import log_read_item
 
 
-def test_returns_matching_in_order(tmp_path):
-    path = tmp_path / "log.jsonl"
-    lines = [
-        {"item": "A", "n": 1},
-        {"item": "B", "n": 1},
-        {"item": "A", "n": 2},
-        {"item": "B", "n": 2},
-        {"item": "A", "n": 3},
-    ]
-    path.write_text("\n".join(json.dumps(line) for line in lines) + "\n")
-    result = log_read_item(str(path), "A")
-    assert result == [
-        {"item": "A", "n": 1},
-        {"item": "A", "n": 2},
-        {"item": "A", "n": 3},
-    ]
+def _entry(item, gate, tokens=1):
+    return {
+        "item": item,
+        "gate": gate,
+        "rule": "r",
+        "inputs": "i",
+        "state": "s",
+        "tokens": tokens,
+        "seconds": 0,
+        "actor": "builder",
+    }
 
 
-def test_missing_file_returns_empty(tmp_path):
-    result = log_read_item(str(tmp_path / "log.jsonl"), "A")
+def test_returns_in_order(bd_repo):
+    log_append(_entry("A", "Built"))
+    log_append(_entry("A", "Proven"))
+    log_append(_entry("A", "Verified"))
+
+    result = log_read_item("A")
+
+    assert [r["gate"] for r in result] == ["Built", "Proven", "Verified"]
+
+
+def test_other_target_excluded(bd_repo):
+    log_append(_entry("B", "Built"))
+
+    result = log_read_item("A")
+
     assert result == []
 
 
-def test_bad_line_raises(tmp_path):
-    path = tmp_path / "log.jsonl"
-    path.write_text("not json\n")
-    with pytest.raises(ValueError):
-        log_read_item(str(path), "A")
+def test_none_empty(bd_repo):
+    result = log_read_item("A")
+
+    assert result == []
 
 
-def test_file_unchanged_after_read(tmp_path):
-    path = tmp_path / "log.jsonl"
-    path.write_bytes((json.dumps({"item": "A", "n": 1}) + "\n").encode("utf-8"))
-    before = path.read_bytes()
-    log_read_item(str(path), "A")
-    assert before == path.read_bytes()
+def test_payload_merged(bd_repo):
+    log_append(_entry("A", "Built", tokens=42))
+
+    result = log_read_item("A")
+
+    assert result[0]["tokens"] == 42
