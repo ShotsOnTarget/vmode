@@ -1,64 +1,49 @@
+import pytest
+
 from prove_rules.prove_rules import prove_rules
 
-_FOLDER = "0003-4-prove_rules-test"
-_NOTE = f"line1\nline2\nline3\nline4\nline5\n{_FOLDER}"
-_CODE = "\n".join(f"x{i} = {i}" for i in range(9)) + "\ndef x():\n    pass\n"
+CODE = 'def {n}(x: int) -> int:\n    """Add one."""\n    return x + 1\n'
+NOTE = "purpose\nsignature\ninputs\noutputs\nside effects\nwork item {n}-code\n"
+TEST = "from {n}.{n} import {n}\n\n\ndef test_adds():\n    assert {n}(1) == {v}\n"
 
 
-def test_clean_code_empty():
-    gathered = {
-        "folder": _FOLDER,
-        "kind": "code",
-        "changed": [f"src/{_FOLDER}/x.py", f"src/{_FOLDER}/x.md"],
-        "code": _CODE,
-        "note": _NOTE,
-        "fmt_out": "",
-        "lint_out": "All checks passed!",
-    }
-    assert prove_rules(gathered) == []
+@pytest.fixture
+def repo(tmp_path, monkeypatch):
+    (tmp_path / "pytest.ini").write_text(
+        "[pytest]\npythonpath = src\naddopts = --import-mode=importlib\n"
+    )
+    (tmp_path / "src").mkdir()
+    monkeypatch.chdir(tmp_path)
+    return tmp_path
 
 
-def test_code_skips_proven():
-    gathered = {
-        "folder": _FOLDER,
-        "kind": "code",
-        "changed": [f"src/{_FOLDER}/x.py"],
-        "code": _CODE,
-        "note": _NOTE,
-        "fmt_out": "",
-        "lint_out": "All checks passed!",
-        "pytest_out": "FAILED x",
-        "cases": ["a"],
-    }
-    assert prove_rules(gathered) == []
+def _folder(root, n, v=2):
+    d = root / "src" / n
+    d.mkdir()
+    (d / f"{n}.py").write_text(CODE.format(n=n))
+    (d / f"{n}.md").write_text(NOTE.format(n=n))
+    (d / f"test_{n}.py").write_text(TEST.format(n=n, v=v))
 
 
-def test_test_runs_proven():
-    gathered = {
-        "folder": _FOLDER,
-        "kind": "test",
-        "changed": [f"src/{_FOLDER}/x.py"],
-        "code": _CODE,
-        "note": _NOTE,
-        "fmt_out": "",
-        "lint_out": "All checks passed!",
-        "pytest_out": "FAILED src/x/test_x.py::test_a",
-        "cases": ["a"],
-    }
-    assert "tests_failed" in prove_rules(gathered)
+def _gathered(n, kind, cases):
+    return {"folder": n, "kind": kind, "changed": [f"src/{n}/{n}.py"], "cases": cases}
 
 
-def test_built_rules_first():
-    gathered = {
-        "folder": _FOLDER,
-        "kind": "test",
-        "changed": [f"src/{_FOLDER}/x.py"],
-        "code": _CODE,
-        "note": _NOTE,
-        "fmt_out": "",
-        "lint_out": "x:1:1: E501",
-        "pytest_out": "FAILED src/x/test_x.py::test_a",
-        "cases": ["a"],
-    }
-    result = prove_rules(gathered)
-    assert result.index("lint_findings") < result.index("tests_failed")
+def test_clean_code_empty(repo):
+    _folder(repo, "clean")
+    assert prove_rules(_gathered("clean", "code", [])) == []
+
+
+def test_code_skips_case_rules(repo):
+    _folder(repo, "coded")
+    assert prove_rules(_gathered("coded", "code", ["other"])) == []
+
+
+def test_test_runs_case_rules(repo):
+    _folder(repo, "tested")
+    assert "case_missing" in prove_rules(_gathered("tested", "test", ["other"]))
+
+
+def test_code_proven_against_tests(repo):
+    _folder(repo, "broken", v=3)
+    assert "tests_failed" in prove_rules(_gathered("broken", "code", []))
