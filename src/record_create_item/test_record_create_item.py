@@ -69,3 +69,18 @@ def test_proposal_is_left_side(bd_repo):
     story = _mk("story", parent=_mk("intent")["id"])
     prop = _mk("proposal", parent=story["id"])
     assert record_run(["show", prop["id"]])[0]["parent"] == story["id"]
+
+
+def test_note_created_with_parent(bd_repo):
+    parent_id = _mk("intent")["id"]
+    item = record_create_item("note", "saw X", "supervisor", parent=parent_id)
+    assert item["kind"] == "note"
+    assert item["parent"] == parent_id
+    assert item["state"] == "waiting"
+    labels = record_run(["show", item["id"]])[0]["labels"]
+    assert "kind:note" in labels
+
+
+def test_note_without_parent_rejected(bd_repo):
+    with pytest.raises(ValueError):
+        record_create_item("note", "saw X", "supervisor", parent=None)
