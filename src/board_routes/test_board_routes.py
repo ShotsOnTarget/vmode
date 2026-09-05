@@ -86,6 +86,12 @@ def test_item_json(bd_repo):
     } <= payload.keys()
 
 
+def test_timeline_json(bd_repo):
+    iid = _intent()
+    status, _, payload = board_routes("GET", "/api/timeline", {"id": iid}, {})
+    assert status == 200 and payload == []
+
+
 def test_unknown_404():
     status, content_type, payload = board_routes("GET", "/nope", {}, {})
     assert status == 404
