@@ -1,5 +1,4 @@
 import os
-import pathlib
 
 from log_read_item.log_read_item import log_read_item
 from prove_apply.prove_apply import prove_apply
@@ -7,7 +6,7 @@ from record_run.record_run import record_run
 from record_show_item.record_show_item import record_show_item
 
 
-def _job_repo(tmp_path, folder, code, note):
+def _job_repo(tmp_path, folder, code, note, test=None):
     repo = tmp_path / "job_repo"
     repo.mkdir()
     os.system(f'git -C "{repo}" init -q')
@@ -17,6 +16,8 @@ def _job_repo(tmp_path, folder, code, note):
     src.mkdir(parents=True)
     (src / f"{folder}.py").write_text(code)
     (src / f"{folder}.md").write_text(note)
+    if test:
+        (src / f"test_{folder}.py").write_text(test)
     return str(repo)
 
 
@@ -51,18 +52,7 @@ def _assignee(item_id):
     return row.get("assignee") or ""
 
 
-_GOOD_CODE = (
-    "def x():\n"
-    "    a = 1\n"
-    "    b = 2\n"
-    "    c = 3\n"
-    "    d = 4\n"
-    "    e = 5\n"
-    "    f = 6\n"
-    "    g = 7\n"
-    "    h = 8\n"
-    "    return a\n"
-)
+_GOOD_CODE = "def widget(x: int) -> int:" + chr(10) + "    return x + 1" + chr(10)
 
 _GOOD_NOTE = "widget\nline two\nline three\nline four\nline five\nline six"
 
@@ -83,7 +73,7 @@ def _base_gathered(tmp_path, **overrides):
         "usage": {"tokens": -1, "seconds": 1.0},
         "pytest_out": "",
         "cases": [],
-        "repo": _job_repo(tmp_path, folder, code, note),
+        "repo": _job_repo(tmp_path, folder, code, note, overrides.get("test")),
     }
     gathered.update(overrides)
     return gathered
@@ -107,7 +97,7 @@ def test_pass_moves_done(bd_repo, tmp_path):
 
 def test_fail_bounces(bd_repo, tmp_path):
     item_id = _create("code")
-    gathered = _base_gathered(tmp_path, lint_out="x.py:1:1: E501")
+    gathered = _base_gathered(tmp_path, code="import os" + chr(10) + _GOOD_CODE)
 
     result = prove_apply(item_id, gathered)
 
@@ -124,12 +114,16 @@ def test_fail_bounces(bd_repo, tmp_path):
 
 def test_third_fail_blocks(bd_repo, tmp_path):
     item_id = _create("code")
-    gathered = _base_gathered(tmp_path, lint_out="x.py:1:1: E501", retries=3)
+    gathered = _base_gathered(
+        tmp_path, code="import os" + chr(10) + _GOOD_CODE, retries=3
+    )
 
     result = prove_apply(item_id, gathered)
 
     assert result == "blocked"
-    assert pathlib.Path(f"work/summaries/{item_id}.md").is_file()
+    rows = record_run(["list", "--all"])
+    notes = [i for i in rows if i.get("title", "").startswith("escalate:")]
+    assert notes
 
 
 def test_usage_extra_keys_ignored(bd_repo, tmp_path):
@@ -154,7 +148,7 @@ def test_test_kind_runs_proven(bd_repo, tmp_path):
     gathered = _base_gathered(
         tmp_path,
         kind="test",
-        pytest_out="FAILED src/x/test_x.py::test_a - AssertionError",
+        test="def test_a():" + chr(10) + "    assert False" + chr(10),
         cases=["a"],
     )
 
@@ -170,7 +164,7 @@ def test_test_kind_runs_proven(bd_repo, tmp_path):
 def test_bounce_clears_claim(bd_repo, tmp_path):
     item_id = _create("code")
     record_run(["update", item_id, "--claim", "--actor", "tester"])
-    gathered = _base_gathered(tmp_path, lint_out="x.py:1:1: E501")
+    gathered = _base_gathered(tmp_path, code="import os" + chr(10) + _GOOD_CODE)
 
     result = prove_apply(item_id, gathered)
 
