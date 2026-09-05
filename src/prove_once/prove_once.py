@@ -14,7 +14,7 @@ def _folder_of(title: str) -> str:
     return title
 
 
-def prove_once(config_path: str, log_path: str) -> list[str]:
+def prove_once(config_path: str) -> list[str]:
     config = board_config(config_path)
     graph = record_graph()
     labels = record_labels()
@@ -25,7 +25,7 @@ def prove_once(config_path: str, log_path: str) -> list[str]:
         gathered = prove_gather(job_id, folder)
         gathered["folder"] = folder
         gathered["repo"] = "."
-        prove_apply(job_id, gathered, log_path)
+        prove_apply(job_id, gathered)
         processed.append(job_id)
 
     graph = record_graph()
