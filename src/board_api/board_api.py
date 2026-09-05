@@ -9,6 +9,7 @@ from record_graph.record_graph import record_graph
 from record_labels.record_labels import record_labels
 from record_set_state.record_set_state import record_set_state
 from record_show_item.record_show_item import record_show_item
+from timeline.timeline import timeline
 
 CONFIG = pathlib.Path(__file__).resolve().parents[2] / "roles" / "board.toml"
 
@@ -27,6 +28,7 @@ def board_api(name: str, query: dict, body: dict) -> object:
         "intents": lambda: board_rollup(record_graph(), _care(record_labels())),
         "tree": lambda: board_tree(query["id"], record_graph()),
         "item": lambda: record_show_item(query["id"]),
+        "timeline": lambda: timeline(query["id"], record_graph()),
         "columns": lambda: board_columns(
             record_graph(), record_labels(), board_config(CONFIG)
         ),
