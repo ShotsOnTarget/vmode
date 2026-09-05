@@ -9,7 +9,7 @@ def _label(labels, prefix):
 
 
 def record_graph() -> dict[str, dict]:
-    items = record_run(["list", "--all"])
+    items = record_run(["list", "--all", "--exclude-type", "event"])
 
     graph = {}
     for item in items:

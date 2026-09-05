@@ -1,3 +1,4 @@
+from log_append.log_append import log_append
 from record_graph.record_graph import record_graph
 from record_run.record_run import record_run
 
@@ -48,3 +49,22 @@ def test_needs_from_blocks(bd_repo):
     record_run(["dep", "add", story_b, "--blocked-by", story_a])
     graph = record_graph()
     assert graph[story_b]["needs"] == [story_a]
+
+
+def test_events_not_in_graph(bd_repo):
+    item = _create("item1")
+    event_id = log_append(
+        {
+            "item": item,
+            "gate": "Built",
+            "rule": "rule1",
+            "inputs": {},
+            "state": "ok",
+            "tokens": 1,
+            "seconds": 0.1,
+            "actor": "builder",
+        }
+    )
+    graph = record_graph()
+    assert event_id not in graph
+    assert item in graph
