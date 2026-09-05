@@ -98,3 +98,26 @@ def test_git_failure_raises(tmp_path):
 
     with pytest.raises(RuntimeError):
         changed_paths("src", {}, repo=str(not_a_repo))
+
+
+def test_bounced_folder_is_claimed(tmp_path):
+    _init_repo(tmp_path)
+    (tmp_path / "src" / "other").mkdir(parents=True)
+    (tmp_path / "src" / "other" / "other.py").write_text("o")
+
+    graph = {
+        "0001": {
+            "id": "0001",
+            "kind": "code",
+            "title": "other code",
+            "owner": "",
+            "state": "ready",
+            "parent": None,
+            "checks": [],
+            "needs": [],
+        }
+    }
+
+    result = changed_paths("mine", graph, repo=str(tmp_path))
+
+    assert "src/other/other.py" not in result
