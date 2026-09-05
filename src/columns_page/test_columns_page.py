@@ -1,3 +1,4 @@
+from columns_modal.columns_modal import columns_modal
 from columns_page.columns_page import columns_page
 
 
@@ -28,6 +29,18 @@ def test_no_overflow_rules():
     assert "text-overflow" in html
     assert "word-break" in html
     assert "overflow-x" in html
+
+
+def test_narrow_columns():
+    html = columns_page()
+    assert "144px" in html
+
+
+def test_modal_and_decide():
+    html = columns_page()
+    modal = columns_modal()
+    assert modal in html
+    assert "openItem" in html
 
 
 def test_no_dialogs():
