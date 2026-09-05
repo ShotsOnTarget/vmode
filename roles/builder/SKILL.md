@@ -40,15 +40,9 @@ For a test job:
 
 Then a report, in `../shared/report-format.md`.
 
-## Standard checks, every job, in this order
+## The one check
 
-Sheets do not repeat these. Run them from the repo root with `<name>` as your folder.
-
-1. `ruff format src/<name>`
-2. `ruff check src/<name>`   (clean; a `noqa` comment is a shape failure, never write one)
-3. `python tools/lint.py`   (no findings for your folder)
-4. Code job only: `python -c "import ast; t=ast.parse(open('src/<name>/<name>.py').read()); print(sum(isinstance(x,ast.FunctionDef) and not x.name.startswith('_') for x in t.body))"`   (must print 1)
-5. Test job only: `python -m pytest src/<name> -q`   (every named case passes)
+Run `python tools/check.py src/<name> <job id>` from the repo root. It prints the rule names the Supervisor's gate will name, exactly, and `clean` when there are none. It is the same function the gate calls, so a clean check cannot bounce on a shape, format, lint or test rule. Sheets never repeat it.
 
 Standard rules, every job:
 
@@ -60,7 +54,7 @@ Standard rules, every job:
 
 ## Before you report done
 
-- The standard checks above are clean, in order. Never shorten lines by hand to fit; the formatter decides layout.
+- The one check is clean. Never shorten lines by hand to fit; the formatter decides layout.
 - Only the files named on the sheet changed.
 - For a test job: every named case exists and passes.
 - The report names the work item id.
