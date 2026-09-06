@@ -7,6 +7,8 @@ from record_graph.record_graph import record_graph
 from record_labels.record_labels import record_labels
 from record_set_state.record_set_state import record_set_state
 
+_SETTLED = ("done", "checking", "in_progress")
+
 
 def _folder_of(title: str) -> str:
     for suffix in (" code", " test"):
@@ -18,6 +20,8 @@ def _folder_of(title: str) -> str:
 def prove_once(config_path: str) -> list[str]:
     """Run one pass of the prove step, gathering and applying gate checks for every job
     in the 'prove' column, then advance any story whose jobs are all done.
+    A claimed or in_progress Story is left alone: a role is working it, and
+    its state is that role's to restore when it finishes.
     """
     config = board_config(config_path)
     graph = record_graph()
@@ -35,7 +39,7 @@ def prove_once(config_path: str) -> list[str]:
     graph = record_graph()
     proposal_sweep(graph)
     for item in graph.values():
-        if item["kind"] != "story" or item["state"] in ("done", "checking"):
+        if item["kind"] != "story" or item["state"] in _SETTLED or item["claimed_by"]:
             continue
         jobs = [
             i

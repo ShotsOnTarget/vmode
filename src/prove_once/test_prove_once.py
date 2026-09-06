@@ -77,3 +77,16 @@ def test_story_stays_when_test_open(fake_bd, tmp_path):
     prove_once(config_path)
 
     assert record_show_item(story_id)["state"] == "ready"
+
+
+def test_claimed_story_left_alone(fake_bd, tmp_path):
+    config_path = _config(tmp_path)
+    story_id = _create("Story S", "kind:story,state:in_progress")
+    record_run(["update", story_id, "-a", "analyst-1"])
+    code_id = _create("Story S code", "kind:code,state:done", parent=story_id)
+    test_id = _create("Story S test", "kind:test,state:done", parent=story_id)
+    record_run(["dep", "add", test_id, code_id, "-t", "validates"])
+
+    prove_once(config_path)
+
+    assert record_show_item(story_id)["state"] == "in_progress"
