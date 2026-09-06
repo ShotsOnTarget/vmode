@@ -1,5 +1,8 @@
 from find_orphans.find_orphans import find_orphans
+from sheet_check.sheet_check import sheet_check
 from story_jobs.story_jobs import story_jobs
+
+_METHODS = ("[looking]", "[reasoning]", "[showing]", "[testing]")
 
 
 def _no_intent(sj, _sheets, _orphans, _under):
@@ -8,10 +11,6 @@ def _no_intent(sj, _sheets, _orphans, _under):
 
 def _code_without_test(sj, _sheets, _orphans, _under):
     return "code_without_test" if any(not sj["tests"][c] for c in sj["code"]) else None
-
-
-def _test_without_code(_sj, _sheets, _orphans, _under):
-    return None
 
 
 def _sheet_missing(sj, sheets, _orphans, _under):
@@ -23,18 +22,49 @@ def _orphan(_sj, _sheets, orphans, under):
     return "orphan" if any(o["id"] in under for o in orphans) else None
 
 
-_RULES = (_no_intent, _code_without_test, _test_without_code, _sheet_missing, _orphan)
+_RULES = (_no_intent, _code_without_test, _sheet_missing, _orphan)
 
 
-def gate_ready(story_id: str, graph: dict, sheets: dict[str, str]) -> list[str]:
-    """Check whether a story's items satisfy the graph rules needed to close it."""
+def _sheet_names(sj, sheets, existing):
+    pairs = [
+        (c, t)
+        for c in sj["code"]
+        if sheets.get(c) and sj["tests"][c]
+        for t in sj["tests"][c]
+        if sheets.get(t)
+    ]
+    names = set()
+    for code, test in pairs:
+        for name in sheet_check(sheets[code], sheets[test], existing):
+            names.add(f"sheet_{name}")
+    return sorted(names)
+
+
+def gate_ready(
+    story_id: str, graph: dict, sheets: dict[str, str], extras: dict | None = None
+) -> list[str]:
+    """List the Ready-gate rules a story fails, [] when ready.
+
+    Inputs: story_id, graph as record_graph returns, sheets by job id,
+        extras None or with checklist items and existing function names.
+    Outputs: ordered distinct failed rule names; extras None runs only
+        the four graph rules.
+    Side effects: none. Pure.
+    """
     if story_id not in graph or graph[story_id].get("kind") != "story":
         raise ValueError("story_id not in graph or not a story")
-
     sj = story_jobs(story_id, graph)
     orphans = find_orphans(graph)
     tests = {t for ts in sj["tests"].values() for t in ts}
     under = {story_id, *sj["code"], *tests}
-
-    broken = (rule(sj, sheets, orphans, under) for rule in _RULES)
-    return [name for name in broken if name]
+    broken = [name for name in (r(sj, sheets, orphans, under) for r in _RULES) if name]
+    if extras is None:
+        return broken
+    checklist = extras.get("checklist", [])
+    existing = extras.get("existing", [])
+    if not checklist:
+        broken.append("no_checklist")
+    if any(not i.strip().endswith(_METHODS) for i in checklist):
+        broken.append("checklist_method")
+    broken.extend(_sheet_names(sj, sheets, existing))
+    return broken
