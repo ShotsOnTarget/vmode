@@ -23,7 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 
-from builder_prompt.builder_prompt import builder_prompt  # noqa: E402
+from role_prompt.role_prompt import role_prompt  # noqa: E402
 
 
 def _events(stdout: str) -> list[dict]:
@@ -87,6 +87,7 @@ def usage(events: list[dict], model: str | None) -> dict:
         "turns": len(_steps(events)) or None,
         "harness": "opencode",
         "model": model,
+        "effort": None,
     }
 
 
@@ -108,14 +109,19 @@ def invoke(item: dict, column: str) -> dict:
     with open(ROOT / "roles/board.toml", "rb") as f:
         board = tomllib.load(f)
     model = _model(item, column)
-    prompt = builder_prompt(item, board["columns"][column]["role"], str(ROOT))
+    role = item.get("role") or board["columns"][column]["role"]
+    prompt = role_prompt(item, role, str(ROOT))
     cmd = [exe, "run", "--format", "json", "--pure", "--dangerously-skip-permissions"]
     if model:
         cmd += ["-m", model]
+    if item.get("effort"):
+        cmd += ["--variant", item["effort"]]
     cmd.append(prompt)
     start = time.time()
-    proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=1800, check=False)
+    proc = subprocess.run(
+        cmd, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800, check=False
+    )
     events = _events(proc.stdout)
     if proc.returncode != 0 or any(e.get("type") == "error" for e in events):
         raise RuntimeError(_report(events)[:500] or proc.stderr[:500] or "opencode failed")
-    return {**usage(events, model), "seconds": time.time() - start}
+    return {**usage(events, model), "effort": item.get("effort"), "seconds": time.time() - start}

@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 
 from adapter_command.adapter_command import adapter_command  # noqa: E402
+from role_prompt.role_prompt import role_prompt  # noqa: E402
 
 KEYS = (
     "input_tokens",
@@ -17,6 +18,13 @@ KEYS = (
     "cache_read_input_tokens",
     "output_tokens",
 )
+
+
+def _column_role(column: str) -> str:
+    import tomllib
+
+    with open(ROOT / "roles/board.toml", "rb") as f:
+        return tomllib.load(f)["columns"][column]["role"]
 
 
 def invoke(item: dict, column: str) -> dict:
@@ -27,9 +35,14 @@ def invoke(item: dict, column: str) -> dict:
         "mcp": ROOT / "roles/pullers/empty-mcp.json",
     }
     cmd = adapter_command(item, column, roots)
+    if item.get("kind") not in ("code", "test"):
+        role = item.get("role") or _column_role(column)
+        cmd[2] = role_prompt(item, role, str(ROOT))
+    if item.get("effort"):
+        cmd += ["--effort", item["effort"]]
     start = time.time()
     proc = subprocess.run(
-        cmd, cwd=ROOT, capture_output=True, text=True, timeout=1800, check=False
+        cmd, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800, check=False
     )
     if proc.returncode != 0:
         raise RuntimeError(proc.stderr[:500] or "claude exited non-zero")
@@ -44,4 +57,5 @@ def invoke(item: dict, column: str) -> dict:
         "turns": out.get("num_turns"),
         "harness": "claude_code",
         "model": cmd[cmd.index("--model") + 1] if "--model" in cmd else None,
+        "effort": item.get("effort"),
     }

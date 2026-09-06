@@ -1,10 +1,11 @@
 """Invoke adapter that picks the harness and model per run.
 
-run_choice (src/run_choice) decides: an item label `harness:<name>` or
-`model:<provider/model>` wins, then the column's `adapter` and tier in
-roles/board.toml, then the manifest's model table for that harness. The
-name is the adapter file in this folder. The adapter receives the item
-with `harness` and `model` set and must use them. This keeps the puller
+run_settings (src/run_settings) decides: an item label `harness:<name>`,
+`model:<provider/model>` or `effort:<level>` wins, then the column's
+`adapter` and tier in roles/board.toml (an item `tier` key overrides the
+column's, for a run by name), then the manifest's model and effort tables.
+The name is the adapter file in this folder. The adapter receives the item
+with `harness`, `model` and `effort` set and must use them. This keeps the puller
 free of harness names while letting the Board, or a role in process, choose
 a cheaper harness or model for one column or one item at a time.
 """
@@ -19,7 +20,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from run_choice.run_choice import run_choice  # noqa: E402
+from run_settings.run_settings import run_settings  # noqa: E402
 
 _LOADED = {}
 
@@ -41,5 +42,8 @@ def invoke(item: dict, column: str) -> dict:
         board = tomllib.load(f)
     with open(ROOT / "roles/manifest.json") as f:
         manifest = json.load(f)
-    choice = run_choice(item.get("labels", []), board["columns"][column], manifest)
+    col = board["columns"][column]
+    if item.get("tier"):
+        col = {**col, "tier": item["tier"]}
+    choice = run_settings(item.get("labels", []), col, manifest)
     return _adapter(choice["harness"])({**item, **choice}, column)

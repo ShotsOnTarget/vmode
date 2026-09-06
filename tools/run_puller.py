@@ -1,5 +1,12 @@
 """Start one puller. Usage: python tools/run_puller.py <role> <adapter.py or -> [stop_file]
 
+Run one role once on one named item, without a column claiming or moving it:
+    python tools/run_puller.py <role> <adapter.py> --item <id> [--column <name>] [--tier <tier>]
+The usage note is written on the item as a pulled run's would be; the role's
+skill sets the item's state. --column names the config column whose adapter
+and tier apply (default: the first column of that role, else sheet_todo);
+--tier overrides its tier (for example engineer).
+
 Loads the adapter file's `invoke` by path so the puller code never names a
 harness. `-` means no adapter (the supervisor role). Run the supervisor from
 a worktree at a released commit (see roles/pullers/README.md); when it moves
@@ -25,8 +32,37 @@ def load_invoke(path: str):
     return module.invoke
 
 
+def run_item(role: str, adapter: str, args: list[str]) -> int:
+    import json
+    import tomllib
+
+    from record_add_note.record_add_note import record_add_note
+    from record_run.record_run import record_run
+    from record_show_item.record_show_item import record_show_item
+
+    opts = dict(zip(args[::2], args[1::2]))
+    with open(ROOT / "roles/board.toml", "rb") as f:
+        columns = tomllib.load(f)["columns"]
+    column = opts.get("--column") or next(
+        (n for n, c in columns.items() if c["role"] == role), "sheet_todo"
+    )
+    item = record_show_item(opts["--item"])
+    labels = record_run(["label", "list", item["id"]])
+    item["labels"] = [x if isinstance(x, str) else x.get("name", "") for x in labels]
+    item["role"] = role
+    if opts.get("--tier"):
+        item["tier"] = opts["--tier"]
+    usage = load_invoke(adapter)(item, column)
+    record_add_note(item["id"], "usage: " + json.dumps(usage))
+    print(json.dumps({k: v for k, v in usage.items() if k != "report"}))
+    print(usage.get("report", ""))
+    return 0
+
+
 def main(argv: list[str]) -> int:
     role, adapter = argv[1], argv[2]
+    if "--item" in argv:
+        return run_item(role, adapter, argv[3:])
     stop = argv[3] if len(argv) > 3 else "work/stop"
     options = {"stop_file": stop, "worktree": str(ROOT)}
     passes = puller(role, "roles/board.toml", load_invoke(adapter), options)
