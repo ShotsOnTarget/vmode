@@ -10,6 +10,11 @@
       "model": "frontier",
       "mode": "primary"
     },
+    "engineer": {
+      "description": "Engineer: turns one Story into code and test job pairs with exact instruction sheets; rewrites or splits a pair the Supervisor escalates.",
+      "model": "engineer",
+      "mode": "subagent"
+    },
     "builder": {
       "description": "Builder: does exactly one code or test job from one instruction sheet.",
       "model": "cheap",
@@ -24,11 +29,13 @@
   "models": {
     "human": null,
     "frontier": "anthropic/claude-fable-5-1",
-    "cheap": "anthropic/claude-sonnet-5"
+    "cheap": "anthropic/claude-sonnet-5",
+    "engineer": "anthropic/claude-opus-5"
   },
   "opencode_models": {
     "human": null,
     "frontier": null,
-    "cheap": "opencode/muse-spark-1.3-contributor-free"
+    "cheap": "opencode/muse-spark-1.3-contributor-free",
+    "engineer": null
   }
 }
