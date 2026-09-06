@@ -52,8 +52,19 @@ def run_item(role: str, adapter: str, args: list[str]) -> int:
     item["role"] = role
     if opts.get("--tier"):
         item["tier"] = opts["--tier"]
-    usage = load_invoke(adapter)(item, column)
+    # Claim for the run, as a puller would: a claimed item is skipped by every
+    # gate, so the usage note lands before the Ready gate reads it.
+    prior = item["state"]
+    record_run(["update", item["id"], "--claim", "--actor", f"{role}-item-{os.getpid()}"])
+    try:
+        usage = load_invoke(adapter)(item, column)
+    finally:
+        record_run(["update", item["id"], "-a", ""])
     record_add_note(item["id"], "usage: " + json.dumps(usage))
+    if record_show_item(item["id"])["state"] == "in_progress":
+        from record_set_state.record_set_state import record_set_state
+
+        record_set_state(item["id"], prior)
     print(json.dumps({k: v for k, v in usage.items() if k != "report"}))
     print(usage.get("report", ""))
     return 0
