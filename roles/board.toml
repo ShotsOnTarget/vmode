@@ -30,14 +30,6 @@ tier = "frontier"
 wip = 2
 poll_seconds = 300
 
-[columns.building]          # a cut Story passed Ready; its pairs are with the Builders. Nobody pulls
-kinds = ["story"]
-states = ["ready"]
-role = "none"
-tier = "none"
-wip = 99
-poll_seconds = 0
-
 [columns.build]             # Builder pulls one code job
 kinds = ["code"]
 states = ["ready", "reopened"]
