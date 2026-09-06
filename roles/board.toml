@@ -90,7 +90,7 @@ tier = "cheap"
 wip = 1
 poll_seconds = 60
 
-[columns.blocked]           # awaiting a person; nobody pulls, everyone sees
+[columns.blocked]           # awaiting a person; nobody pulls, everyone sees. The note under a blocked item says who: its For line
 kinds = ["intent", "story", "code", "test", "proposal"]
 states = ["blocked"]
 role = "none"
