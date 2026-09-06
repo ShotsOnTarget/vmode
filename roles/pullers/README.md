@@ -11,8 +11,10 @@ invoke(item: dict, column: str) -> {"tokens": int, "seconds": float, "report": s
 - `item` is the graph entry: id, kind, title, owner, state, parent, checks, needs.
 - `column` is the column name the item was pulled from; it says which role skill to load.
 - Runs one role on one item and returns when it is finished. Blocking is fine; the puller is single-threaded on purpose.
+- `item` may carry `harness` and `model` (set by `by_column.py` from `run_choice`); an adapter uses that model when present.
 - `tokens` is every token the harness bills for the run: input, cache creation, cache read and output (captured 2026-09-04: a trivial `claude -p` call reports about 105k cache creation tokens, which is the per-run baseline), or -1 if the harness reported nothing. `cost_usd` is included when the harness reports it. `seconds` is wall time. `report` is the role's final text, verbatim.
 - Raises on failure to start or on a timeout. The puller releases the item and records the error.
+- `turns`, `harness` and `model` are included when known; the Supervisor writes them into the Built event so cost can be compared per model.
 - Never edits the record. The role does that through the work-record skill, or the puller does after invoke returns.
 
 ## Running
@@ -34,8 +36,11 @@ Run pullers as detached processes (`just loop`, `just builders`, `just board`), 
 
 | File | Harness | Notes |
 |---|---|---|
-| `by_column.py` | picks per column | reads `adapter` from the column in roles/board.toml; the runner's default |
-| `opencode.py` | opencode CLI | `opencode run --format json`; model per tier from `opencode_models` in roles/manifest.json; needs a provider with credit |
+| `by_column.py` | picks per run | `run_choice`: item labels `harness:<name>` / `model:<provider/model>`, then the column's `adapter` and tier, then the manifest; the runner's default |
+| `opencode.py` | opencode CLI | `opencode run --format json`; model per tier from `opencode_models` in roles/manifest.json; tokens, turns and cost from its `step_finish` events |
 | `claude_code.py` | Claude Code CLI | `claude -p` with the role's model from the manifest and JSON output for usage |
 | `pi.py` | pi | not written |
-| `opencode.py` | opencode | not written |
+
+## Choosing the model
+
+Three places, most specific wins. A label on the item (`harness:opencode`, `model:opencode/glm-5.3-flash`) is how a role picks in process for one item: `bd label add <id> model:<provider/model>`. The column's `adapter` and `tier` in roles/board.toml pick for a column. The manifest maps a tier to a model per harness (`models` for Claude Code, `opencode_models` for opencode). `opencode models` lists what opencode can run; the `-free` ones cost nothing and report cost 0, tokens still counted. The Zen paid models need a payment method on the opencode workspace (that was the 401 in the first probe).

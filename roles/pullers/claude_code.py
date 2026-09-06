@@ -42,4 +42,6 @@ def invoke(item: dict, column: str) -> dict:
         "report": out.get("result", ""),
         "cost_usd": out.get("total_cost_usd"),
         "turns": out.get("num_turns"),
+        "harness": "claude_code",
+        "model": cmd[cmd.index("--model") + 1] if "--model" in cmd else None,
     }

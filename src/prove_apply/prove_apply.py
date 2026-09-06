@@ -23,7 +23,12 @@ def prove_apply(job_id: str, gathered: dict) -> str:
     usage = gathered["usage"]
     base = {
         "rule": ",".join(rules) if rules else "pass",
-        "inputs": {"retries": retries, "action": action},
+        "inputs": {
+            "retries": retries,
+            "action": action,
+            "harness": usage.get("harness"),
+            "model": usage.get("model"),
+        },
         "state": state,
         "tokens": int(usage.get("tokens", -1)),
         "seconds": float(usage.get("seconds", 0.0)),

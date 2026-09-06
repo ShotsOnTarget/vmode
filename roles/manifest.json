@@ -29,6 +29,6 @@
   "opencode_models": {
     "human": null,
     "frontier": null,
-    "cheap": null
+    "cheap": "opencode/muse-spark-1.3-contributor-free"
   }
 }

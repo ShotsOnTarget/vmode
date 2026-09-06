@@ -19,7 +19,9 @@ def adapter_command(item: dict, column: str, roots: dict) -> list[str]:
     """The argv for one Builder run on the Claude Code harness.
 
     roots: board (roles/board.toml), manifest (roles/manifest.json), root
-    (working directory), mcp (a JSON file declaring no MCP servers). The run
+    (working directory), mcp (a JSON file declaring no MCP servers). The
+    model is item['model'] when the puller chose one (see run_choice), else
+    the manifest's model for the column's tier; provider prefix dropped. The run
     is stripped: no MCP servers, six tools, so the per-turn baseline is the
     harness prompt and those tools only (measured 2026-09-05: 44k vs 105k).
     """
@@ -40,7 +42,8 @@ def adapter_command(item: dict, column: str, roots: dict) -> list[str]:
         "--disallowedTools",
         ",".join(_NO_TOOLS),
     ]
-    model = _model(column_config["tier"], manifest)
+    model = item.get("model") or _model(column_config["tier"], manifest)
     if model is not None:
+        model = model.split("/", 1)[-1]
         argv += ["--model", model]
     return argv

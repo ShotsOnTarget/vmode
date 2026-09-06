@@ -4,3 +4,4 @@ __pycache__/
 .ruff_cache/
 work/*.log
 work/stop
+repomix-output.xml
