@@ -1,6 +1,6 @@
 # How We Build Things
 
-Draft 0.2. Written so a 12 year old could follow it. This is the policy. It says who does what and what counts as done. It never names a tool, a model, or a product. Those are choices we can swap later.
+Draft 0.3. Written so a 12 year old could follow it. This is the policy. It says who does what and what counts as done. It never names a tool, a model, or a product. Those are choices we can swap later.
 
 ## 1. The big idea
 
@@ -25,18 +25,19 @@ Two words we use a lot:
 
 You can build something perfectly and still build the wrong thing. That is why we need both.
 
-## 2. The four roles
+## 2. The five roles
 
 Think of it like a small company.
 
 | Role | Who | Their job | Not allowed to |
 |---|---|---|---|
 | **Board** | A human | Decides what we want and why. Says yes or no at the end. Decides anything that is a matter of taste or judgement. | Read code. Check details. |
-| **Architect** | The smartest helper | Turns what the Board wants into clear, checkable instructions. Checks that finished work matches what was asked. Keeps the whole picture in mind across pieces. | Read or write code. Run the process. |
+| **Architect** | The smartest helper | Turns what the Board wants into Stories: what each piece must do and how we will know. Checks that finished work matches what was asked. Keeps the whole picture of what we want in mind across pieces. | Read or write code. Write instruction sheets. Run the process. |
+| **Engineer** | A capable, affordable helper | Turns one Story into job pairs with full instruction sheets. Knows the shape of the code we already have and probes the things the code will touch, so every sheet is exact. Rewrites or splits jobs when a pair keeps failing. | Change a Story or its checklist. Write code or tests. Run the process. |
 | **Supervisor** | A rulebook, not a thinker | Runs the process. Decides which job is next. Checks every gate. Counts retries. Writes everything down. Passes problems up. | Decide what we want. Write instructions. Write code. Make judgement calls. |
 | **Builder** | A cheap, fast helper | Does exactly one job from exactly one instruction sheet. Writes code or writes tests. | Change the job. Make design choices. Touch anything outside the job. |
 
-Problems go **up one level only**. A Builder talks to the Supervisor. The Supervisor talks to the Architect. The Architect talks to the Board. Nobody skips a level.
+Problems go **up one level only**. A Builder talks to the Supervisor. The Supervisor talks to the Engineer. The Engineer talks to the Architect. The Architect talks to the Board. Nobody skips a level.
 
 ## 3. The work items
 
@@ -46,7 +47,7 @@ Everything we do is a work item. There are six kinds, plus one for learning. Eac
 |---|---|---|
 | **Intent**: what we want and why | **Validation**: the Board says "yes, that is it" | Board |
 | **Story**: one thing it must do, with a checklist of what "done" looks like | **Verification**: the Architect ticks every item on the checklist | Architect |
-| **Code job**: build one small function | **Test job**: prove that function works | Architect writes both, Builders do them |
+| **Code job**: build one small function | **Test job**: prove that function works | Engineer writes both, Builders do them |
 | **Proposal**: a change to how we work, learned from the log | **Verification** for Low care, **Validation** for High care or any role skill | Analyst writes, Architect or Board checks |
 
 Rules for work items:
@@ -99,8 +100,9 @@ The person who made a thing never checks that thing. Always somebody else.
 |---|---|---|
 | Code | One Builder | A different Builder writes the tests, without seeing the first Builder's work or thoughts |
 | A finished code and test pair | Builders | Supervisor, against the instruction sheet |
-| A Story's checklist, before any Builder starts | Architect | Supervisor confirms every item is clear, checkable, and linked to an Intent |
-| A finished Story | Architect wrote it | Architect checks it against the Intent and against every other finished Story under that Intent |
+| A Story, before the Engineer starts | Architect | Supervisor confirms every checklist item names its check method, the Story names its job pairs, and it is linked to an Intent |
+| A Story's job pairs and sheets, before any Builder starts | Engineer | Supervisor confirms every code job has its test job, every job has its sheet, and nothing is orphaned |
+| A finished Story | Architect wrote it, Engineer cut it into jobs | Architect checks it against the Intent and against every other finished Story under that Intent |
 | A finished Intent | Board wrote it | Board looks at it and decides |
 
 This is written down because it is easy to skip when busy. It is never skipped.
@@ -111,7 +113,7 @@ A gate is a checkpoint. Nothing passes a gate without meeting every rule at that
 
 | Gate | When | Passes if |
 |---|---|---|
-| **Ready** | Before a Story goes to Builders | Every checklist item is clear and checkable. Story is linked to an Intent. Every code job has its test job. |
+| **Ready** | Before a Story goes to Builders | Every checklist item names its check method. Story is linked to an Intent. Every code job has its test job. Every job has its sheet. The Engineer's cost for the Story is written in the log. |
 | **Built** | When a Builder says a job is done | Code fits the size and shape rules (section 8). Nothing outside the job was touched. The change is attributed to the job: a change to code that names no Builder job is rejected, whoever made it. The Architect never lands code, not even a helper script. |
 | **Proven** | When a test job is done | All tests pass. Tests cover every checklist item they were asked to cover. |
 | **Verified** | When all pairs under a Story are done | Architect ticks every item on the Story checklist. No conflict with other finished Stories under the same Intent. |
@@ -124,8 +126,8 @@ The Supervisor follows these rules exactly. It does not think about why.
 
 1. A gate fails: send it back to the Builder with the exact rule that failed. No escalation.
 2. A test job fails: reopen its code job, attach the failure, run the pair again.
-3. The same pair fails **three** times: stop. Mark it blocked. Send the Architect a short summary: what failed, how many times, which rule. The Architect never sees the code or the raw error.
-4. The Architect cannot fix it by rewriting or splitting the jobs: send the Board a short summary.
+3. The same pair fails **three** times: stop. Mark it blocked. Send the Engineer a short summary: what failed, how many times, which rule. The Engineer rewrites the sheet or splits the job. It never sees the raw error, only the summary; it may read the code we already have, never a Builder's half-built work.
+4. The Engineer cannot fix it by rewriting or splitting the jobs: send the Architect a short summary. The Architect changes the Story checklist, or sends the Board a short summary if that would change what the Intent means.
 5. Every retry, every stop, every escalation is written in the log (section 10).
 
 ## 8. Shape of the code
@@ -148,7 +150,7 @@ Rules:
 - Exactly two files in the folder: the code and its tests. Never a third.
 - The public function carries a docstring saying what it is for, what goes in, what comes out, and what else it touches. Which work item asked for it is in the record and the commit, not in the code.
 
-Whether a piece is small enough, simple enough, and tidy enough is decided by tools at the Built gate, never by a person, and never by suppressing the tool. The numbers those tools use live in their own settings, not here. A file that the formatter would change, or the linter or shape checker would flag, fails the gate. If a function cannot meet the tools, the Architect splits the job. The Builder never decides that.
+Whether a piece is small enough, simple enough, and tidy enough is decided by tools at the Built gate, never by a person, and never by suppressing the tool. The numbers those tools use live in their own settings, not here. A file that the formatter would change, or the linter or shape checker would flag, fails the gate. If a function cannot meet the tools, the Engineer splits the job. The Builder never decides that.
 
 ## 9. How careful to be
 
@@ -174,14 +176,14 @@ The log is how the Board can trust a closed item it never looked at. Nothing is 
 
 1. Board writes an Intent, picks Low or High, and writes the Validation it will use to say yes.
 2. Architect writes Stories under it, each with a checklist and a Verification.
-3. Architect writes code and test job pairs under each Story, with full instruction sheets.
-4. Supervisor runs the Ready gate on each Story.
+3. Engineer writes code and test job pairs under each Story, with full instruction sheets, and says the Story is ready.
+4. Supervisor runs the Ready gate on each Story and writes the Engineer's cost in the log.
 5. Supervisor hands each pair to Builders, one job each, runs Built and Proven gates, retries on the rules in section 7.
 6. Supervisor tells the Architect a Story is ready to verify. Architect checks the checklist and the other Stories under the Intent.
 7. Supervisor tells the Board an Intent is ready. Board looks, or is shown it for High, and says yes or no.
 8. Next piece.
 
-Good pieces are small. If a Story needs more than a handful of job pairs, it is probably two Stories.
+Good pieces are small. If a Story needs more than a handful of job pairs, it is probably two Stories; the Engineer says so to the Architect rather than writing them all.
 
 ## 12. What this document is not
 
