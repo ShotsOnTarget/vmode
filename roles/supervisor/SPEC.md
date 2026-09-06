@@ -27,6 +27,7 @@ waiting, ready, in progress, blocked, checking, done, reopened.
 | Proven | Test runner passes. Every named case is present in the test file. |
 | Verified | Architect has recorded a tick on every checklist item. |
 | Validated | Board has recorded yes. For High care, a "shown" entry exists in the log. |
+| Proposal | Names a wiki page. Targets one file under `roles/` or `policy/`, never `src/`. The diff touches only that file. A proposal that fails this gate is re-checked on every Supervisor pass, not just once, so a fix landed after the failure is picked up without a person moving the item by hand. |
 
 ## Failure rules
 
