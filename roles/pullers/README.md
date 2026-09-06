@@ -28,6 +28,8 @@ The supervisor puller needs no invoke; its work is `prove_once`. Touch `work/sto
 
 The Supervisor runs from a git worktree at a released commit, never from the working tree, so a Builder's half-built function can never be imported into the gate. Create it once with `git worktree add --detach ../vmode-supervisor HEAD` and start it with `python ../vmode-supervisor/tools/run_puller.py supervisor -` from the main repo. Each pass it also keeps house (dead claims released, prune findings raised as notes), and when HEAD has moved and no job is in progress or checking it moves its worktree to HEAD and restarts itself. Builders run from the main tree; restart them after a release that changes the puller or the config.
 
+Run pullers as detached processes (`just loop`, `just builders`, `just board`), never as background tasks of an agent session: a session ends or interrupts its own tasks and the pullers die with it. The justfile exports the record client path (`VMODE_BD`); a shell that starts a puller by hand must set it too, or every record call fails. Each puller writes to `work/puller-<role>.log` and `.err`; `just stop` (a file at `work/stop`) ends them all at their next poll.
+
 ## Adapters
 
 | File | Harness | Notes |
