@@ -38,7 +38,11 @@ def _run_bd(args: list[str]) -> dict | list:
         raise RecordError(f"record client not found: {client}", "")
     try:
         result = subprocess.run(
-            [client, *args, "--json"], capture_output=True, text=True
+            [client, *args, "--json"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
         )
     except OSError as exc:
         raise RecordError("failed to run bd", str(exc)) from exc
