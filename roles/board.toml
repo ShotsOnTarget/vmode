@@ -37,7 +37,7 @@ role = "builder"
 tier = "cheap"
 wip = 4
 poll_seconds = 30
-adapter = "opencode"      # the file in roles/pullers; an item label harness:<name> overrides
+adapter = "claude_code"   # opencode free limit reached 2026-09-06; an item label harness:<name> overrides
 
 [columns.test]              # Builder pulls one test job
 kinds = ["test"]
@@ -46,7 +46,7 @@ role = "builder"
 tier = "cheap"
 wip = 4
 poll_seconds = 30
-adapter = "opencode"      # the file in roles/pullers; an item label harness:<name> overrides
+adapter = "claude_code"   # opencode free limit reached 2026-09-06; an item label harness:<name> overrides
 
 [columns.prove]             # Supervisor gates a finished job, no model
 kinds = ["code", "test"]
