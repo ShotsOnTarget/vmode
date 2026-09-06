@@ -41,7 +41,7 @@ Then a report, in `../shared/report-format.md`.
 
 ## The one check
 
-Run `python tools/check.py src/<name> <job id>` from the repo root. It prints the rule names the Supervisor's gate will name, exactly, and `clean` when there are none. It is the same function the gate calls, so a clean check cannot bounce on a shape, format, lint or test rule. Sheets never repeat it.
+Run `python tools/check.py src/<name> <job id>` from the repo root. It prints the rule names the Supervisor's gate will name, exactly, and `clean` when there are none. It is the same function the gate calls, so a clean check cannot bounce on a shape, format, lint or test rule. Sheets never repeat it. The job id is not optional on a test job: leave it off and case coverage goes unchecked, so `clean` can still bounce on `case_missing` at the gate.
 
 Standard rules, every job:
 
