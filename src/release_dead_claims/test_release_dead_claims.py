@@ -26,3 +26,11 @@ def test_person_kept(fake_bd):
     job = _job("in_progress", "fable")
     assert release_dead_claims(record_graph(), set()) == []
     assert record_graph()[job]["claimed_by"] == "fable"
+
+
+def test_dead_story_claim_released(fake_bd):
+    args = ["create", "S", "-t", "task", "-l", "kind:story,state:done"]
+    story = record_run([*args, "--no-inherit-labels", "-a", "analyst-99999"])["id"]
+    assert release_dead_claims(record_graph(), {"1"}) == [story]
+    graph = record_graph()
+    assert graph[story]["claimed_by"] == "" and graph[story]["state"] == "done"
