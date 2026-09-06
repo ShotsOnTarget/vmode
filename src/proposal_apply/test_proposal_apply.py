@@ -28,7 +28,7 @@ def _proposal(sheet, tmp_path):
     story = record_create_item("story", "S", "architect", intent["id"])["id"]
     pid = record_create_item("proposal", "P", "analyst", story)["id"]
     path = tmp_path / "sheet.md"
-    path.write_text(sheet, encoding="utf-8")
+    path.write_bytes(sheet.encode("utf-8"))
     record_run(["update", pid, "--body-file", str(path)])
     return pid
 
@@ -63,3 +63,14 @@ def test_not_proposal_raises(fake_bd, tmp_path):
     intent = record_create_item("intent", "I", "board")["id"]
     with pytest.raises(ValueError):
         proposal_apply(intent, str(tmp_path), "2026-09-05")
+
+
+def test_crlf_sheet_applies(fake_bd, tmp_path):
+    repo = _repo(tmp_path)
+    nl, crlf_end = chr(10), chr(13) + chr(10)
+    head = nl.join(["page: none", "target: roles/x.md", "care: low", "---", ""])
+    crlf = (head + DIFF).replace(nl, crlf_end)
+    pid = _proposal(crlf, tmp_path)
+    proposal_apply(pid, str(repo), "2026-09-06")
+    text = (repo / "roles" / "x.md").read_text(encoding="utf-8")
+    assert text == "one" + nl + "three" + nl

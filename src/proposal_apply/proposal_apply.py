@@ -40,7 +40,8 @@ def proposal_apply(proposal_id: str, repo: str, today: str) -> dict:
     item = record_show_item(proposal_id)
     if item["kind"] != "proposal":
         raise ValueError(f"not a proposal: {proposal_id}")
-    header, _, diff = item["sheet"].partition("\n---\n")
+    sheet = item["sheet"].replace(chr(13), "")
+    header, _, diff = sheet.partition(chr(10) + "---" + chr(10))
     fields = dict(line.split(": ", 1) for line in header.splitlines() if ": " in line)
     _apply(repo, diff)
     message = f"{item['title']}\n\nProposal {proposal_id} accepted by the Board."
