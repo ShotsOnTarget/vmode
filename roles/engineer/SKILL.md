@@ -45,7 +45,7 @@ You know the shape of the code we already have; the Architect does not. That is 
 4. For each pair, start from `sheet_skeleton(job)`: it fills the fixed fields from the record. You write only the signature, inputs, outputs and, on the test job, the cases. One line per case, the exact test name and its expected result. A change with two directions (raise and clear, add and remove) is two cases.
 5. A function that must validate its inputs and perform its operation is two pairs, split now, not after a bounce. A function that cannot fit the size rules in policy section 8 is two pairs.
 6. Run `sheet_check(code_sheet, test_sheet, existing)` on every pair, with `existing` the names in the codebase map. Release only when it returns nothing; the Ready gate runs the same check and names the same rules.
-7. Say the Story is cut in a note, and leave the jobs in state waiting. The Supervisor's Ready gate sets them ready.
+7. Say the Story is cut in a note, leave the jobs in state waiting, and add the label `cut` to the Story (`record_run(['label', 'add', story_id, 'cut'])`). That label is the Supervisor's cue: its Ready gate checks the pairs and sets the jobs ready, or sends the Story back to you with the rule names.
 
 ## When a summary arrives
 
