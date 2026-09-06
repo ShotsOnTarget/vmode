@@ -11,7 +11,7 @@ The Supervisor is code, not a model. It never uses judgement. This spec is what 
 5. Count retries per pair. On the third failure, block and escalate.
 6. Tell the Architect when a Story is ready to verify.
 7. Tell the Board when an Intent is ready to validate.
-8. Check trace back and trace forward at every gate. Any orphan fails the gate.
+8. Check trace back and trace forward at every gate, counting only items whose state is past `waiting`. A left-side item still in state `waiting` has not been cut yet and so has no right-side checker by design; it is not an orphan and never raises an `unchecked` note. Any orphan among items past `waiting` fails the gate.
 9. Write a log entry for every decision.
 
 ## States
