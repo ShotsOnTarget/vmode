@@ -81,14 +81,6 @@ tier = "cheap"
 wip = 1
 poll_seconds = 60
 
-[columns.patterns]          # Analyst writes, Architect reads before writing sheets; never claimed
-kinds = ["pattern"]
-states = ["waiting", "ready"]
-role = "architect"
-tier = "frontier"
-wip = 99
-poll_seconds = 0
-
 [columns.learn]             # Analyst reads the log for a Verified Story
 kinds = ["story"]
 states = ["done"]
