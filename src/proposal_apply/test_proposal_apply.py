@@ -74,3 +74,17 @@ def test_crlf_sheet_applies(fake_bd, tmp_path):
     proposal_apply(pid, str(repo), "2026-09-06")
     text = (repo / "roles" / "x.md").read_text(encoding="utf-8")
     assert text == "one" + nl + "three" + nl
+
+
+def test_trimmed_trailing_context_applies(fake_bd, tmp_path):
+    repo = _repo(tmp_path)
+    nl = chr(10)
+    (repo / "roles" / "x.md").write_text("one" + nl + "two" + nl + nl, encoding="utf-8")
+    subprocess.run(["git", "commit", "-qam", "blank"], cwd=repo, check=True)
+    hunk = ["--- a/roles/x.md", "+++ b/roles/x.md", "@@ -1,3 +1,3 @@", " one", "-two"]
+    trimmed = nl.join(hunk + ["+three"])
+    head = nl.join(["page: none", "target: roles/x.md", "care: low", "---", ""])
+    pid = _proposal(head + trimmed, tmp_path)
+    proposal_apply(pid, str(repo), "2026-09-06")
+    text = (repo / "roles" / "x.md").read_text(encoding="utf-8")
+    assert text == "one" + nl + "three" + nl + nl

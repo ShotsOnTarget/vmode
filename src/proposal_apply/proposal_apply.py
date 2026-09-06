@@ -13,10 +13,25 @@ def _git(repo: str, *args: str) -> subprocess.CompletedProcess:
     return subprocess.run(["git", *args], cwd=repo, capture_output=True, text=True)
 
 
+def _restore_trimmed(diff: str) -> str:
+    """The record trims trailing blank lines from a sheet; a diff whose last
+    hunk ended in blank context loses them. Put back the missing lines."""
+    lines = diff.rstrip("\n").split("\n")
+    heads = [i for i, line in enumerate(lines) if line.startswith("@@ ")]
+    if not heads:
+        return diff
+    head = lines[heads[-1]]
+    old_count = head.split(" ")[1].split(",")
+    wanted = int(old_count[1]) if len(old_count) > 1 else 1
+    body = lines[heads[-1] + 1 :]
+    have = sum(1 for line in body if not line.startswith("+"))
+    return "\n".join(lines + [" "] * (wanted - have)) + "\n"
+
+
 def _apply(repo: str, diff: str) -> None:
     fd, path = tempfile.mkstemp(suffix=".diff", text=True)
     with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as f:
-        f.write(diff if diff.endswith("\n") else diff + "\n")
+        f.write(_restore_trimmed(diff))
     try:
         check = _git(repo, "apply", "--check", path)
         if check.returncode != 0:
