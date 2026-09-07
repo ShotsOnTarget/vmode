@@ -27,7 +27,8 @@ def test_dead_pid_released(fake_bd):
 
 def test_alive_pid_kept(fake_bd):
     job = _job("in_progress", "builder-4242")
-    assert release_dead_claims(record_graph(), {"4242"}) == []
+    now = _offset(job, 0)
+    assert release_dead_claims(record_graph(), {"4242"}, now=now) == []
     assert record_graph()[job]["claimed_by"] == "builder-4242"
 
 
