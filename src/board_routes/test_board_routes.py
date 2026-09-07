@@ -18,6 +18,55 @@ def _intent():
     )["id"]
 
 
+def _story():
+    iid = _intent()
+    sid = record_run(
+        [
+            "create",
+            "S",
+            "-t",
+            "task",
+            "-l",
+            "kind:story,state:ready",
+            "-a",
+            "board",
+            "--parent",
+            iid,
+            "--no-inherit-labels",
+        ]
+    )["id"]
+    cid = record_run(
+        [
+            "create",
+            "C",
+            "-t",
+            "task",
+            "-l",
+            "kind:code,state:done",
+            "-a",
+            "board",
+            "--parent",
+            sid,
+            "--no-inherit-labels",
+        ]
+    )["id"]
+    tid = record_run(
+        [
+            "create",
+            "T",
+            "-t",
+            "task",
+            "-l",
+            "kind:test,state:done",
+            "-a",
+            "board",
+            "--no-inherit-labels",
+        ]
+    )["id"]
+    record_run(["dep", "add", tid, cid, "-t", "validates"])
+    return sid
+
+
 def _validation(iid):
     vid = record_run(
         [
@@ -103,3 +152,11 @@ def test_bad_request_400(fake_bd):
     )
     assert status == 400
     assert "error" in payload
+
+
+def test_status_json(fake_bd):
+    sid = _story()
+    status, content_type, payload = board_routes("GET", "/api/status", {"id": sid}, {})
+    assert status == 200
+    assert content_type == "application/json"
+    assert set(payload.keys()) == {"id", "state", "jobs", "runs"}
