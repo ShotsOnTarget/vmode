@@ -1,4 +1,5 @@
 from modal_proposal.modal_proposal import modal_proposal
+from modal_status.modal_status import modal_status
 from modal_timeline.modal_timeline import modal_timeline
 
 _HTML = """
@@ -35,7 +36,7 @@ function decisionFor(k,t){
   g('modalReason').style.display='none'; g('modalReason').value='';
   g('modal').style.display='block';}window.openItem=function(id){
   window.currentItemId=id;
-  fetch('/api/item?id='+encodeURIComponent(id)).then(r=>r.json()).then(d=>{fillDetails(d);loadTimeline(id);});};
+  fetch('/api/item?id='+encodeURIComponent(id)).then(r=>r.json()).then(d=>{fillDetails(d);loadTimeline(id);loadStatus(id);});};
 function modalNoClick(){
 var r=g('modalReason');if(r.style.display==='none'){r.style.display='';r.focus();return}
   if(r.value!==''){modalDecide('no');}}function post(url,body){
@@ -50,4 +51,4 @@ function modalRelease(){post('/api/release',{id:window.currentItemId});}
 
 def columns_modal() -> str:
     """The board modal: item details, the decision line, Release and Yes/No."""
-    return modal_timeline() + modal_proposal() + _HTML
+    return modal_timeline() + modal_status() + modal_proposal() + _HTML
