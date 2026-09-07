@@ -33,7 +33,7 @@ def pull_once(role: str, config_path: str, invoke) -> list[str]:
     for column in columns:
         headroom = min(wip_headroom(column, graph, config), cap - len(claimed))
         for item in column_items(column, graph, labels, config)[:headroom]:
-            item = {**item, "labels": labels.get(item["id"], [])}
+            item = {**item, "labels": list(labels.get(item["id"], []))}
             if claim_and_run(item, column, role, options):
                 claimed.append(item["id"])
     return claimed
