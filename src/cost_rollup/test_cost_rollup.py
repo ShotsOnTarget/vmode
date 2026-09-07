@@ -73,6 +73,19 @@ def test_usd_turns_and_proven_not_double(fake_bd):
     assert result["usd"] == 0.25 and result["turns"] == 4
 
 
+def test_each_event_counted_once(fake_bd):
+    story = _mk("story1")
+    code = _mk("code1", **{"--parent": story})
+    test = _mk("test1", **{"--parent": story})
+    record_run(["dep", "add", test, code, "-t", "validates"])
+    _event(test, 9)
+
+    result = cost_rollup(story, record_graph())
+
+    assert result["runs"] == 1
+    assert result["tokens"] == 9
+
+
 def test_ready_event_counted(fake_bd):
     story = _mk("story1")
     log_append(
