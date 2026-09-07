@@ -7,16 +7,17 @@ export VMODE_BD := "C:/Users/steve/code/bin/bd.exe"
 board port="8080":
     $env:PYTHONPATH = "src"; python -c "import signal, os; signal.signal(signal.SIGINT, lambda *a: os._exit(0)); from board_serve.board_serve import board_serve; board_serve({{port}})"
 
-# Start the Supervisor (from its worktree at HEAD) and one Analyst puller, each in its own window that outlives this shell.
+# Start the Supervisor (from its worktree at HEAD), one Engineer and one Analyst puller, each in its own window that outlives this shell.
 loop:
     git -C ../vmode-supervisor checkout -q --detach (git rev-parse HEAD)
-    Remove-Item work/stop -ErrorAction SilentlyContinue
+    if (Test-Path work/stop) { Remove-Item work/stop }
     Start-Process python -ArgumentList "../vmode-supervisor/tools/run_puller.py supervisor -" -WorkingDirectory (Get-Location)
+    Start-Process python -ArgumentList "tools/run_puller.py engineer roles/pullers/by_column.py" -WorkingDirectory (Get-Location)
     Start-Process python -ArgumentList "tools/run_puller.py analyst roles/pullers/by_column.py" -WorkingDirectory (Get-Location)
 
 # Start N Builder pullers in their own windows (default 2).
 builders n="2":
-    Remove-Item work/stop -ErrorAction SilentlyContinue
+    if (Test-Path work/stop) { Remove-Item work/stop }
     1..{{n}} | ForEach-Object { Start-Process python -ArgumentList "tools/run_puller.py builder roles/pullers/by_column.py" -WorkingDirectory (Get-Location); Start-Sleep -Seconds 15 }
 
 # Ask every puller to stop at its next poll.

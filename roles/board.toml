@@ -22,13 +22,23 @@ tier = "frontier"
 wip = 1
 poll_seconds = 300
 
-[columns.sheet_todo]        # Architect writes job pairs and sheets for a Story
+[columns.sheet_todo]        # Engineer cuts a Story into job pairs with sheets
 kinds = ["story"]
 states = ["waiting"]
-role = "architect"
-tier = "frontier"
+labels_absent = ["cut"]     # leaves the column when the Engineer has cut it
+role = "engineer"
+tier = "engineer"
 wip = 2
 poll_seconds = 300
+adapter = "claude_code"
+
+[columns.building]          # a cut Story whose pairs are being built; nobody pulls, everyone sees
+kinds = ["story"]
+states = ["ready"]
+role = "none"
+tier = "none"
+wip = 99
+poll_seconds = 0
 
 [columns.build]             # Builder pulls one code job
 kinds = ["code"]
