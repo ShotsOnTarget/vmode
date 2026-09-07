@@ -16,6 +16,18 @@ def test_valid_column_empty():
     assert column_valid("intent", _valid_column()) == []
 
 
+def test_engineer_tier_valid():
+    column = _valid_column()
+    column["tier"] = "engineer"
+    assert column_valid("intent", column) == []
+
+
+def test_none_tier_valid():
+    column = _valid_column()
+    column["tier"] = "none"
+    assert column_valid("intent", column) == []
+
+
 def test_missing_key_reported():
     column = _valid_column()
     del column["wip"]
