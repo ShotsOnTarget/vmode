@@ -123,3 +123,62 @@ def test_timeline_json(fake_bd):
 def test_unknown_name_raises(fake_bd):
     with pytest.raises(KeyError):
         board_api("nope", {}, {})
+
+
+def _story_with_jobs():
+    iid = _intent()
+    sid = record_run(
+        [
+            "create",
+            "S",
+            "-t",
+            "epic",
+            "-l",
+            "kind:story,state:ready",
+            "-a",
+            "board",
+            "--no-inherit-labels",
+            "--parent",
+            iid,
+        ]
+    )["id"]
+    cid = record_run(
+        [
+            "create",
+            "widget code",
+            "-t",
+            "task",
+            "-l",
+            "kind:code,state:done",
+            "-a",
+            "builder",
+            "--no-inherit-labels",
+            "--parent",
+            sid,
+        ]
+    )["id"]
+    tid = record_run(
+        [
+            "create",
+            "widget test",
+            "-t",
+            "task",
+            "-l",
+            "kind:test,state:done",
+            "-a",
+            "builder",
+            "--no-inherit-labels",
+            "--parent",
+            sid,
+        ]
+    )["id"]
+    record_run(["dep", "add", tid, cid, "-t", "validates"])
+    return sid
+
+
+def test_status_view(fake_bd):
+    sid = _story_with_jobs()
+    payload = board_api("status", {"id": sid}, {})
+    assert {"id", "state", "jobs", "runs"} <= payload.keys()
+    assert payload["id"] == sid
+    assert len(payload["jobs"]) == 2
