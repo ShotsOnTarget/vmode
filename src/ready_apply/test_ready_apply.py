@@ -1,8 +1,8 @@
-from ready_apply.ready_apply import ready_apply
-
 from log_read_item.log_read_item import log_read_item
+from ready_apply.ready_apply import ready_apply
 from record_graph.record_graph import record_graph
 from record_run.record_run import record_run
+from record_set_state.record_set_state import record_set_state
 
 
 def _setup():
@@ -46,6 +46,49 @@ def _setup():
         ]
     )["id"]
     return story, code, test
+
+
+def _setup_two_code_jobs():
+    story = record_run(
+        [
+            "create",
+            "S",
+            "-t",
+            "task",
+            "--no-inherit-labels",
+            "-l",
+            "kind:story,state:in_progress",
+        ]
+    )["id"]
+    record_run(["update", story, "--acceptance", "1. x [testing]"])
+    record_run(["label", "add", story, "cut"])
+    code_a = record_run(
+        [
+            "create",
+            "CA",
+            "-t",
+            "task",
+            "--no-inherit-labels",
+            "-l",
+            "kind:code,state:waiting",
+            "--parent",
+            story,
+        ]
+    )["id"]
+    code_b = record_run(
+        [
+            "create",
+            "CB",
+            "-t",
+            "task",
+            "--no-inherit-labels",
+            "-l",
+            "kind:code,state:waiting",
+            "--parent",
+            story,
+        ]
+    )["id"]
+    return story, code_a, code_b
 
 
 def _gathered(jobs, usage):
@@ -137,3 +180,22 @@ def test_fail_leaves_jobs_waiting(fake_bd):
     ready_apply(story, ["no_checklist"], _gathered([code, test], {}))
     assert _state(code) == "waiting"
     assert _state(test) == "waiting"
+
+
+def test_pass_leaves_a_done_job_done(fake_bd):
+    story, code_a, code_b = _setup_two_code_jobs()
+    record_set_state(code_b, "done")
+    gathered = _gathered([code_a, code_b], {})
+    ready_apply(story, [], gathered)
+    assert _state(code_a) == "ready"
+    assert _state(code_b) == "done"
+
+
+def test_pass_still_counts_every_pair(fake_bd):
+    story, code_a, code_b = _setup_two_code_jobs()
+    record_set_state(code_b, "done")
+    gathered = _gathered([code_a, code_b], {})
+    ready_apply(story, [], gathered)
+    events = log_read_item(story)
+    assert len(events) == 1
+    assert events[0]["inputs"]["pairs"] == 2
