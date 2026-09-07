@@ -175,3 +175,20 @@ def test_lost_claim_skipped(fake_bd, tmp_path):
     assert claimed == []
     row = _show(ready_id)
     assert row.get("assignee") == "other"
+
+
+def test_item_carries_its_labels(fake_bd, tmp_path):
+    item_id = _make_item()
+    config_path = _plain_config(tmp_path)
+    seen = {}
+
+    def _capturing_invoke(item, column):
+        seen["item"] = {**item, "labels": list(item.get("labels", []))}
+        return _ok_invoke(item, column)
+
+    claimed = pull_once("builder", config_path, _capturing_invoke)
+
+    assert claimed == [item_id]
+    assert "labels" in seen["item"]
+    assert "kind:code" in seen["item"]["labels"]
+    assert "state:ready" in seen["item"]["labels"]
