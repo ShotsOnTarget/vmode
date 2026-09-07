@@ -30,7 +30,7 @@ role = "engineer"
 tier = "engineer"
 wip = 2
 poll_seconds = 300
-adapter = "claude_code"
+adapter = "opencode"
 
 [columns.building]          # a cut Story whose pairs are being built; nobody pulls, everyone sees
 kinds = ["story"]
@@ -47,7 +47,7 @@ role = "builder"
 tier = "cheap"
 wip = 4
 poll_seconds = 30
-adapter = "claude_code"   # opencode free limit reached 2026-09-06; an item label harness:<name> overrides
+adapter = "opencode"   # opencode free limit reached 2026-09-06; an item label harness:<name> overrides
 
 [columns.test]              # Builder pulls one test job
 kinds = ["test"]
@@ -56,7 +56,7 @@ role = "builder"
 tier = "cheap"
 wip = 4
 poll_seconds = 30
-adapter = "claude_code"   # opencode free limit reached 2026-09-06; an item label harness:<name> overrides
+adapter = "opencode"   # opencode free limit reached 2026-09-06; an item label harness:<name> overrides
 
 [columns.prove]             # Supervisor gates a finished job, no model
 kinds = ["code", "test"]
