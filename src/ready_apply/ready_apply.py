@@ -16,8 +16,11 @@ def ready_apply(story_id: str, rules: list[str], gathered: dict) -> str:
         The new Story state: 'ready' when rules is empty, 'reopened' otherwise.
 
     Side effects:
-        Writes the record: sets job and Story states, removes a label and
-        adds a note on failure, and appends exactly one ready gate event.
+        Writes the record: on a pass, sets each job under the Story to
+        'ready' only when its state in gathered['graph'] is 'waiting', and
+        sets the Story to 'ready'. On failure sets the Story to 'reopened',
+        removes the 'cut' label and adds a note, leaving job states as they
+        are. Either way appends exactly one ready gate event.
     """
     usage = gathered["usage"]
     graph = gathered["graph"]
@@ -25,7 +28,8 @@ def ready_apply(story_id: str, rules: list[str], gathered: dict) -> str:
     pairs = sum(1 for j in jobs if graph.get(j, {}).get("kind") == "code")
     if not rules:
         for job_id in jobs:
-            record_set_state(job_id, "ready")
+            if graph.get(job_id, {}).get("state") == "waiting":
+                record_set_state(job_id, "ready")
         record_set_state(story_id, "ready")
         state = "ready"
         rule = "pass"
