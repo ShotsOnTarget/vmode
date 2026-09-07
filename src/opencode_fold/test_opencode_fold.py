@@ -1,69 +1,19 @@
+import json
+import pathlib
+
 from opencode_fold.opencode_fold import opencode_fold
 
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+ERROR_EVENT = json.loads(
+    (ROOT / "fixtures" / "opencode_error_event.json").read_text(encoding="utf-8")
+)
 EVENTS = [
-    {"type": "step_start", "timestamp": 1788798823174, "part": {"type": "step-start"}},
-    {
-        "type": "text",
-        "timestamp": 1788798827521,
-        "part": {
-            "type": "text",
-            "text": "Using glob to list the policy folder for file count.",
-        },
-    },
-    {
-        "type": "tool_use",
-        "timestamp": 1788798827685,
-        "part": {
-            "type": "tool",
-            "tool": "glob",
-            "state": {"status": "completed", "input": {"pattern": "policy/*"}},
-        },
-    },
-    {
-        "type": "step_finish",
-        "timestamp": 1788798828230,
-        "part": {
-            "reason": "tool-calls",
-            "type": "step-finish",
-            "tokens": {
-                "total": 14701,
-                "input": 14102,
-                "output": 69,
-                "reasoning": 530,
-                "cache": {"write": 0, "read": 0},
-            },
-            "cost": 0,
-        },
-    },
-    {"type": "step_start", "timestamp": 1788798830651, "part": {"type": "step-start"}},
-    {
-        "type": "text",
-        "timestamp": 1788798830683,
-        "part": {"type": "text", "text": "1"},
-    },
-    {
-        "type": "step_finish",
-        "timestamp": 1788798831328,
-        "part": {
-            "reason": "stop",
-            "type": "step-finish",
-            "tokens": {
-                "total": 14823,
-                "input": 673,
-                "output": 11,
-                "reasoning": 74,
-                "cache": {"write": 0, "read": 14065},
-            },
-            "cost": 0,
-        },
-    },
+    json.loads(line)
+    for line in (ROOT / "fixtures" / "opencode_run.jsonl")
+    .read_text(encoding="utf-8")
+    .splitlines()
+    if line.strip()
 ]
-
-ERROR_EVENT = {
-    "type": "error",
-    "timestamp": 1788624094161,
-    "error": {"name": "APIError", "data": {"message": "No payment method."}},
-}
 
 
 def test_opencode_fold_counts_a_captured_run():

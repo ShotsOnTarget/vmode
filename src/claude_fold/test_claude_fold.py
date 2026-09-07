@@ -1,19 +1,10 @@
+import json
+import pathlib
+
 from claude_fold.claude_fold import claude_fold
 
-RESULT = {
-    "type": "result",
-    "subtype": "success",
-    "is_error": False,
-    "num_turns": 1,
-    "result": "ok",
-    "total_cost_usd": 0.0222415,
-    "usage": {
-        "input_tokens": 10,
-        "cache_creation_input_tokens": 10210,
-        "cache_read_input_tokens": 16265,
-        "output_tokens": 37,
-    },
-}
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+RESULT = json.loads((ROOT / "fixtures" / "claude_run.json").read_text(encoding="utf-8"))
 
 
 def test_claude_fold_sums_the_four_token_keys():

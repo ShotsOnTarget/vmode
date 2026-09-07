@@ -1,0 +1,10 @@
+{
+  "type": "error",
+  "timestamp": 1788624094161,
+  "error": {
+    "name": "APIError",
+    "data": {
+      "message": "No payment method."
+    }
+  }
+}

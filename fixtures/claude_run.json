@@ -1,0 +1,14 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 1,
+  "result": "ok",
+  "total_cost_usd": 0.0222415,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 10210,
+    "cache_read_input_tokens": 16265,
+    "output_tokens": 37
+  }
+}
