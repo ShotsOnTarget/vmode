@@ -9,6 +9,7 @@ from record_graph.record_graph import record_graph
 from record_labels.record_labels import record_labels
 from record_set_state.record_set_state import record_set_state
 from record_show_item.record_show_item import record_show_item
+from story_status.story_status import story_status
 from timeline.timeline import timeline
 
 CONFIG = pathlib.Path(__file__).resolve().parents[2] / "roles" / "board.toml"
@@ -37,6 +38,7 @@ def board_api(name: str, query: dict, body: dict) -> object:
             body.get("intent", ""), body.get("decision", ""), body.get("reason", "")
         ),
         "release": lambda: _release(body["id"]),
+        "status": lambda: story_status(query["id"], record_graph(), record_labels()),
     }
     return handlers[name]()
 
