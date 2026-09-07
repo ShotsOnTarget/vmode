@@ -50,6 +50,7 @@ Standard rules, every job:
 - Import only what the sheet allows. Nothing else.
 - Out of scope, always: tests on a code job, the code file on a test job, any other folder, any case or behaviour the sheet did not name.
 - Test job: import with `from <name>.<name> import <name>`. When the record is involved use the `fake_bd` fixture (an in-memory record, milliseconds per test); `bd_repo` is for the few integration tests marked `integration` and needs a sheet that says so.
+- The `fake_bd` record's clock is frozen: `created_at` and `updated_at` come back as a fixed instant, not the current time. So a function whose behaviour depends on age or elapsed time must take the instant to compare against as an argument, and the test must pass it, computed from the item's own `updated_at`. Let such a function read the real clock in a test and it passes or fails on how old the fixed timestamp happens to be that day, not on what the code does.
 
 ## Before you report done
 
