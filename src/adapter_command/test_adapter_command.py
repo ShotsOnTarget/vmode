@@ -35,6 +35,22 @@ def test_model_from_manifest(monkeypatch):
     assert argv[idx + 1] == "claude-sonnet-5"
 
 
+def test_model_from_item_overrides_manifest(monkeypatch):
+    monkeypatch.setattr(shutil, "which", lambda n: "C:/x/claude.cmd")
+    item = {"id": "vm-1", "kind": "code", "model": "grok-code"}
+    argv = adapter_command(item, "build", ROOTS)
+    idx = argv.index("--model")
+    assert argv[idx + 1] == "grok-code"
+
+
+def test_item_model_provider_prefix_dropped(monkeypatch):
+    monkeypatch.setattr(shutil, "which", lambda n: "C:/x/claude.cmd")
+    item = {"id": "vm-1", "kind": "code", "model": "opencode/grok-code-fast-1"}
+    argv = adapter_command(item, "build", ROOTS)
+    idx = argv.index("--model")
+    assert argv[idx + 1] == "grok-code-fast-1"
+
+
 def test_prompt_mentions_item_and_role(monkeypatch):
     monkeypatch.setattr(shutil, "which", lambda n: "C:/x/claude.cmd")
     item = {"id": "0001-1-thing-code", "kind": "code"}
