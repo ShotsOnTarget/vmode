@@ -19,6 +19,7 @@ def test_nonzero_exit_raises(bd_repo):
 
 
 def test_missing_binary_raises(bd_repo, monkeypatch):
+    monkeypatch.delenv("VMODE_BD", raising=False)
     monkeypatch.setenv("PATH", "")
     with pytest.raises(RecordError):
         record_run(["list"])
