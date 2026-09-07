@@ -1,7 +1,7 @@
 import pytest
-from record_set_sheet.record_set_sheet import record_set_sheet
 
 from record_run.record_run import record_run
+from record_set_sheet.record_set_sheet import record_set_sheet
 from record_show_item.record_show_item import record_show_item
 
 
@@ -36,3 +36,30 @@ def test_empty_rejected(fake_bd):
         record_set_sheet(item_id, "  ")
 
     assert record_show_item(item_id)["sheet"] == ""
+
+
+def test_em_dash_reads_back_unchanged(fake_bd):
+    item_id = _item()
+    text = "line one—line two"
+
+    record_set_sheet(item_id, text)
+
+    assert record_show_item(item_id)["sheet"] == text
+
+
+def test_mixed_non_ascii_reads_back_unchanged(fake_bd):
+    item_id = _item()
+    text = "em—dash en–dash café"
+
+    record_set_sheet(item_id, text)
+
+    assert record_show_item(item_id)["sheet"] == text
+
+
+def test_non_ascii_returned_dict_matches(fake_bd):
+    item_id = _item()
+    text = "em—dash en–dash café"
+
+    result = record_set_sheet(item_id, text)
+
+    assert result == {"id": item_id, "sheet": text}
