@@ -92,6 +92,58 @@ def test_label_column_adds_label(fake_bd):
     assert not row.get("assignee")
 
 
+def test_claim_line_names_the_item(fake_bd, capsys):
+    item_id = _make_item()
+    item = _item_dict(item_id)
+    options = {"config": _config(), "invoke": _ok_invoke}
+
+    claim_and_run(item, "build", "builder", options)
+
+    lines = capsys.readouterr().out.splitlines()
+    claim_lines = [line for line in lines if line.startswith("claim")]
+    assert len(claim_lines) == 1
+    assert item_id in claim_lines[0]
+    assert "build" in claim_lines[0]
+
+
+def test_finish_line_names_the_item(fake_bd, capsys):
+    item_id = _make_item()
+    item = _item_dict(item_id)
+    options = {"config": _config(), "invoke": _ok_invoke}
+
+    claim_and_run(item, "build", "builder", options)
+
+    lines = capsys.readouterr().out.splitlines()
+    claim_index = next(i for i, line in enumerate(lines) if line.startswith("claim"))
+    finish_index = next(i for i, line in enumerate(lines) if line.startswith("finish"))
+    assert item_id in lines[finish_index]
+    assert claim_index < finish_index
+
+
+def test_failed_run_still_prints_finish(fake_bd, capsys):
+    item_id = _make_item()
+    item = _item_dict(item_id)
+    options = {"config": _config(), "invoke": _raising_invoke}
+
+    claim_and_run(item, "build", "builder", options)
+
+    lines = capsys.readouterr().out.splitlines()
+    finish_lines = [line for line in lines if line.startswith("finish")]
+    assert len(finish_lines) == 1
+    assert item_id in finish_lines[0]
+
+
+def test_lost_claim_prints_nothing(fake_bd, capsys):
+    item_id = _make_item()
+    item = _item_dict(item_id)
+    record_run(["update", item_id, "--claim", "--actor", "other"])
+    options = {"config": _config(), "invoke": _ok_invoke}
+
+    claim_and_run(item, "build", "builder", options)
+
+    assert capsys.readouterr().out == ""
+
+
 def test_label_column_keeps_role_state(fake_bd):
     from record_set_state.record_set_state import record_set_state
 
