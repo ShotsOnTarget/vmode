@@ -38,6 +38,10 @@ waiting, ready, in progress, blocked, checking, done, reopened.
 | Architect marks it unfixable | Send Board a summary. |
 | Left-side item edited | Reopen every item that checks it. |
 
+## Corrections
+
+The Architect may land a direct correction commit outside any job, to break a deadlock the retry rules cannot fix (a config or gate bug, not a Story change). A correction commit carries no job id. Files it touches are claimed by the correction, never by whichever job's Built gate happens to run next: file_outside_folder never fires against a job for a file a correction commit already landed.
+
 ## Log entry
 
 One line of structured data per decision: timestamp, work item id, gate, rule checked, raw inputs (tool output, test output, retry count), resulting state, tokens, seconds. Append only.

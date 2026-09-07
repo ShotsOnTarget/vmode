@@ -66,9 +66,9 @@ tier = "none"
 wip = 8
 poll_seconds = 15
 
-[columns.verify]            # Architect ticks a Story checklist
+[columns.verify]            # Architect ticks a Story checklist, and decides Analyst proposals
 kinds = ["story", "proposal"]
-states = ["checking"]
+states = ["checking", "reopened"]
 role = "architect"
 tier = "frontier"
 wip = 2

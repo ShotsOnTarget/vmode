@@ -48,7 +48,7 @@ Everything we do is a work item. There are six kinds, plus one for learning. Eac
 | **Intent**: what we want and why | **Validation**: the Board says "yes, that is it" | Board |
 | **Story**: one thing it must do, with a checklist of what "done" looks like | **Verification**: the Architect ticks every item on the checklist | Architect |
 | **Code job**: build one small function | **Test job**: prove that function works | Engineer writes both, Builders do them |
-| **Proposal**: a change to how we work, learned from the log | **Verification** for Low care, **Validation** for High care or any role skill | Analyst writes, Architect or Board checks |
+| **Proposal**: a change to how we work, learned from the log | **Verification**: the Architect says yes or no, whatever its care level or target | Analyst writes, Architect checks |
 
 Rules for work items:
 
@@ -61,6 +61,7 @@ Rules for work items:
 7. If a left-side item changes, every right-side item that checks it opens again.
 8. Only three kinds of link exist: "parent of", "checks", and "needs first". No others.
 9. Every item says how it gets checked: by **looking** (a tool inspects it), by **reasoning** (someone analyses it), by **showing** (someone demonstrates it to the Board), or by **testing** (code runs against it). Not everything needs a test.
+10. Adding a new kind updates every generic handler that switches on kind (sweeps, decision handlers, gates) in the same change. A kind only one handler knows about sits inert until someone notices by hand.
 
 Nobody is allowed to write an item without its checklist. No checklist, not ready.
 
@@ -118,7 +119,7 @@ A gate is a checkpoint. Nothing passes a gate without meeting every rule at that
 | **Proven** | When a test job is done | All tests pass. Tests cover every checklist item they were asked to cover. |
 | **Verified** | When all pairs under a Story are done | Architect ticks every item on the Story checklist. No conflict with other finished Stories under the same Intent. |
 | **Validated** | When all Stories under an Intent are done | Board says yes. |
-| **Proposal** | When the Analyst proposes a change | Names a wiki page. Targets one file under roles or policy, never src. The diff touches only that file. Then the Architect (Low) or the Board (High, or any role skill) says yes. Only then is it applied: a diff is applied mechanically by the Supervisor; a Builder is used only when a proposal is not a diff. |
+| **Proposal** | When the Analyst proposes a change | Names a wiki page. Targets one file under roles or policy, never src. The diff touches only that file. Then the Architect says yes, whatever its care level or target. Only then is it applied: a diff is applied mechanically by the Supervisor; a Builder is used only when a proposal is not a diff. |
 
 ## 7. When something fails
 
