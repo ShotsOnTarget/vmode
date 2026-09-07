@@ -5,6 +5,7 @@ import tomllib
 from harness_run.harness_run import harness_run
 from opencode_fold.opencode_fold import opencode_fold
 from role_prompt.role_prompt import role_prompt
+from transcript_write.transcript_write import transcript_write
 
 
 def _load_config(root: str) -> tuple[dict, dict]:
@@ -44,17 +45,10 @@ def _parse_events(stdout: str) -> list[dict]:
 
 
 def opencode_invoke(item: dict, column: str, root: str) -> dict:
-    """Run one job on the opencode harness and fold its result.
-
-    Inputs: item (id, kind, optional role/model/effort); column (board column name);
-    root (repo root). Outputs: a dict with tokens (int), turns (int or None), cost_usd
-    (float or None), report (str), seconds (float), harness ('opencode'), model (str or
-    None), effort (item['effort'] or None). Side effects: runs opencode.
-    """
+    """Run one job on opencode, write a transcript, and return the fold plus path."""
     executable = shutil.which("opencode")
     if executable is None:
         raise RuntimeError("opencode not found on PATH")
-
     board, manifest = _load_config(root)
     tier = board["columns"][column]["tier"]
     model = item.get("model") or manifest["opencode_models"].get(tier)
@@ -62,9 +56,13 @@ def opencode_invoke(item: dict, column: str, root: str) -> dict:
     role = item.get("role") or board["columns"][column]["role"]
     prompt = role_prompt(item, role, root)
     argv = _build_argv(executable, model, effort, prompt)
-
     run = harness_run(argv, root, 1800)
-    fold = opencode_fold(_parse_events(run["stdout"]))
+    events = _parse_events(run["stdout"])
+    fold = opencode_fold(events)
+    meta = dict(
+        item=item["id"], harness="opencode", model=model, effort=effort, role=role
+    )
+    transcript = transcript_write(events, meta, f"{root}/../vmode-runs")
     if run["returncode"] != 0 or fold["error"]:
         msg = fold["report"][:500] or run["stderr"][:500] or "opencode failed"
         raise RuntimeError(msg)
@@ -77,4 +75,5 @@ def opencode_invoke(item: dict, column: str, root: str) -> dict:
         "harness": "opencode",
         "model": model,
         "effort": effort,
+        "transcript": transcript,
     }
