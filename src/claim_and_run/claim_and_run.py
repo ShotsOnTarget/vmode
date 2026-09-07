@@ -31,19 +31,28 @@ def _finish(item_id: str, prior_state: str, absent: list | None) -> None:
         record_set_state(item_id, prior_state)
 
 
+def _log(word: str, item_id: str, column: str) -> None:
+    print(word + " " + item_id + " " + column, flush=True)
+
+
 def claim_and_run(item: dict, column: str, role: str, options: dict) -> bool:
     """Claim an item and run invoke on it; False when another puller won the
     claim. A failed run releases the item back to ready with the error noted;
-    a finished run records usage and moves the item on (see _finish)."""
+    a finished run records usage and moves the item on (see _finish). Prints
+    'claim <item id> <column>' once the claim is won and 'finish <item id>
+    <column>' once the pass is over; a puller that took nothing prints
+    nothing."""
     item_id = item["id"]
     try:
         claim_item(item_id, role + "-" + str(os.getpid()))
     except RecordError:
         return False
+    _log("claim", item_id, column)
     try:
         usage = options["invoke"](item, column)
     except Exception as exc:
         _release(item_id, exc)
+        _log("finish", item_id, column)
         return True
     record_add_note(item_id, "usage: " + json.dumps(usage))
     _finish(
@@ -51,4 +60,5 @@ def claim_and_run(item: dict, column: str, role: str, options: dict) -> bool:
         item["state"],
         options["config"]["columns"][column].get("labels_absent"),
     )
+    _log("finish", item_id, column)
     return True
