@@ -36,3 +36,11 @@ def test_no_dialogs_no_external():
 
 def test_has_timeline():
     assert "loadTimeline" in columns_modal() and "/api/timeline" in columns_modal()
+
+
+def test_has_status():
+    html = columns_modal()
+    assert "loadStatus" in html
+    assert "/api/status" in html
+    open_idx = html.index("openItem")
+    assert "loadStatus" in html[open_idx:]
