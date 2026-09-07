@@ -1,9 +1,25 @@
 import os
 import subprocess
 import sys
+import time
 
 import pytest
+
 from harness_run.harness_run import harness_run
+
+_TREE_CHILD = (
+    "import subprocess, sys, time\n"
+    "p = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'])\n"
+    "open(sys.argv[1], 'w').write(str(p.pid))\n"
+    "time.sleep(60)\n"
+)
+
+
+def _pid_running(pid: str) -> bool:
+    out = subprocess.run(
+        ["tasklist", "/FI", f"PID eq {pid}"], capture_output=True, text=True
+    ).stdout
+    return pid in out
 
 
 def test_returns_the_four_keys(tmp_path):
@@ -80,3 +96,28 @@ def test_undecodable_bytes_do_not_break_it(tmp_path):
         str(tmp_path),
     )
     assert isinstance(result["stdout"], str)
+
+
+def test_timeout_fires_while_a_grandchild_holds_the_pipes(tmp_path):
+    pid_file = tmp_path / "grandchild_pid.txt"
+    start = time.monotonic()
+    with pytest.raises(subprocess.TimeoutExpired):
+        harness_run(
+            [sys.executable, "-c", _TREE_CHILD, str(pid_file)],
+            str(tmp_path),
+            timeout=2,
+        )
+    elapsed = time.monotonic() - start
+    assert elapsed <= 2 + 5
+
+
+def test_timeout_ends_the_whole_process_tree(tmp_path):
+    pid_file = tmp_path / "grandchild_pid.txt"
+    with pytest.raises(subprocess.TimeoutExpired):
+        harness_run(
+            [sys.executable, "-c", _TREE_CHILD, str(pid_file)],
+            str(tmp_path),
+            timeout=2,
+        )
+    grandchild_pid = pid_file.read_text().strip()
+    assert not _pid_running(grandchild_pid)
