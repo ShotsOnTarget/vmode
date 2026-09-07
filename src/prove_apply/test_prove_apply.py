@@ -195,3 +195,37 @@ def test_bounce_clears_claim(fake_bd, tmp_path):
 
     assert result == "ready"
     assert _assignee(item_id) == ""
+
+
+def test_harness_and_model_logged(fake_bd, tmp_path):
+    item_id = _create("code")
+    gathered = _base_gathered(
+        tmp_path,
+        usage={
+            "tokens": 5,
+            "seconds": 1.0,
+            "harness": "claude_code",
+            "model": "claude-sonnet-5",
+        },
+    )
+
+    result = prove_apply(item_id, gathered)
+
+    assert result == "done"
+    entries = log_read_item(item_id)
+    built = [e for e in entries if e["gate"] == "built"]
+    assert built[0]["inputs"]["harness"] == "claude_code"
+    assert built[0]["inputs"]["model"] == "claude-sonnet-5"
+
+
+def test_harness_and_model_none_when_absent(fake_bd, tmp_path):
+    item_id = _create("code")
+    gathered = _base_gathered(tmp_path, usage={"tokens": 5, "seconds": 1.0})
+
+    result = prove_apply(item_id, gathered)
+
+    assert result == "done"
+    entries = log_read_item(item_id)
+    built = [e for e in entries if e["gate"] == "built"]
+    assert built[0]["inputs"]["harness"] is None
+    assert built[0]["inputs"]["model"] is None
