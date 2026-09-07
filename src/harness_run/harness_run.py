@@ -6,26 +6,36 @@ def harness_run(argv: list[str], cwd: str, timeout: int = 1800) -> dict:
     """Run one harness command and capture its result.
 
     argv: the full command line, executable first. cwd: the directory the
-    child runs in. timeout: whole seconds the child is allowed before it is
-    killed; default 1800. Returns a dict with stdout (str), stderr (str),
-    returncode (int, as-is), and seconds (float, wall-clock time around the
-    child run). A child that outlives timeout lets subprocess.TimeoutExpired
-    reach the caller.
+    child runs in. timeout: whole seconds the child is allowed before its
+    whole process tree is killed; default 1800. Returns a dict with stdout
+    (str), stderr (str), returncode (int, as-is), and seconds (float,
+    wall-clock time around the child run). A child that outlives timeout has
+    its whole process tree killed, without waiting for any pipe to close,
+    and lets subprocess.TimeoutExpired reach the caller.
     """
     start = time.monotonic()
-    result = subprocess.run(
+    proc = subprocess.Popen(
         argv,
         cwd=cwd,
-        timeout=timeout,
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
         encoding="utf-8",
         errors="replace",
     )
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        subprocess.run(
+            ["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+            capture_output=True,
+        )
+        proc.wait()
+        raise
     end = time.monotonic()
     return {
-        "stdout": result.stdout,
-        "stderr": result.stderr,
-        "returncode": result.returncode,
+        "stdout": stdout,
+        "stderr": stderr,
+        "returncode": proc.returncode,
         "seconds": end - start,
     }
