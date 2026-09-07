@@ -87,18 +87,20 @@ kinds = ["note"]
 states = ["waiting", "ready", "in_progress"]
 labels_absent = ["triaged"] # leaves the column when the Analyst has disposed of it
 role = "analyst"
-tier = "cheap"
+tier = "analyst"
 wip = 1
 poll_seconds = 60
+adapter = "opencode"
 
 [columns.learn]             # Analyst reads the log for a Verified Story
 kinds = ["story"]
 states = ["done", "in_progress"]
 labels_absent = ["learned"] # leaves the column when the Analyst adds this label
 role = "analyst"
-tier = "cheap"
+tier = "analyst"
 wip = 1
 poll_seconds = 60
+adapter = "opencode"
 
 [columns.blocked]           # awaiting a person; nobody pulls, everyone sees. The note under a blocked item says who: its For line
 kinds = ["intent", "story", "code", "test", "proposal"]

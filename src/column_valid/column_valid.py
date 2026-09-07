@@ -1,7 +1,7 @@
 _LEFT = {"intent", "story", "code", "proposal", "note", "pattern"}
 KINDS = _LEFT | {"test", "verification", "validation"}
 STATES = {"waiting", "ready", "in_progress", "blocked", "checking", "done", "reopened"}
-TIERS = {"human", "frontier", "cheap", "engineer", "none"}
+TIERS = {"human", "frontier", "cheap", "engineer", "analyst", "none"}
 REQUIRED = {"kinds", "states", "role", "tier", "wip", "poll_seconds"}
 ALLOWED = REQUIRED | {"labels_absent", "adapter"}
 
@@ -29,7 +29,7 @@ CHECKERS = (
     (
         "tier",
         lambda v: v in TIERS,
-        "must be one of human, frontier, cheap, engineer, none",
+        "must be one of human, frontier, cheap, engineer, analyst, none",
     ),
     ("wip", lambda v: _is_int_at_least(v, 0), "must be an int >= 0"),
     ("poll_seconds", lambda v: _is_int_at_least(v, 0), "must be an int >= 0"),
