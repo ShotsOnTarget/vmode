@@ -149,7 +149,13 @@ def test_usage_extra_keys_ignored(fake_bd, tmp_path):
     assert "report" not in built[0]
 
 
-def test_test_kind_runs_proven(fake_bd, tmp_path):
+def test_test_kind_does_not_run_the_tests(fake_bd, tmp_path):
+    """A test job's gate never runs pytest, so a failing case does not bounce it.
+
+    Its cases describe behaviour the paired code job has not written yet; the
+    tests run at that code job's gate, which comes after. Judging the test job
+    on them deadlocks a change pair (Intent 0009).
+    """
     item_id = _create("test")
     gathered = _base_gathered(
         tmp_path,
@@ -160,11 +166,24 @@ def test_test_kind_runs_proven(fake_bd, tmp_path):
 
     result = prove_apply(item_id, gathered)
 
+    assert result == "done"
+
+
+def test_test_kind_still_bounces_on_a_missing_case(fake_bd, tmp_path):
+    item_id = _create("test")
+    gathered = _base_gathered(
+        tmp_path,
+        kind="test",
+        test="def test_a():" + chr(10) + "    assert True" + chr(10),
+        cases=["a", "b"],
+    )
+
+    result = prove_apply(item_id, gathered)
+
     assert result == "ready"
     entries = log_read_item(item_id)
-    proven = [e for e in entries if e["gate"] == "proven"]
-    assert proven
-    assert "tests_failed" in proven[0]["rule"]
+    built = [e for e in entries if e["gate"] == "built"]
+    assert "case_missing" in built[0]["rule"]
 
 
 def test_bounce_clears_claim(fake_bd, tmp_path):

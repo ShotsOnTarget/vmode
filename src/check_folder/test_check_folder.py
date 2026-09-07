@@ -83,3 +83,9 @@ def test_test_job_without_code_uses_test_gate(repo):
         "def test_adds():" + chr(10) + "    assert True" + chr(10)
     )
     assert check_folder("early", {"kind": "test", "cases": ["adds"]}) == []
+
+
+def test_change_pair_test_job_does_not_run_tests(repo):
+    _folder(repo, "changing", v=3)
+    assert "tests_failed" in check_folder("changing", {})
+    assert check_folder("changing", {"kind": "test", "cases": ["adds"]}) == []

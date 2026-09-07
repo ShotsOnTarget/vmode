@@ -26,11 +26,15 @@ def check_folder(folder: str, options: dict) -> list[str]:
     tree to check, default '.'). Returns the failed rule names exactly as
     the Built and Proven gates name them; [] when clean. Tests run whenever
     a test file exists, so a code job is checked against its tests too. A
-    test job whose code does not exist yet gets the test-only gate.
+    test job always gets the test-only gate: its own file's shape, format,
+    lint and case names, and no pytest run. The pair's tests are run at the
+    code job's gate, which comes after it. Running them at the test job's
+    gate deadlocks a change pair, whose new cases describe behaviour the
+    unchanged code does not have yet (Intent 0009).
     """
     repo = options.get("repo", ".")
     src, base = f"src/{folder}", os.path.join(repo, "src", folder, folder)
-    if options.get("kind") == "test" and not os.path.exists(base + ".py"):
+    if options.get("kind") == "test":
         return check_test_only(folder, options)
     inputs = {
         "changed": options.get("changed", []),
