@@ -62,3 +62,37 @@ def test_leaf_only_own(fake_bd):
 def test_unknown_raises(fake_bd):
     with pytest.raises(ValueError):
         timeline("nope", record_graph())
+
+
+def test_event_of_a_doubly_reachable_item_listed_once(fake_bd):
+    intent = _mk("intent1")
+    story = _mk("story1", **{"--parent": intent})
+    code = _mk("code1", **{"--parent": story})
+    test = _mk("test1", **{"--parent": story})
+    record_run(["dep", "add", test, code, "-t", "validates"])
+
+    log_append(_event(story))
+    log_append(_event(code))
+    log_append(_event(test))
+
+    result = timeline(story, record_graph())
+
+    assert sum(1 for entry in result if entry["item"] == test) == 1
+
+
+def test_no_entry_id_repeats(fake_bd):
+    intent = _mk("intent1")
+    story = _mk("story1", **{"--parent": intent})
+    code = _mk("code1", **{"--parent": story})
+    test = _mk("test1", **{"--parent": story})
+    record_run(["dep", "add", test, code, "-t", "validates"])
+
+    written = [story, code, test]
+    for item in written:
+        log_append(_event(item))
+
+    result = timeline(story, record_graph())
+
+    ids = [entry["id"] for entry in result]
+    assert len(set(ids)) == len(ids)
+    assert len(result) == len(written)
