@@ -2,35 +2,68 @@ import json
 import pathlib
 
 import pytest
+
 from opencode_invoke.opencode_invoke import opencode_invoke
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
-TEXT_EVENT = json.dumps({"type": "text", "part": {"type": "text", "text": "ok"}})
-FINISH_EVENT = json.dumps(
-    {"type": "step_finish", "part": {"tokens": {"total": 120}, "cost": 0.25}}
-)
-OK_STDOUT = TEXT_EVENT + "\n" + FINISH_EVENT
-ERROR_EVENT = json.dumps({"type": "error", "error": "nope"})
+TEXT_EVENT = {"type": "text", "part": {"type": "text", "text": "ok"}}
+TOOL_EVENT = {
+    "type": "tool_use",
+    "timestamp": 1788798827685,
+    "part": {
+        "type": "tool",
+        "tool": "glob",
+        "callID": "call_01",
+        "state": {"status": "completed"},
+    },
+}
+FINISH_EVENT = {
+    "type": "step_finish",
+    "part": {"tokens": {"total": 120}, "cost": 0.25},
+}
+ERROR_EVENT = {"type": "error", "error": "nope"}
+
+EVENTS = [TEXT_EVENT, TOOL_EVENT, FINISH_EVENT]
+OK_STDOUT = "\n".join(json.dumps(e) for e in EVENTS)
+ERROR_STDOUT = json.dumps(ERROR_EVENT)
+TRANSCRIPT_PATH = "/vmode-runs/vm-x/opencode.json"
+
+RESULT_KEYS = {
+    "tokens",
+    "turns",
+    "cost_usd",
+    "report",
+    "seconds",
+    "harness",
+    "model",
+    "effort",
+    "transcript",
+}
 
 
-def _patch_which(monkeypatch, path="/usr/bin/opencode"):
+def _patch_all(
+    monkeypatch,
+    *,
+    which_path="/usr/bin/opencode",
+    prompt="THE PROMPT",
+    stdout=OK_STDOUT,
+    stderr="",
+    returncode=0,
+    seconds=1.5,
+    transcript_answer=TRANSCRIPT_PATH,
+):
     monkeypatch.setattr(
-        "opencode_invoke.opencode_invoke.shutil.which", lambda name: path
+        "opencode_invoke.opencode_invoke.shutil.which", lambda name: which_path
+    )
+    monkeypatch.setattr(
+        "opencode_invoke.opencode_invoke.role_prompt", lambda *a, **k: prompt
     )
 
-
-def _patch_prompt(monkeypatch, text="THE PROMPT"):
-    monkeypatch.setattr(
-        "opencode_invoke.opencode_invoke.role_prompt", lambda *a, **k: text
-    )
-
-
-def _patch_harness(monkeypatch, stdout=OK_STDOUT, stderr="", returncode=0, seconds=1.5):
-    calls = []
+    harness_calls = []
 
     def fake_harness_run(argv, root, timeout):
-        calls.append({"argv": argv, "root": root, "timeout": timeout})
+        harness_calls.append({"argv": argv, "root": root, "timeout": timeout})
         return {
             "stdout": stdout,
             "stderr": stderr,
@@ -39,7 +72,20 @@ def _patch_harness(monkeypatch, stdout=OK_STDOUT, stderr="", returncode=0, secon
         }
 
     monkeypatch.setattr("opencode_invoke.opencode_invoke.harness_run", fake_harness_run)
-    return calls
+
+    transcript_calls = []
+
+    def fake_transcript_write(events, meta, directory):
+        transcript_calls.append(
+            {"events": events, "meta": meta, "directory": directory}
+        )
+        return transcript_answer
+
+    monkeypatch.setattr(
+        "opencode_invoke.opencode_invoke.transcript_write", fake_transcript_write
+    )
+
+    return harness_calls, transcript_calls
 
 
 def _pair_in(argv, first, second):
@@ -47,18 +93,14 @@ def _pair_in(argv, first, second):
 
 
 def test_missing_executable_ends_in_runtimeerror(monkeypatch):
-    monkeypatch.setattr(
-        "opencode_invoke.opencode_invoke.shutil.which", lambda name: None
-    )
+    _patch_all(monkeypatch, which_path=None)
     with pytest.raises(RuntimeError) as excinfo:
         opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
     assert str(excinfo.value) == "opencode not found on PATH"
 
 
 def test_argv_starts_with_the_run_flags(monkeypatch):
-    _patch_which(monkeypatch)
-    _patch_prompt(monkeypatch)
-    calls = _patch_harness(monkeypatch)
+    calls, _ = _patch_all(monkeypatch)
     opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
     argv = calls[0]["argv"]
     assert argv[0] == "/usr/bin/opencode"
@@ -72,17 +114,13 @@ def test_argv_starts_with_the_run_flags(monkeypatch):
 
 
 def test_the_prompt_is_the_last_argument(monkeypatch):
-    _patch_which(monkeypatch)
-    _patch_prompt(monkeypatch, "THE PROMPT TEXT")
-    calls = _patch_harness(monkeypatch)
+    calls, _ = _patch_all(monkeypatch, prompt="THE PROMPT TEXT")
     opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
     assert calls[0]["argv"][-1] == "THE PROMPT TEXT"
 
 
 def test_the_items_model_wins(monkeypatch):
-    _patch_which(monkeypatch)
-    _patch_prompt(monkeypatch)
-    calls = _patch_harness(monkeypatch)
+    calls, _ = _patch_all(monkeypatch)
     result = opencode_invoke(
         {"id": "vm-x", "kind": "code", "model": "x/y"}, "build", str(ROOT)
     )
@@ -91,26 +129,20 @@ def test_the_items_model_wins(monkeypatch):
 
 
 def test_the_manifest_model_is_used_when_the_item_has_none(monkeypatch):
-    _patch_which(monkeypatch)
-    _patch_prompt(monkeypatch)
-    _patch_harness(monkeypatch)
+    _patch_all(monkeypatch)
     result = opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
     assert result["model"] == "opencode/muse-spark-1.3-contributor-free"
 
 
 def test_no_model_flag_when_the_tier_has_none(monkeypatch):
-    _patch_which(monkeypatch)
-    _patch_prompt(monkeypatch)
-    calls = _patch_harness(monkeypatch)
+    calls, _ = _patch_all(monkeypatch)
     result = opencode_invoke({"id": "vm-x", "kind": "story"}, "story_todo", str(ROOT))
     assert "-m" not in calls[0]["argv"]
     assert result["model"] is None
 
 
 def test_effort_adds_a_variant_flag(monkeypatch):
-    _patch_which(monkeypatch)
-    _patch_prompt(monkeypatch)
-    calls = _patch_harness(monkeypatch)
+    calls, _ = _patch_all(monkeypatch)
     result = opencode_invoke(
         {"id": "vm-x", "kind": "code", "effort": "high"}, "build", str(ROOT)
     )
@@ -119,18 +151,14 @@ def test_effort_adds_a_variant_flag(monkeypatch):
 
 
 def test_no_effort_leaves_argv_alone(monkeypatch):
-    _patch_which(monkeypatch)
-    _patch_prompt(monkeypatch)
-    calls = _patch_harness(monkeypatch)
+    calls, _ = _patch_all(monkeypatch)
     result = opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
     assert "--variant" not in calls[0]["argv"]
     assert result["effort"] is None
 
 
 def test_tokens_turns_cost_and_report_come_from_the_fold(monkeypatch):
-    _patch_which(monkeypatch)
-    _patch_prompt(monkeypatch)
-    _patch_harness(monkeypatch, stdout=OK_STDOUT)
+    _patch_all(monkeypatch, stdout=OK_STDOUT)
     result = opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
     assert result["tokens"] == 120
     assert result["turns"] == 1
@@ -139,61 +167,95 @@ def test_tokens_turns_cost_and_report_come_from_the_fold(monkeypatch):
 
 
 def test_lines_that_are_not_json_are_skipped(monkeypatch):
-    _patch_which(monkeypatch)
-    _patch_prompt(monkeypatch)
-    stdout = "starting opencode\n" + OK_STDOUT
-    _patch_harness(monkeypatch, stdout=stdout)
+    stdout = "noise\n" + OK_STDOUT
+    _patch_all(monkeypatch, stdout=stdout)
     result = opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
     assert result["tokens"] == 120
     assert result["report"] == "ok"
 
 
 def test_seconds_comes_from_the_run(monkeypatch):
-    _patch_which(monkeypatch)
-    _patch_prompt(monkeypatch)
-    _patch_harness(monkeypatch, seconds=42.5)
+    _patch_all(monkeypatch, seconds=42.5)
     result = opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
     assert result["seconds"] == 42.5
 
 
 def test_harness_is_opencode(monkeypatch):
-    _patch_which(monkeypatch)
-    _patch_prompt(monkeypatch)
-    _patch_harness(monkeypatch)
+    _patch_all(monkeypatch)
     result = opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
     assert result["harness"] == "opencode"
 
 
 def test_the_error_key_is_not_on_the_result(monkeypatch):
-    _patch_which(monkeypatch)
-    _patch_prompt(monkeypatch)
-    _patch_harness(monkeypatch)
+    _patch_all(monkeypatch)
     result = opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
-    assert set(result.keys()) == {
-        "tokens",
-        "turns",
-        "cost_usd",
-        "report",
-        "seconds",
-        "harness",
-        "model",
-        "effort",
-    }
+    assert set(result.keys()) == RESULT_KEYS
+
+
+def test_the_transcript_gets_every_event(monkeypatch):
+    _, transcript_calls = _patch_all(monkeypatch)
+    opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
+    assert transcript_calls[0]["events"] == EVENTS
+
+
+def test_the_transcript_meta_names_the_run(monkeypatch):
+    _, transcript_calls = _patch_all(monkeypatch)
+    opencode_invoke(
+        {"id": "vm-x", "kind": "code", "model": "m1", "effort": "high"},
+        "build",
+        str(ROOT),
+    )
+    meta = transcript_calls[0]["meta"]
+    assert meta["item"] == "vm-x"
+    assert meta["harness"] == "opencode"
+    assert meta["model"] == "m1"
+    assert meta["effort"] == "high"
+    assert meta["role"] == "builder"
+
+
+def test_the_transcript_directory_is_outside_the_repo(monkeypatch):
+    _, transcript_calls = _patch_all(monkeypatch)
+    opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
+    assert transcript_calls[0]["directory"].endswith("/../vmode-runs")
+
+
+def test_the_transcript_path_is_on_the_result(monkeypatch):
+    _patch_all(monkeypatch, transcript_answer=TRANSCRIPT_PATH)
+    result = opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
+    assert result["transcript"] == TRANSCRIPT_PATH
+
+
+def test_an_unwritable_transcript_does_not_fail_the_run(monkeypatch):
+    _patch_all(monkeypatch, transcript_answer=None)
+    result = opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
+    assert result["transcript"] is None
+    assert result["tokens"] == 120
+    assert result["turns"] == 1
+    assert result["cost_usd"] == 0.25
+    assert result["report"] == "ok"
+    assert result["harness"] == "opencode"
+    assert result["model"] == "opencode/muse-spark-1.3-contributor-free"
+    assert result["effort"] is None
+
+
+def test_a_failed_run_still_writes_its_transcript(monkeypatch):
+    _, transcript_calls = _patch_all(
+        monkeypatch, stdout="", stderr="boom", returncode=1
+    )
+    with pytest.raises(RuntimeError):
+        opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
+    assert len(transcript_calls) == 1
 
 
 def test_nonzero_returncode_ends_in_runtimeerror(monkeypatch):
-    _patch_which(monkeypatch)
-    _patch_prompt(monkeypatch)
-    _patch_harness(monkeypatch, stdout="", stderr="boom", returncode=1)
+    _patch_all(monkeypatch, stdout="", stderr="boom", returncode=1)
     with pytest.raises(RuntimeError) as excinfo:
         opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
     assert "boom" in str(excinfo.value)
 
 
 def test_an_error_event_ends_in_runtimeerror(monkeypatch):
-    _patch_which(monkeypatch)
-    _patch_prompt(monkeypatch)
-    _patch_harness(monkeypatch, stdout=ERROR_EVENT)
+    _patch_all(monkeypatch, stdout=ERROR_STDOUT)
     with pytest.raises(RuntimeError) as excinfo:
         opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
     assert "nope" in str(excinfo.value)
