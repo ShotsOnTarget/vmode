@@ -17,7 +17,7 @@ def record_set_sheet(item_id: str, text: str) -> dict:
 
     fd, path = tempfile.mkstemp(suffix=".md")
     try:
-        with os.fdopen(fd, "w") as f:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(text)
         record_run(["update", item_id, "--body-file", path])
     finally:
