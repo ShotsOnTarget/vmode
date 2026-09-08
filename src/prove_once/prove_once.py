@@ -10,9 +10,8 @@ from record_graph.record_graph import record_graph
 from record_labels.record_labels import record_labels
 from record_set_state.record_set_state import record_set_state
 
-# The Story states whose jobs the Ready gate has approved for dispatch. A Story
-# the Engineer is still cutting is in_progress, which is not one of them: its
-# sheets have not been gated, and releasing them dispatches work nobody approved.
+# Story states whose jobs the Ready gate has approved for dispatch. Not
+# in_progress: that is a Story still being cut, whose sheets no gate has seen.
 _RELEASED = ("ready", "checking", "done")
 
 
