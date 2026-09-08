@@ -1,8 +1,8 @@
-from smoke_story.smoke_story import smoke_story
-
 from record_create_item.record_create_item import record_create_item
+from record_graph.record_graph import record_graph
 from record_run.record_run import record_run
 from record_show_item.record_show_item import record_show_item
+from smoke_story.smoke_story import smoke_story
 
 
 def _intent():
@@ -51,3 +51,12 @@ def test_minted_story_stays_in_sheet_todo(fake_bd):
     assert shown["state"] == "waiting"
     labels = record_run(["show", story_id])[0]["labels"]
     assert "cut" not in labels
+
+
+def test_minted_story_is_checked_by_a_verification(fake_bd):
+    """The Ready gate fails a Story nothing checks, so minting must link one."""
+    result = smoke_story(_intent(), 11)
+    story_id = _story_id(result)
+    checker = record_graph()[result["verification_id"]]
+    assert checker["kind"] == "verification"
+    assert story_id in checker["checks"]
