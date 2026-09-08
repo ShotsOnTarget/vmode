@@ -1,5 +1,8 @@
 import subprocess
 
+# what the pipeline writes about itself: never a job's doing
+_RUNTIME = (".beads/", ".claude/", ".dolt-data/", ".opencode/", ".pi/", "work/")
+
 
 def _claimed_folders(folder, graph):
     claimed = set()
@@ -24,8 +27,12 @@ def _parse_porcelain(output):
 
 
 def changed_paths(folder: str, graph: dict, repo: str = ".") -> list[str]:
-    """List changed src paths for this job's folder from git status, excluding paths
-    claimed by other in-progress or checking jobs.
+    """List every path this job changed, from git status.
+
+    Reports whatever the working tree shows as changed, wherever it lives, so
+    the Built gate can judge it: filtering is not judging, and a path dropped
+    here is one no gate can ever see. Excluded are only the directories the
+    pipeline writes about itself, and src folders claimed by another job.
     """
     result = subprocess.run(
         ["git", "status", "--porcelain", "--untracked-files=all"],
@@ -40,11 +47,11 @@ def changed_paths(folder: str, graph: dict, repo: str = ".") -> list[str]:
     paths = _parse_porcelain(result.stdout)
     kept = []
     for path in paths:
-        if not path.startswith("src/"):
+        if path.startswith(_RUNTIME):
             continue
         parts = path.split("/")
-        owner = parts[1] if len(parts) > 1 else ""
-        if owner in claimed:
+        src = path.startswith("src/") and len(parts) > 1
+        if src and parts[1] in claimed:
             continue
         kept.append(path)
     return sorted(kept)

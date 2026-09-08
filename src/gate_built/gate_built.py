@@ -4,6 +4,7 @@ _KEYS = ("changed", "code", "fmt_out", "lint_out")
 
 _RULES = (
     ("file_outside_folder", lambda c: c["outside"]),
+    ("markdown_touched", lambda c: c["docs"]),
     ("too_many_files", lambda c: c["many"]),
     ("over_80_lines", lambda c: c["long"]),
     ("not_one_public_function", lambda c: c["funcs"] != 1),
@@ -37,6 +38,7 @@ def gate_built(job_id: str, inputs: dict) -> list[str]:
     ]
     ctx = {
         "outside": any(not p.startswith(folder) for p in changed),
+        "docs": any(p.endswith(".md") for p in changed),
         "many": len({p for p in changed if p.startswith(folder)}) > 2,
         "long": code.count("\n") + (0 if code.endswith("\n") else 1) > 80,
         "funcs": len(public),

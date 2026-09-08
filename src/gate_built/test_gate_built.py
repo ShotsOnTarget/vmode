@@ -50,3 +50,19 @@ def test_three_files_too_many():
 def test_syntax_error_raises():
     with pytest.raises(ValueError):
         gate_built(JOB, _inputs(code="def x(:\n"))
+
+
+def test_file_outside_src_is_seen():
+    """Before 2026-09-08 a path outside src was filtered out before the gate."""
+    changed = [f"src/{JOB}/x.py", "roles/shared/report-format.md"]
+    assert "file_outside_folder" in gate_built(JOB, _inputs(changed=changed))
+
+
+def test_markdown_touched():
+    """A Builder writes code and tests, never documentation."""
+    changed = [f"src/{JOB}/x.py", "roles/builder/SKILL.md"]
+    assert "markdown_touched" in gate_built(JOB, _inputs(changed=changed))
+
+
+def test_no_markdown_no_rule():
+    assert "markdown_touched" not in gate_built(JOB, _inputs())

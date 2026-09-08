@@ -64,8 +64,11 @@ def test_changed_filtered(fake_bd):
     result = prove_gather(item_id, "x")
 
     assert result["changed"]
-    for path in result["changed"]:
-        assert path.startswith("src/x/")
+    # another job's claimed folder is still hidden, so the gate cannot blame
+    # this job for it; everything else is reported, so the gate can judge it
+    assert not any(path.startswith("src/y/") for path in result["changed"])
+    assert "outside.txt" in result["changed"]
+    assert "src/x/x.md" in result["changed"]
 
 
 def test_usage_from_note(fake_bd):
