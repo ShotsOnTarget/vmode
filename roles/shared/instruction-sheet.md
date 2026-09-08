@@ -6,6 +6,7 @@ A sheet is a contract, not a recipe. It says what the function must do and how i
 - **Kind**: code or test.
 - **Parent Story**:
 - **Function name**: also the folder name and file stem.
+- **Change** (only when that function already exists): what changes about it. A sheet naming a function already in the codebase map, with no Change field, is refused as `exists_without_change`: without it a Builder cannot tell a new function from a rewrite of one that already works, and has rewritten the working one.
 - **Folder**: `src/<function name>/`
 - **Signature**: exact.
 - **Inputs**: type and meaning of each.
