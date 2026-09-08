@@ -28,6 +28,9 @@ EVENTS = [TEXT_EVENT, TOOL_EVENT, FINISH_EVENT]
 OK_STDOUT = "\n".join(json.dumps(e) for e in EVENTS)
 ERROR_STDOUT = json.dumps(ERROR_EVENT)
 TRANSCRIPT_PATH = "/vmode-runs/vm-x/opencode.json"
+CHEAP_MODEL = json.loads((ROOT / "roles" / "manifest.json").read_text())[
+    "opencode_models"
+]["cheap"]
 
 RESULT_KEYS = {
     "tokens",
@@ -129,9 +132,10 @@ def test_the_items_model_wins(monkeypatch):
 
 
 def test_the_manifest_model_is_used_when_the_item_has_none(monkeypatch):
-    _patch_all(monkeypatch)
+    calls, _ = _patch_all(monkeypatch)
     result = opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
-    assert result["model"] == "opencode/muse-spark-1.3-contributor-free"
+    assert result["model"] == CHEAP_MODEL
+    assert _pair_in(calls[0]["argv"], "-m", CHEAP_MODEL)
 
 
 def test_no_model_flag_when_the_tier_has_none(monkeypatch):
@@ -234,7 +238,6 @@ def test_an_unwritable_transcript_does_not_fail_the_run(monkeypatch):
     assert result["cost_usd"] == 0.25
     assert result["report"] == "ok"
     assert result["harness"] == "opencode"
-    assert result["model"] == "opencode/muse-spark-1.3-contributor-free"
     assert result["effort"] is None
 
 
