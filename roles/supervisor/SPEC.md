@@ -44,7 +44,7 @@ The Architect may land a direct correction commit outside any job, to break a de
 
 ## Log entry
 
-One line of structured data per decision: timestamp, work item id, gate, rule checked, raw inputs (tool output, test output, retry count), resulting state, tokens, seconds. Append only.
+One line of structured data per decision: timestamp, work item id, gate, rule checked, raw inputs (tool output, test output, retry count), resulting state, tokens, seconds. Append only. On a Built or Proven gate failure, raw inputs names the failing test(s) or the tool's printed rule name, not only the harness, model and retry count; a bounce logged without it gives the Analyst no way to tell a sheet defect from a Builder slip.
 
 Cost fields: `tokens` is the total tokens the harness reports for the Builder run that produced the decision (input plus output), `seconds` its wall time. Gate decisions with no Builder run carry tokens 0 and seconds 0.0. A run whose cost the harness did not report is logged with tokens -1, never omitted. `cost_rollup` sums per item, per Story, per Intent by id prefix.
 
