@@ -1,8 +1,14 @@
 from columns_modal.columns_modal import columns_modal
+from pipeline_run_count.pipeline_run_count import pipeline_run_count
 
 
 def columns_page() -> str:
-    """Return the columns board HTML page as a string."""
+    """Return the columns board HTML page as a string.
+
+    Inputs: none. Outputs: HTML string with board and run count.
+    Side effects: none.
+    """
+    count = pipeline_run_count()
     return (
         """<!doctype html><html><head><meta charset="utf-8"><title>Columns</title>
 <style>body{font-family:system-ui,sans-serif;font-size:14px;padding:16px;margin:0}"""
@@ -22,6 +28,7 @@ def columns_page() -> str:
         """.pill{display:inline-block;padding:1px 6px;border-radius:10px;"""
         """background:#e6e8eb;font-size:12px}.empty{color:#888}</style>
 </head><body>
+<div>Pipeline runs: """ + str(count) + """</div>
 <div id="columns"></div>
 <script>
 function esc(s){const d=document.createElement('div');d.textContent=s;"""
