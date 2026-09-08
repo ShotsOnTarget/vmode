@@ -54,27 +54,22 @@ def _va(cf: dict) -> str | None:
     return "validate_and_operate" if n >= 3 else None
 
 
-def _ex(cf: dict, existing: list[str]) -> str | None:
+def _ex(cf: dict, tf: dict, existing: dict[str, list[str]]) -> list[str]:
     n = cf.get("function_name", "").replace("`", "").strip()
-    if n in existing and "change" not in cf:
-        return "exists_without_change"
-    return None
+    if n not in existing:
+        return []
+    if "change" not in cf:
+        return ["exists_without_change"]
+    present = set(tf.get("cases", []))
+    return [f"existing_case_missing:{x}" for x in existing[n] if x not in present]
 
 
-def sheet_check(code: str, test: str, existing: list[str]) -> list[str]:
+def sheet_check(code: str, test: str, existing: dict[str, list[str]]) -> list[str]:
     """Name the faults in a code and test sheet pair.
-    Inputs: code and test sheet texts, existing function names.
+    Inputs: code and test sheet texts, existing test names per function.
     Outputs: sorted distinct rule names, [] when clean.
     Side effects: none."""
     cf = sheet_fields(code)
     tf = sheet_fields(test)
-    checks = (
-        _mm(cf, tf),
-        _fm(cf, tf),
-        _nc(tf),
-        _fb(cf, tf),
-        _od(cf, tf),
-        _va(cf),
-        _ex(cf, existing),
-    )
-    return sorted(c for c in checks if c is not None)
+    checks = (_mm(cf, tf), _fm(cf, tf), _nc(tf), _fb(cf, tf), _od(cf, tf), _va(cf))
+    return sorted({c for c in checks if c} | set(_ex(cf, tf, existing)))
