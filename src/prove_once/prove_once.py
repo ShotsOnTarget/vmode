@@ -10,7 +10,10 @@ from record_graph.record_graph import record_graph
 from record_labels.record_labels import record_labels
 from record_set_state.record_set_state import record_set_state
 
-_RELEASED = ("ready", "in_progress", "checking", "done")
+# The Story states whose jobs the Ready gate has approved for dispatch. A Story
+# the Engineer is still cutting is in_progress, which is not one of them: its
+# sheets have not been gated, and releasing them dispatches work nobody approved.
+_RELEASED = ("ready", "checking", "done")
 
 
 def _folder_of(title: str) -> str:

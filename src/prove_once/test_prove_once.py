@@ -78,3 +78,16 @@ def test_ordinary_pass_leaves_job_waiting_under_an_ungated_story(fake_bd, tmp_pa
     prove_once(config_path)
 
     assert record_show_item(job_id)["state"] == "waiting"
+
+
+def test_a_story_still_being_cut_does_not_release_its_jobs(fake_bd, tmp_path):
+    """A Story the Engineer holds is in_progress and its sheets are not gated yet."""
+    config_path = _config(tmp_path)
+    story_id = _create("Story S", "kind:story,state:in_progress")
+    need_id = _create("Need code", "kind:code,state:done", parent=story_id)
+    job_id = _create("Blocked code", "kind:code,state:waiting", parent=story_id)
+    record_run(["dep", "add", job_id, "--blocked-by", need_id])
+
+    prove_once(config_path)
+
+    assert record_show_item(job_id)["state"] == "waiting"
