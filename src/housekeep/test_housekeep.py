@@ -1,60 +1,44 @@
-import subprocess
-
 from housekeep.housekeep import housekeep
-from record_graph.record_graph import record_graph
+from log_read_item.log_read_item import log_read_item
 from record_run.record_run import record_run
 
 
-def _item(title, labels, parent=None, assignee=None):
-    args = ["create", title, "-t", "task", "-l", labels, "--no-inherit-labels"]
-    if parent:
-        args += ["--parent", parent]
-    if assignee:
-        args += ["-a", assignee]
-    return record_run(args)["id"]
-
-
-def test_dead_claim_released(fake_bd):
-    subprocess.run(["git", "init", "-q"], check=True)
-    job = _item("w code", "kind:code,state:in_progress", assignee="builder-99999")
-    result = housekeep(".")
-    assert job in result["released"]
-    assert record_graph()[job]["state"] == "ready"
-
-
-def test_leftover_raised_once(fake_bd):
-    subprocess.run(["git", "init", "-q"], check=True)
-    intent = _item("I", "kind:intent,state:done")
-    job = _item("w code", "kind:code,state:done", parent=intent)
-    (fake_bd / "src" / "w").mkdir(parents=True)
-    (fake_bd / "src" / "w" / "w.py").write_text("def w():\n    pass\n")
-    first = housekeep(".")
-    second = housekeep(".")
-    notes = [
-        i
-        for i in record_graph().values()
-        if i["kind"] == "note"
-        and i["parent"] == job
-        and i["title"].startswith("leftover")
-    ]
-    assert len(first["notes"]) >= 1 and second["notes"] == []
-    assert len(notes) == 1
-
-
-def test_stale_finding_cleared(fake_bd):
-    subprocess.run(["git", "init", "-q"], check=True)
-    intent = _item("I", "kind:intent,state:done")
-    _item("w code", "kind:code,state:done", parent=intent)
-    (fake_bd / "src" / "w").mkdir(parents=True)
-    (fake_bd / "src" / "w" / "w.py").write_text(
-        "def w():" + chr(10) + "    pass" + chr(10)
+def _claimed_item(title: str, claim: str) -> str:
+    created = record_run(
+        [
+            "create",
+            title,
+            "-t",
+            "task",
+            "-l",
+            "kind:code,state:in_progress",
+            "-a",
+            claim,
+        ]
     )
-    first = housekeep(".")
-    subprocess.run(["git", "add", "-A"], check=True)
-    who = ["-c", "user.email=t@t", "-c", "user.name=t"]
-    subprocess.run(["git", *who, "commit", "-q", "-m", "w"], check=True)
-    second = housekeep(".")
-    graph = record_graph()
-    leftover = [n for n in first["notes"] if graph[n]["title"].startswith("leftover")]
-    assert leftover and second["cleared"] == leftover
-    assert graph[leftover[0]]["state"] == "done"
+    return created["id"]
+
+
+def test_housekeep_writes_one_log_entry_per_released_claim(fake_bd):
+    first = _claimed_item("w code", "builder-99999999")
+    second = _claimed_item("v code", "builder-99999997")
+
+    result = housekeep(".")
+
+    assert first in result["released"]
+    assert second in result["released"]
+    assert len(log_read_item(first)) == 1
+    assert len(log_read_item(second)) == 1
+
+
+def test_housekeep_log_entry_names_item_and_claim(fake_bd):
+    claim = "builder-99999998"
+    item = _claimed_item("w code", claim)
+
+    result = housekeep(".")
+
+    assert item in result["released"]
+    events = log_read_item(item)
+    assert len(events) == 1
+    assert events[0]["item"] == item
+    assert events[0]["inputs"] == claim
