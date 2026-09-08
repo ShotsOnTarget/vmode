@@ -150,3 +150,21 @@ def test_reports_bounces_without_failing_success(fake_bd):
     assert _passed(result) is True
     assert int(_bounces(result)) == 2
     assert str(_version(result)) == str(target)
+
+
+def test_fails_when_the_run_wrote_a_different_count(fake_bd, monkeypatch):
+    target = pipeline_run_count()
+    story_id = _story(_intent(), target)
+    code_id, test_id = _pair(story_id)
+    record_set_state(code_id, "done")
+    record_set_state(test_id, "done")
+    record_set_state(story_id, "checking")
+    _event(story_id, "ready")
+    _event(code_id, "built")
+    _event(test_id, "proven")
+    monkeypatch.setattr("smoke_judge.smoke_judge.count_written", lambda: target - 1)
+
+    result = smoke_judge(story_id, 5.0)
+
+    assert _passed(result) is False
+    assert result["count"] == {"asked": target, "wrote": target - 1}

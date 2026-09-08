@@ -4,6 +4,7 @@ from pathlib import Path
 
 from board_config.board_config import board_config
 from column_of.column_of import column_of
+from count_written.count_written import count_written
 from record_graph.record_graph import record_graph
 from record_labels.record_labels import record_labels
 from record_run.record_run import record_run
@@ -57,9 +58,11 @@ def smoke_judge(story_id: str, timeout_seconds: float) -> dict:
     """Judge a smoke run from the record and the log.
 
     Inputs: story_id, the smoke Story to observe; timeout_seconds, the max
-    wall-clock wait. Outputs: on pass, the result with the Story's run-count
-    version and the bounce count; on timeout, the result with the stall's
-    column, item id and state. Side effects: polls the record up to the
+    wall-clock wait. Outputs: on pass, the run-count version and the bounce
+    count; when the count written is not the one asked for, both; on
+    timeout, the stall's column, item id and state. No gate reads the count
+    itself, so a run writing any value with a test agreeing to it passes
+    them all: it is read back here. Side effects: polls the record to the
     timeout; raises ValueError when story_id is not a Story.
     """
     deadline = time.monotonic() + timeout_seconds
@@ -67,14 +70,11 @@ def smoke_judge(story_id: str, timeout_seconds: float) -> dict:
         graph = record_graph()
         status = story_status(story_id, graph, record_labels())
         if _passing(status):
-            return {
-                "result": "pass",
-                "version": _version(story_id),
-                "bounces": _bounces(story_id, graph),
-            }
+            asked, wrote = _version(story_id), count_written()
+            if asked != wrote:
+                return {"result": "fail", "count": {"asked": asked, "wrote": wrote}}
+            bounces = _bounces(story_id, graph)
+            return {"result": "pass", "version": asked, "bounces": bounces}
         if time.monotonic() >= deadline:
-            return {
-                "result": "fail",
-                "stall": _stall(status, graph, record_labels()),
-            }
+            return {"result": "fail", "stall": _stall(status, graph, record_labels())}
         time.sleep(_POLL)
