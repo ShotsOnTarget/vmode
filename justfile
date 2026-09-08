@@ -7,18 +7,19 @@ export VMODE_BD := "C:/Users/steve/code/bin/bd.exe"
 board port="8080":
     $env:PYTHONPATH = "src"; python -c "import signal, os; signal.signal(signal.SIGINT, lambda *a: os._exit(0)); from board_serve.board_serve import board_serve; board_serve({{port}})"
 
-# Start the Supervisor (from its worktree at HEAD), one Engineer and one Analyst puller, each in its own window that outlives this shell.
+# Start the Supervisor (from its worktree at HEAD), one Engineer and one Analyst puller, each detached and outliving this shell,
+# writing claim/finish lines to work/puller-<role>.log and errors to .err.
 loop:
     git -C ../vmode-supervisor checkout -q --detach (git rev-parse HEAD)
     if (Test-Path work/stop) { Remove-Item work/stop }
-    Start-Process python -ArgumentList "../vmode-supervisor/tools/run_puller.py supervisor -" -WorkingDirectory (Get-Location)
-    Start-Process python -ArgumentList "tools/run_puller.py engineer roles/pullers/by_column.py" -WorkingDirectory (Get-Location)
-    Start-Process python -ArgumentList "tools/run_puller.py analyst roles/pullers/by_column.py" -WorkingDirectory (Get-Location)
+    Start-Process python -ArgumentList "../vmode-supervisor/tools/run_puller.py supervisor -" -WorkingDirectory (Get-Location) -RedirectStandardOutput work/puller-supervisor.log -RedirectStandardError work/puller-supervisor.err
+    Start-Process python -ArgumentList "tools/run_puller.py engineer roles/pullers/by_column.py" -WorkingDirectory (Get-Location) -RedirectStandardOutput work/puller-engineer.log -RedirectStandardError work/puller-engineer.err
+    Start-Process python -ArgumentList "tools/run_puller.py analyst roles/pullers/by_column.py" -WorkingDirectory (Get-Location) -RedirectStandardOutput work/puller-analyst.log -RedirectStandardError work/puller-analyst.err
 
-# Start N Builder pullers in their own windows (default 2).
+# Start N Builder pullers (default 2), detached, logging to work/puller-builder<N>.log and .err.
 builders n="2":
     if (Test-Path work/stop) { Remove-Item work/stop }
-    1..{{n}} | ForEach-Object { Start-Process python -ArgumentList "tools/run_puller.py builder roles/pullers/by_column.py" -WorkingDirectory (Get-Location); Start-Sleep -Seconds 15 }
+    1..{{n}} | ForEach-Object { Start-Process python -ArgumentList "tools/run_puller.py builder roles/pullers/by_column.py" -WorkingDirectory (Get-Location) -RedirectStandardOutput "work/puller-builder$_.log" -RedirectStandardError "work/puller-builder$_.err"; Start-Sleep -Seconds 15 }
 
 # Ask every puller to stop at its next poll.
 stop:
