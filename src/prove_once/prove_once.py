@@ -12,10 +12,7 @@ from record_set_state.record_set_state import record_set_state
 
 
 def _folder_of(title: str) -> str:
-    for suffix in (" code", " test"):
-        if title.endswith(suffix):
-            return title[: -len(suffix)]
-    return title
+    return title[:-5] if title.endswith((" code", " test")) else title
 
 
 def _ready() -> None:
@@ -44,37 +41,40 @@ def _advance() -> None:
             or item["claimed_by"]
         ):
             continue
-        jobs = [
-            j
-            for j in graph.values()
-            if j["parent"] == item["id"] and j["kind"] in ("code", "test")
-        ]
+        jobs = [j for j in graph.values() if j["parent"] == item["id"]]
+        jobs = [j for j in jobs if j["kind"] in ("code", "test")]
         if jobs and all(job["state"] == "done" for job in jobs):
             record_set_state(item["id"], "checking")
 
 
+def _promote() -> None:
+    graph = record_graph()
+    for job in graph.values():
+        if job["kind"] in ("code", "test"):
+            met = all(
+                graph.get(n, {}).get("state") == "done" for n in job.get("needs", [])
+            )
+            if (job["state"], met) in (("waiting", True), ("ready", False)):
+                record_set_state(job["id"], "ready" if met else "waiting")
+
+
 def prove_once(config_path: str) -> list[str]:
     """Gate prove jobs, then cut stories, then advance done stories.
-
     Args: config_path: board config path. Returns: prove job ids.
     Side effects: record states, one ready event per cut story.
     """
     config = board_config(config_path)
-    graph = record_graph()
-    labels = record_labels()
+    graph, labels = record_graph(), record_labels()
     processed = []
     for item in column_items("prove", graph, labels, config):
         job_id = item["id"]
         folder = _folder_of(item["title"])
         gathered = prove_gather(job_id, folder)
-        gathered["folder"] = folder
-        gathered["repo"] = "."
+        gathered.update(folder=folder, repo=".")
         prove_apply(job_id, gathered)
         processed.append(job_id)
-
-    graph = record_graph()
-    proposal_sweep(graph)
+    proposal_sweep(record_graph())
     _ready()
     _advance()
-
+    _promote()
     return processed
