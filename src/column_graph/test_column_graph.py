@@ -10,10 +10,11 @@ from record_run.record_run import record_run
 _BOARD = str(pathlib.Path(__file__).resolve().parents[2] / "roles" / "board.toml")
 
 
-def _make(kind, state):
-    created = record_run(
-        ["create", "-l", f"kind:{kind},state:{state}", "--no-inherit-labels", "Item"]
-    )
+def _make(kind, state, parent=None):
+    args = ["create", "-l", f"kind:{kind},state:{state}", "--no-inherit-labels", "Item"]
+    if parent:
+        args += ["--parent", parent]
+    created = record_run(args)
     item = created[0] if isinstance(created, list) else created
     return item["id"]
 
@@ -51,3 +52,13 @@ def test_an_item_the_column_needs_first_is_fetched_too(fake_bd):
 def test_unknown_column_refused(fake_bd):
     with pytest.raises(ValueError):
         column_graph("no-such-column", board_config(_BOARD))
+
+
+def test_the_story_a_job_hangs_under_is_fetched_too(fake_bd):
+    story = _make("story", "blocked")
+    job = _make("code", "ready", parent=story)
+
+    graph, _ = column_graph("build", board_config(_BOARD))
+
+    assert graph[job]["parent"] == story
+    assert graph[story]["state"] == "blocked"

@@ -23,6 +23,8 @@ def _rows_for(kind: str, states: list[str]) -> list:
 def _needed_ids(rows: list, have: set) -> list:
     ids = set()
     for row in rows:
+        if row.get("parent"):
+            ids.add(row["parent"])
         for dep in row.get("dependencies", []):
             if dep.get("type") == "blocks":
                 ids.add(dep["depends_on_id"])
@@ -37,8 +39,10 @@ def column_graph(column: str, config: dict) -> tuple[dict, dict]:
     record_labels() return them, holding only the rows that column can act
     on: its kinds in its own states, the same kinds in_progress so the WIP
     count is right, and the items those rows need first so a needs link can
-    be resolved. Side effects: reads the record, one query per kind plus at
-    most one more for the needed items. Raises ValueError for an unknown
+    be resolved, and the items they hang under, so column_items can see a
+    job's Story and refuse a job from one the gate has not released. Side
+    effects: reads the record, one query per kind plus at most one more for
+    the needed and parent items. Raises ValueError for an unknown
     column.
 
     A whole-record read costs the same whether one item is waiting or a
