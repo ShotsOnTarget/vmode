@@ -7,7 +7,14 @@ from record_graph.record_graph import record_graph
 from record_set_state.record_set_state import record_set_state
 from release_dead_claims.release_dead_claims import release_dead_claims
 
-_OWN = ("leftover_files: ", "no_record_item: ")
+# every rule prune can raise; a stale note for any of them costs an Analyst run
+_OWN = (
+    "leftover_files: ",
+    "no_record_item: ",
+    "no_parent: ",
+    "unchecked: ",
+    "checks_nothing: ",
+)
 
 
 def _log_releases(released: list[str], claim_by: dict) -> None:
@@ -39,8 +46,9 @@ def housekeep(repo: str) -> dict:
 
     Claims held by pullers that no longer run are released. Every prune
     finding with a parent becomes a note under it, once. A finding note the
-    Supervisor raised earlier whose condition is gone is closed by the
-    Supervisor itself, so nobody pays to dismiss a stale finding. For each
+    Supervisor raised earlier whose condition is gone, of any prune rule,
+    is closed by the Supervisor itself, so nobody pays to dismiss a stale
+    finding (17 unchecked notes were paid for before 2026-09-08). For each
     released claim a Housekeep log event is appended naming the released
     item and the original claim that was broken.
     Returns {'released', 'notes', 'cleared', 'unraised'}.

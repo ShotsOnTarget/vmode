@@ -42,3 +42,47 @@ def test_housekeep_log_entry_names_item_and_claim(fake_bd):
     assert len(events) == 1
     assert events[0]["item"] == item
     assert events[0]["inputs"] == claim
+
+
+def test_a_stale_unchecked_note_is_cleared(fake_bd):
+    intent = record_run(
+        [
+            "create",
+            "I",
+            "-t",
+            "epic",
+            "-l",
+            "kind:intent,state:ready,owner:board",
+            "--no-inherit-labels",
+        ]
+    )["id"]
+    note = record_run(
+        [
+            "create",
+            f"unchecked: {intent}",
+            "-t",
+            "task",
+            "-l",
+            "kind:note,state:waiting,owner:supervisor",
+            "--no-inherit-labels",
+            "--parent",
+            intent,
+        ]
+    )["id"]
+    validation = record_run(
+        [
+            "create",
+            "V",
+            "-t",
+            "task",
+            "-l",
+            "kind:validation,state:waiting,owner:board",
+            "--no-inherit-labels",
+        ]
+    )["id"]
+    record_run(["dep", "add", validation, intent, "-t", "validates"])
+
+    result = housekeep(".")
+
+    assert note in result["cleared"]
+    assert "state:done" in record_run(["show", note])[0]["labels"]

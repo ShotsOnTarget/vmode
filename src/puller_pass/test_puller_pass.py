@@ -47,3 +47,13 @@ def test_record_error_ends_the_pass_without_killing_the_puller():
         raise RecordError("bd exited non-zero", "")
 
     assert puller_pass("supervisor", run, "") is False
+
+
+def test_record_error_prints_what_the_record_said(capsys):
+    def run():
+        raise RecordError(
+            "failed to run bd", "[WinError 206] The filename or extension is too long"
+        )
+
+    puller_pass("builder", run, "")
+    assert "WinError 206" in capsys.readouterr().out

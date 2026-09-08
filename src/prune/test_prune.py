@@ -77,3 +77,15 @@ def test_orphans_included(repo):
         "checks": [],
     }
     assert any(f["target"] == "s" for f in prune(graph, repo))
+
+
+def test_a_test_job_being_built_owns_its_folder(repo):
+    graph = _graph("waiting")
+    graph["t"]["state"] = "in_progress"
+    rules = [f["rule"] for f in prune(graph, repo)]
+    assert "leftover_files" not in rules
+
+
+def test_leftover_parent_is_the_code_job(repo):
+    found = [f for f in prune(_graph("done"), repo) if f["rule"] == "leftover_files"]
+    assert found and found[0]["parent"] == "c"

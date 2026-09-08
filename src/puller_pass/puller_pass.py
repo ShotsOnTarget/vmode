@@ -31,6 +31,7 @@ def puller_pass(role: str, run, worktree: str) -> bool:
             return True
         raise
     except RecordError as exc:
-        print(f"{role}: record error, retrying next pass: {exc}", flush=True)
+        detail = (exc.stderr or "").strip()[:300]
+        print(f"{role}: record error, retrying next pass: {exc} {detail}", flush=True)
         return False
     return _release(role, worktree)

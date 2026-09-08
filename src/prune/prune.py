@@ -23,20 +23,30 @@ def _finding(rule: str, target: str, parent: str | None) -> dict:
     return {"rule": rule, "target": target, "parent": parent}
 
 
-def prune(graph: dict, repo: str) -> list[dict]:
-    """Findings for the Supervisor to raise as notes: leftover_files (uncommitted
-    changes in a folder with no open job; parent its code job), no_record_item
-    (a src folder with no code job; parent None), and every orphan (parent itself).
-    """
+def _owners(graph: dict) -> dict[str, list[dict]]:
+    """Folder name to the code and test jobs whose titles name it."""
     jobs = {}
     for item in graph.values():
-        if item["kind"] == "code" and item["title"].endswith(" code"):
-            jobs.setdefault(item["title"][: -len(" code")], []).append(item)
+        for kind in ("code", "test"):
+            if item["kind"] == kind and item["title"].endswith(" " + kind):
+                jobs.setdefault(item["title"][: -len(kind) - 1], []).append(item)
+    return jobs
+
+
+def prune(graph: dict, repo: str) -> list[dict]:
+    """Findings for the Supervisor to raise as notes: leftover_files (uncommitted
+    changes in a folder with no open code or test job; parent its code job;
+    a test job counts because tests are built first while the code job
+    still waits, which raised 37 false notes before 2026-09-08), no_record_item
+    (a src folder with no code job; parent None), and every orphan (parent itself).
+    """
+    jobs = _owners(graph)
     findings = []
     for folder in sorted(_changed_folders(repo)):
         owners = jobs.get(folder, [])
         if not any(j["state"] in _OPEN for j in owners):
-            parent = owners[-1]["id"] if owners else None
+            codes = [j for j in owners if j["kind"] == "code"] or owners
+            parent = codes[-1]["id"] if codes else None
             findings.append(_finding("leftover_files", folder, parent))
     findings += [
         _finding("no_record_item", f, None) for f in _folders(repo) if f not in jobs

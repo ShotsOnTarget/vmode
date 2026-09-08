@@ -32,6 +32,17 @@ def _finish(item_id: str, prior_state: str, absent: list | None) -> None:
         record_set_state(item_id, prior_state)
 
 
+_REPORT = 4000  # a bd argument rides the Windows command line, capped near 32k
+
+
+def _bounded(usage: dict) -> dict:
+    report = str(usage.get("report") or "")
+    if len(report) <= _REPORT:
+        return usage
+    tail = " ... (trimmed; the transcript holds the whole report)"
+    return {**usage, "report": report[:_REPORT] + tail}
+
+
 def _log(word: str, item_id: str, column: str) -> None:
     print(word + " " + item_id + " " + column, flush=True)
 
@@ -41,10 +52,12 @@ def claim_and_run(item: dict, column: str, role: str, options: dict) -> bool:
     claim. The item handed to invoke carries last_gate: what the last gate
     or failed run said about it, so a retry knows what to fix. A failed run
     releases the item (see release_strike: back to its prior state, or
-    blocked on the third release in a row); a finished run records usage
-    and moves the item on (see _finish). Prints 'claim <item id> <column>' once the
-    claim is won and 'finish <item id> <column>' once the pass is over; a
-    puller that took nothing prints nothing."""
+    blocked on the third release in a row); a finished run records usage,
+    report cut to 4000 characters (a 34k report on one command line
+    stranded a finished job, WinError 206, 2026-09-08), and moves the item
+    on (see _finish). Prints 'claim <item id> <column>' once the claim is
+    won and 'finish <item id> <column>' once the pass is over; a puller
+    that took nothing prints nothing."""
     item_id = item["id"]
     try:
         claim_item(item_id, role + "-" + str(os.getpid()))
@@ -57,7 +70,7 @@ def claim_and_run(item: dict, column: str, role: str, options: dict) -> bool:
         _release(item_id, item["state"], exc)
         _log("finish", item_id, column)
         return True
-    record_add_note(item_id, "usage: " + json.dumps(usage))
+    record_add_note(item_id, "usage: " + json.dumps(_bounded(usage)))
     _finish(
         item_id,
         item["state"],

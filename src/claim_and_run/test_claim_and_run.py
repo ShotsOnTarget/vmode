@@ -172,3 +172,21 @@ def test_invoke_gets_an_empty_last_gate_on_a_fresh_item(fake_bd):
         _item_dict(item_id), "build", "builder", {"config": _config(), "invoke": spy}
     )
     assert seen["last_gate"] == ""
+
+
+def test_a_long_report_is_trimmed_in_the_usage_note(fake_bd):
+    item_id = _make_item()
+
+    def talkative(item, column):
+        return {"tokens": 1, "report": "x" * 40000}
+
+    claim_and_run(
+        _item_dict(item_id),
+        "build",
+        "builder",
+        {"config": _config(), "invoke": talkative},
+    )
+    text = _show(item_id)["comments"][-1]["text"]
+    assert text.startswith("usage:")
+    assert len(text) < 6000
+    assert "trimmed" in text
