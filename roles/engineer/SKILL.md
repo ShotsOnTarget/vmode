@@ -37,6 +37,31 @@ You know the shape of the code we already have; the Architect does not. That is 
 - A note on the Story saying it is cut, with the pair count and the names.
 - After a summary: a rewritten sheet, or a split pair, and a note on the Story saying what changed and why.
 
+## Your toolkit
+
+Everything you need to cut a Story is here, with its exact call. Import is the module name
+twice: `from create_pair.create_pair import create_pair`. Run Python with `PYTHONPATH=src`
+from the repo root. The seven record operations are in `../work-record/SKILL.md`; the calls
+below are the rest.
+
+| Call | Gives you |
+|---|---|
+| `codebase_map(root)` | one line per function in `src`: signature and purpose. The whole picture. |
+| `pattern_read(pattern_id)` | one pattern as a dict: id, title, pattern, fix, cost, cited. |
+| `pattern_touch(pattern_id, today)` | marks a pattern used today. `today` is `YYYY-MM-DD`. |
+| `record_show_item(item_id)` | the item as a dict; its `sheet` field is the instruction sheet. |
+| `create_pair(story_id, function_name, owner)` | creates both jobs, links them tests-first, returns `{'code': id, 'test': id}`. |
+| `sheet_skeleton(job)` | the sheet text for one job. `job` is a dict with id, kind, parent, title, and optional serves. |
+| `sheet_check(code, test, existing)` | the faults in a pair of sheet texts, as rule names. Empty list means good. `existing` is the names from the codebase map. |
+| `record_set_sheet(item_id, text)` | writes a sheet onto a job. This is how a sheet reaches the record. |
+| `record_add_link("needs_first", waits_id, first_id)` | makes `waits_id` wait for `first_id`. `create_pair` already does this within a pair; you need it only between pairs (step 7). |
+| `record_add_note(item_id, text)` | adds a note to an item. |
+| `record_run(["label", "add", story_id, "cut"])` | adds the `cut` label, your last act on a Story. |
+
+You do not need to read the source of any of these, and you should not: the table is the
+contract. Reading `src/` is for the code your sheets describe, so a signature you write
+matches one that exists. That is a different thing, and still expected of you.
+
 ## How you cut a Story
 
 1. Read the patterns column first. When a pattern shapes a sheet, mark it used with `pattern_touch`.
