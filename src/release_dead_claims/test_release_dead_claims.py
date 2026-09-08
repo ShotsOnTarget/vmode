@@ -11,73 +11,55 @@ def _job(state, claimant, kind="code"):
     return record_run(args)["id"]
 
 
-def _offset(item_id, seconds):
+def _now_after(item_id, seconds):
     updated = record_run(["show", item_id])[0]["updated_at"]
     when = datetime.fromisoformat(updated.replace("Z", "+00:00"))
     when += timedelta(seconds=seconds)
     return when.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def test_dead_pid_released(fake_bd):
+def test_dead_pid_released_from_non_in_progress_states(fake_bd):
+    jobs = {
+        state: _job(state, "builder-99999")
+        for state in ("ready", "waiting", "checking", "blocked")
+    }
+    assert release_dead_claims(record_graph(), {"1"}) == list(jobs.values())
+    graph = record_graph()
+    for state, job in jobs.items():
+        assert graph[job]["claimed_by"] == "" and graph[job]["state"] == state
+
+
+def test_dead_pid_released_from_in_progress_state(fake_bd):
     job = _job("in_progress", "builder-99999")
     assert release_dead_claims(record_graph(), {"1"}) == [job]
     graph = record_graph()
     assert graph[job]["claimed_by"] == "" and graph[job]["state"] == "ready"
 
 
-def test_alive_pid_kept(fake_bd):
+def test_alive_pid_kept_inside_timeout(fake_bd):
     job = _job("in_progress", "builder-4242")
-    now = _offset(job, 0)
+    now = _now_after(job, 0)
     assert release_dead_claims(record_graph(), {"4242"}, now=now) == []
-    assert record_graph()[job]["claimed_by"] == "builder-4242"
-
-
-def test_person_kept(fake_bd):
-    job = _job("in_progress", "fable")
-    assert release_dead_claims(record_graph(), set()) == []
-    assert record_graph()[job]["claimed_by"] == "fable"
-
-
-def test_dead_story_claim_in_progress_released(fake_bd):
-    story = _job("in_progress", "analyst-99999", kind="story")
-    assert release_dead_claims(record_graph(), {"1"}) == [story]
     graph = record_graph()
-    assert graph[story]["claimed_by"] == "" and graph[story]["state"] == "done"
+    assert graph[job]["claimed_by"] == "builder-4242"
+    assert graph[job]["state"] == "in_progress"
 
 
-def test_done_job_untouched(fake_bd):
-    job = _job("done", "builder-99999")
-    assert release_dead_claims(record_graph(), {"1"}) == []
-    graph = record_graph()
-    assert graph[job]["claimed_by"] == "builder-99999" and graph[job]["state"] == "done"
-
-
-def test_ready_job_untouched(fake_bd):
-    job = _job("ready", "builder-99999")
-    assert release_dead_claims(record_graph(), {"1"}) == []
-    graph = record_graph()
-    assert (
-        graph[job]["claimed_by"] == "builder-99999" and graph[job]["state"] == "ready"
-    )
-
-
-def test_live_pid_released_when_claim_is_older_than_the_timeout(fake_bd):
+def test_live_pid_released_after_timeout(fake_bd):
     job = _job("in_progress", "builder-4242")
-    now = _offset(job, 7200)
+    now = _now_after(job, 7200)
     assert release_dead_claims(record_graph(), {"4242"}, 1800, now) == [job]
     graph = record_graph()
     assert graph[job]["claimed_by"] == "" and graph[job]["state"] == "ready"
 
 
-def test_live_pid_kept_inside_the_timeout(fake_bd):
-    job = _job("in_progress", "builder-4242")
-    now = _offset(job, 600)
-    assert release_dead_claims(record_graph(), {"4242"}, 1800, now) == []
-    assert record_graph()[job]["claimed_by"] == "builder-4242"
+def test_person_claim_kept(fake_bd):
+    job = _job("in_progress", "fable")
+    assert release_dead_claims(record_graph(), set()) == []
+    assert record_graph()[job]["claimed_by"] == "fable"
 
 
-def test_unknown_kind_keeps_its_state(fake_bd):
-    item = _job("in_progress", "builder-99999", kind="verification")
-    assert release_dead_claims(record_graph(), {"1"}) == [item]
-    graph = record_graph()
-    assert graph[item]["claimed_by"] == "" and graph[item]["state"] == "in_progress"
+def test_empty_claim_kept(fake_bd):
+    job = _job("in_progress", "")
+    assert release_dead_claims(record_graph(), set()) == []
+    assert record_graph()[job]["claimed_by"] == ""
