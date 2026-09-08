@@ -113,5 +113,8 @@ wip = 99
 poll_seconds = 0
 
 [limits]
-max_parallel_model_runs = 6   # across all columns, the hard spend cap
+max_parallel_model_runs = 8   # across all columns, the hard spend cap: a backstop against
+                              # runaway spend, not a scheduler. Set to the most pullers the
+                              # Board intends to run at once (6 builders, 1 engineer,
+                              # 1 analyst), since one puller is one model run at a time.
 claim_timeout_seconds = 1800  # a claimed item nobody finished returns to its column
