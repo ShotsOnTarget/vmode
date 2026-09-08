@@ -3,8 +3,6 @@ from datetime import UTC, datetime
 from record_run.record_run import record_run
 from record_set_state.record_set_state import record_set_state
 
-_RESET = {"code": "ready", "test": "ready", "note": "ready", "story": "done"}
-
 
 def _parse(instant: str) -> datetime:
     return datetime.fromisoformat(instant.replace("Z", "+00:00"))
@@ -22,10 +20,10 @@ def _stale(item_id: str, timeout_seconds: int, current: datetime) -> bool:
     return (current - _parse(updated)).total_seconds() > timeout_seconds
 
 
-def _release(item_id: str, item: dict) -> None:
+def _release(item_id: str, state: str) -> None:
     record_run(["update", item_id, "-a", ""])
-    if item["kind"] in _RESET:
-        record_set_state(item_id, _RESET[item["kind"]])
+    if state == "in_progress":
+        record_set_state(item_id, "ready")
 
 
 def release_dead_claims(
@@ -33,27 +31,24 @@ def release_dead_claims(
 ) -> list[str]:
     """Release claims held by a dead or stalled puller.
 
-    A candidate is an item whose state is in_progress and whose claimed_by
-    is a puller claim 'role-<pid>'; a person's claim (no digits after the
-    last dash) is left alone. A candidate is released when its pid is not
+    A claimed_by is a puller claim only when the text after its final dash
+    is a pid (all digits); a person claim, an empty claim, and an item with
+    no claim are left alone. A puller claim is released when its pid is not
     in alive, or when now minus the item's updated_at exceeds
-    timeout_seconds. Releasing empties the claim slot and moves a code,
-    test or note back to ready and a story back to done; any other kind
-    keeps its state. Every other item is untouched: no claim slot emptied,
-    no state moved. Side effects: reads each candidate's updated_at and
-    writes the release through the record.
+    timeout_seconds, whatever state the item is in. Releasing empties the
+    claim slot and, only when the item's state was in_progress, moves the
+    item back to ready; any other state is kept. Side effects: reads each
+    released item's updated_at and writes the release through the record.
     Returns the ids released, in graph order.
     """
     current = _parse(now) if now else datetime.now(UTC)
     released = []
     for item_id, item in graph.items():
-        if item["state"] != "in_progress":
-            continue
         pid = _puller_pid(item.get("claimed_by") or "")
         if pid is None:
             continue
         if pid in alive and not _stale(item_id, timeout_seconds, current):
             continue
-        _release(item_id, item)
+        _release(item_id, item["state"])
         released.append(item_id)
     return released
