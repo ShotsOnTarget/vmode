@@ -130,6 +130,7 @@ The Supervisor follows these rules exactly. It does not think about why.
 3. The same pair fails **three** times: stop. Mark it blocked. Send the Engineer a short summary: what failed, how many times, which rule. The Engineer rewrites the sheet or splits the job. It never sees the raw error, only the summary; it may read the code we already have, never a Builder's half-built work.
 4. The Engineer cannot fix it by rewriting or splitting the jobs: send the Architect a short summary. The Architect changes the Story checklist, or sends the Board a short summary if that would change what the Intent means.
 5. Every retry, every stop, every escalation is written in the log (section 10).
+6. The Ready gate fails a Story: it goes back to the Engineer, owned by the Engineer, to add or fix job pairs, then the Supervisor runs the Ready gate again. Whatever state that failure sets, the Engineer must already have one place it watches for it; a state nothing watches is a policy bug, fixed before the state is used, not a queue a Story waits in unseen.
 
 ## 8. Shape of the code
 
