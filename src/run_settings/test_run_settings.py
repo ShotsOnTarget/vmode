@@ -1,6 +1,5 @@
-from run_settings.run_settings import run_settings
-
 from run_choice.run_choice import run_choice
+from run_settings.run_settings import run_settings
 
 
 def test_harness_and_model_as_run_choice():

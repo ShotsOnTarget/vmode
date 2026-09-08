@@ -116,3 +116,59 @@ def test_label_column_keeps_role_state(fake_bd):
     shown = _show(item_id)
     assert "state:done" in shown["labels"]
     assert "triaged" in shown["labels"]
+
+
+def test_third_failure_in_a_row_blocks_the_item(fake_bd):
+    item_id = _make_item()
+    options = {"config": _config(), "invoke": _raising_invoke}
+    for _ in range(3):
+        claim_and_run(_item_dict(item_id), "build", "builder", options)
+    row = _show(item_id)
+    assert "state:blocked" in row["labels"]
+    assert not row.get("assignee")
+
+
+def test_the_release_note_keeps_the_whole_reason(fake_bd):
+    item_id = _make_item()
+
+    def long_error(item, column):
+        raise RuntimeError("timed out; " + "x" * 600)
+
+    claim_and_run(
+        _item_dict(item_id),
+        "build",
+        "builder",
+        {"config": _config(), "invoke": long_error},
+    )
+    text = _show(item_id)["comments"][-1]["text"]
+    assert text.startswith("release: timed out; ")
+    assert len(text) > 300
+
+
+def test_invoke_is_told_what_the_last_gate_said(fake_bd):
+    item_id = _make_item()
+    record_run(["comment", item_id, "bounce: case_missing"])
+    seen = {}
+
+    def spy(item, column):
+        seen.update(item)
+        return {"tokens": 1}
+
+    claim_and_run(
+        _item_dict(item_id), "build", "builder", {"config": _config(), "invoke": spy}
+    )
+    assert seen["last_gate"] == "bounce: case_missing"
+
+
+def test_invoke_gets_an_empty_last_gate_on_a_fresh_item(fake_bd):
+    item_id = _make_item()
+    seen = {}
+
+    def spy(item, column):
+        seen.update(item)
+        return {"tokens": 1}
+
+    claim_and_run(
+        _item_dict(item_id), "build", "builder", {"config": _config(), "invoke": spy}
+    )
+    assert seen["last_gate"] == ""

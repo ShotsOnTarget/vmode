@@ -1,6 +1,6 @@
 import pytest
-from cutter_gather.cutter_gather import cutter_gather
 
+from cutter_gather.cutter_gather import cutter_gather
 from log_append.log_append import log_append
 from record_create_item.record_create_item import record_create_item
 from record_graph.record_graph import record_graph

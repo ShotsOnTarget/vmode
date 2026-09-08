@@ -1,3 +1,4 @@
+import contextlib
 import json
 import shutil
 import tomllib
@@ -16,15 +17,11 @@ def _load_config(root: str) -> tuple[dict, dict]:
     return board, manifest
 
 
+_RUN = ("run", "--format", "json", "--pure", "--dangerously-skip-permissions")
+
+
 def _build_argv(executable: str, model, effort, prompt: str) -> list[str]:
-    argv = [
-        executable,
-        "run",
-        "--format",
-        "json",
-        "--pure",
-        "--dangerously-skip-permissions",
-    ]
+    argv = [executable, *_RUN]
     if model is not None:
         argv += ["-m", model]
     if effort is not None:
@@ -32,16 +29,20 @@ def _build_argv(executable: str, model, effort, prompt: str) -> list[str]:
     return argv + [prompt]
 
 
-def _parse_json_line(line: str):
-    try:
-        return json.loads(line)
-    except json.JSONDecodeError:
-        return None
-
-
 def _parse_events(stdout: str) -> list[dict]:
-    parsed = (_parse_json_line(x) for x in stdout.splitlines() if x.startswith("{"))
-    return [e for e in parsed if e is not None]
+    events = []
+    for line in stdout.splitlines():
+        if line.startswith("{"):
+            with contextlib.suppress(json.JSONDecodeError):
+                events.append(json.loads(line))
+    return events
+
+
+def _failure(run: dict, fold: dict) -> str:
+    """Why a run failed: its error events, else its stderr, else its exit code."""
+    errors = [x for x in fold["report"].splitlines() if x.startswith("ERROR:")]
+    text = "\n".join(errors) or run["stderr"].strip()
+    return (text or f"opencode exited {run['returncode']}")[:500]
 
 
 def opencode_invoke(item: dict, column: str, root: str) -> dict:
@@ -64,8 +65,7 @@ def opencode_invoke(item: dict, column: str, root: str) -> dict:
     )
     transcript = transcript_write(events, meta, f"{root}/../vmode-runs")
     if run["returncode"] != 0 or fold["error"]:
-        msg = fold["report"][:500] or run["stderr"][:500] or "opencode failed"
-        raise RuntimeError(msg)
+        raise RuntimeError(_failure(run, fold))
     return {
         "tokens": fold["tokens"],
         "turns": fold["turns"],

@@ -1,4 +1,5 @@
 import pytest
+
 from run_events.run_events import run_events
 
 LINE = (

@@ -1,5 +1,3 @@
-from smoke_judge.smoke_judge import smoke_judge
-
 from log_append.log_append import log_append
 from pipeline_run_count.pipeline_run_count import pipeline_run_count
 from record_create_item.record_create_item import record_create_item
@@ -7,6 +5,7 @@ from record_graph.record_graph import record_graph
 from record_set_checklist.record_set_checklist import record_set_checklist
 from record_set_sheet.record_set_sheet import record_set_sheet
 from record_set_state.record_set_state import record_set_state
+from smoke_judge.smoke_judge import smoke_judge
 
 
 def _intent():

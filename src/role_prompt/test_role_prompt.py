@@ -1,6 +1,5 @@
-from role_prompt.role_prompt import role_prompt
-
 from builder_prompt.builder_prompt import builder_prompt
+from role_prompt.role_prompt import role_prompt
 
 
 def test_job_kinds_delegate():
@@ -35,3 +34,17 @@ def test_story_prompt_exact():
         "(roles/work-record/SKILL.md). Do only that item. "
         "When you are done, say what you did in one paragraph and nothing else."
     )
+
+
+def test_story_prompt_carries_the_last_gate_word():
+    item = {"id": "vm-9", "kind": "story", "last_gate": "ready: sheet_missing"}
+    prompt = role_prompt(item, "engineer", "R")
+    tail = (
+        "The last gate on this item said: ready: sheet_missing. Deal with that first."
+    )
+    assert prompt.endswith(tail)
+
+
+def test_job_kinds_delegate_with_the_last_gate_word():
+    item = {"id": "vm-x", "kind": "code", "last_gate": "bounce: lint_findings"}
+    assert role_prompt(item, "builder", "R") == builder_prompt(item, "builder", "R")

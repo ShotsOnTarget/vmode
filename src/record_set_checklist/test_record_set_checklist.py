@@ -1,7 +1,7 @@
 import pytest
-from record_set_checklist.record_set_checklist import record_set_checklist
 
 from record_run.record_run import record_run
+from record_set_checklist.record_set_checklist import record_set_checklist
 
 
 def _item():

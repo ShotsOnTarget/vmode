@@ -1,4 +1,5 @@
 import pytest
+
 from summary_lines.summary_lines import summary_lines
 
 

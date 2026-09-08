@@ -2,9 +2,11 @@ import json
 import os
 
 from claim_item.claim_item import claim_item
+from last_gate.last_gate import last_gate
 from record_add_note.record_add_note import record_add_note
 from record_run.record_run import RecordError, record_run
 from record_set_state.record_set_state import record_set_state
+from release_strike.release_strike import release_strike
 
 
 def _state(item_id: str) -> str:
@@ -15,8 +17,7 @@ def _state(item_id: str) -> str:
 
 def _release(item_id: str, prior_state: str, exc: Exception) -> None:
     record_run(["update", item_id, "-a", ""])
-    record_set_state(item_id, prior_state)
-    record_add_note(item_id, "release: " + str(exc)[:200])
+    release_strike(item_id, prior_state, str(exc))
 
 
 def _finish(item_id: str, prior_state: str, absent: list | None) -> None:
@@ -37,9 +38,11 @@ def _log(word: str, item_id: str, column: str) -> None:
 
 def claim_and_run(item: dict, column: str, role: str, options: dict) -> bool:
     """Claim an item and run invoke on it; False when another puller won the
-    claim. A failed run releases the item back to the state it held before
-    the claim with the error noted; a finished run records usage and moves
-    the item on (see _finish). Prints 'claim <item id> <column>' once the
+    claim. The item handed to invoke carries last_gate: what the last gate
+    or failed run said about it, so a retry knows what to fix. A failed run
+    releases the item (see release_strike: back to its prior state, or
+    blocked on the third release in a row); a finished run records usage
+    and moves the item on (see _finish). Prints 'claim <item id> <column>' once the
     claim is won and 'finish <item id> <column>' once the pass is over; a
     puller that took nothing prints nothing."""
     item_id = item["id"]
@@ -49,7 +52,7 @@ def claim_and_run(item: dict, column: str, role: str, options: dict) -> bool:
         return False
     _log("claim", item_id, column)
     try:
-        usage = options["invoke"](item, column)
+        usage = options["invoke"]({**item, "last_gate": last_gate(item_id)}, column)
     except Exception as exc:
         _release(item_id, item["state"], exc)
         _log("finish", item_id, column)

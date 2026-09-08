@@ -14,3 +14,16 @@ def test_test_kind_wording():
 def test_code_kind_wording():
     text = builder_prompt({"id": "vm-1", "kind": "code"}, "builder", ".")
     assert "Do not write tests" in text
+
+
+def test_the_last_gate_word_is_carried():
+    item = {"id": "vm-1", "kind": "test", "last_gate": "bounce: case_missing"}
+    text = builder_prompt(item, "builder", ".")
+    tail = "The last gate on this item said: bounce: case_missing. Fix that first."
+    assert text.endswith(tail)
+
+
+def test_no_last_gate_adds_nothing():
+    plain = builder_prompt({"id": "vm-1", "kind": "code"}, "builder", ".")
+    item = {"id": "vm-1", "kind": "code", "last_gate": ""}
+    assert builder_prompt(item, "builder", ".") == plain

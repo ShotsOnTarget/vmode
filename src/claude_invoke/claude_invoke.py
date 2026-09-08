@@ -2,12 +2,11 @@ import contextlib
 import json
 import tomllib
 
-from transcript_write.transcript_write import transcript_write
-
 from adapter_command.adapter_command import adapter_command
 from claude_fold.claude_fold import claude_fold
 from harness_run.harness_run import harness_run
 from role_prompt.role_prompt import role_prompt
+from transcript_write.transcript_write import transcript_write
 
 
 def _events(stdout: str) -> list[dict]:

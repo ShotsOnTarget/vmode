@@ -1,4 +1,5 @@
 import pytest
+
 from summary_for.summary_for import summary_for
 
 

@@ -1,4 +1,5 @@
 import pytest
+
 from cutter_report.cutter_report import cutter_report
 
 

@@ -1,12 +1,12 @@
 import copy
 
 import pytest
-from story_status.story_status import story_status
 
 from log_append.log_append import log_append
 from record_graph.record_graph import record_graph
 from record_labels.record_labels import record_labels
 from record_run.record_run import record_run
+from story_status.story_status import story_status
 
 
 def _item(

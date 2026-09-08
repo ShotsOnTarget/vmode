@@ -3,8 +3,6 @@ import subprocess
 import sys
 import time
 
-import pytest
-
 from harness_run.harness_run import harness_run
 
 _TREE_CHILD = (
@@ -77,13 +75,19 @@ def test_runs_in_the_given_cwd(tmp_path):
     assert not os.path.samefile(printed, caller_cwd)
 
 
-def test_timeout_reaches_the_caller(tmp_path):
-    with pytest.raises(subprocess.TimeoutExpired):
-        harness_run(
-            [sys.executable, "-c", "import time; time.sleep(5)"],
-            str(tmp_path),
-            timeout=1,
-        )
+def test_timeout_comes_back_as_a_result_that_says_so(tmp_path):
+    result = harness_run(
+        [
+            sys.executable,
+            "-c",
+            "print('partial', flush=True); import time; time.sleep(5)",
+        ],
+        str(tmp_path),
+        timeout=1,
+    )
+    assert result["returncode"] == -1
+    assert result["stderr"].startswith("timed out after 1 seconds")
+    assert "partial" in result["stdout"]
 
 
 def test_undecodable_bytes_do_not_break_it(tmp_path):
@@ -101,23 +105,18 @@ def test_undecodable_bytes_do_not_break_it(tmp_path):
 def test_timeout_fires_while_a_grandchild_holds_the_pipes(tmp_path):
     pid_file = tmp_path / "grandchild_pid.txt"
     start = time.monotonic()
-    with pytest.raises(subprocess.TimeoutExpired):
-        harness_run(
-            [sys.executable, "-c", _TREE_CHILD, str(pid_file)],
-            str(tmp_path),
-            timeout=2,
-        )
+    result = harness_run(
+        [sys.executable, "-c", _TREE_CHILD, str(pid_file)], str(tmp_path), timeout=2
+    )
+    assert result["returncode"] == -1
     elapsed = time.monotonic() - start
     assert elapsed <= 2 + 5
 
 
 def test_timeout_ends_the_whole_process_tree(tmp_path):
     pid_file = tmp_path / "grandchild_pid.txt"
-    with pytest.raises(subprocess.TimeoutExpired):
-        harness_run(
-            [sys.executable, "-c", _TREE_CHILD, str(pid_file)],
-            str(tmp_path),
-            timeout=2,
-        )
+    harness_run(
+        [sys.executable, "-c", _TREE_CHILD, str(pid_file)], str(tmp_path), timeout=2
+    )
     grandchild_pid = pid_file.read_text().strip()
     assert not _pid_running(grandchild_pid)

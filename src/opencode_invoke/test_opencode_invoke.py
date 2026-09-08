@@ -262,3 +262,27 @@ def test_an_error_event_ends_in_runtimeerror(monkeypatch):
     with pytest.raises(RuntimeError) as excinfo:
         opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
     assert "nope" in str(excinfo.value)
+
+
+def test_a_failed_run_names_the_error_not_the_prose(monkeypatch):
+    prose = {"type": "text", "part": {"type": "text", "text": "I will read the sheet"}}
+    stdout = "\n".join(json.dumps(e) for e in (prose, ERROR_EVENT))
+    _patch_all(monkeypatch, stdout=stdout)
+    with pytest.raises(RuntimeError) as caught:
+        opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
+    assert str(caught.value).startswith("ERROR:")
+    assert "I will read" not in str(caught.value)
+
+
+def test_a_timed_out_run_says_so(monkeypatch):
+    _patch_all(monkeypatch, returncode=-1, stderr="timed out after 1800 seconds\n")
+    with pytest.raises(RuntimeError) as caught:
+        opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
+    assert str(caught.value).startswith("timed out after 1800 seconds")
+
+
+def test_a_silent_nonzero_exit_names_the_code(monkeypatch):
+    _patch_all(monkeypatch, returncode=7, stderr="")
+    with pytest.raises(RuntimeError) as caught:
+        opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
+    assert str(caught.value) == "opencode exited 7"

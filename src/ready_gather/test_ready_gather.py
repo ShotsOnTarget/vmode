@@ -1,6 +1,6 @@
 import pytest
-from ready_gather.ready_gather import ready_gather
 
+from ready_gather.ready_gather import ready_gather
 from record_run.record_run import record_run
 
 
