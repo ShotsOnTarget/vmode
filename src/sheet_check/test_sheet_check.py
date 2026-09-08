@@ -158,3 +158,16 @@ def test_new_function_skips_existing_case_rule():
     existing = {"g": ["test_first", "test_second"]}
     result = sheet_check(code, test, existing)
     assert not any(r.startswith("existing_case_missing:") for r in result)
+
+
+def test_existing_as_names_only_skips_the_case_rule():
+    code = _code("f", extra="- **Change**: rewrite")
+    test = _test("f", cases=["test_first"])
+    result = sheet_check(code, test, ["f", "g"])
+    assert not any(r.startswith("existing_case_missing:") for r in result)
+
+
+def test_existing_as_names_only_still_demands_change():
+    code = _code("f")
+    test = _test("f", cases=["test_first"])
+    assert "exists_without_change" in sheet_check(code, test, ["f"])
