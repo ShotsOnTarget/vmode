@@ -36,7 +36,7 @@
   "opencode_models": {
     "human": null,
     "frontier": null,
-    "cheap": "opencode/big-pickle",
+    "cheap": "opencode/deepseek-v4-flash",
     "engineer": "openai/gpt-5.6-luna",
     "analyst": "openai/gpt-5.6-luna"
   },
