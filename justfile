@@ -23,3 +23,9 @@ builders n="2":
 # Ask every puller to stop at its next poll.
 stop:
     New-Item -ItemType File -Force work/stop | Out-Null
+
+# Prove the whole pipeline still works: mint one smoke Story under the standing
+# Intent, let the real Engineer and Builders do it, then judge the result.
+# Exits non-zero on failure. Needs the pullers running. Never run from the unit suite.
+smoke intent="vm-8k177" timeout="1800":
+    $env:PYTHONPATH = "src"; python -c "import json, sys; from pipeline_run_count.pipeline_run_count import pipeline_run_count; from smoke_story.smoke_story import smoke_story; from smoke_judge.smoke_judge import smoke_judge; target = pipeline_run_count() + 1; minted = smoke_story('{{intent}}', target); print('minted ' + minted['story_id'] + ' asking for run count ' + str(target), flush=True); outcome = smoke_judge(minted['story_id'], {{timeout}}); print(json.dumps(outcome, indent=1)); sys.exit(0 if outcome['result'] == 'pass' else 1)"
