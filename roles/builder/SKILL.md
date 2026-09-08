@@ -54,7 +54,7 @@ Standard rules, every job:
 
 ## Before you report done
 
-- The one check is clean. Never shorten lines by hand to fit; the formatter decides layout.
+- Run the one check again, after your last edit, and read `clean` with your own eyes in that run's output. A clean run from earlier in the job does not count once you have touched the file again. Never shorten lines by hand to fit; the formatter decides layout.
 - List every file you touched (for example with `git status`) and confirm each one is exactly a file the sheet named; delete any stray or leftover file before reporting done.
 - For a test job: every named case exists and passes.
 - The report names the work item id.
