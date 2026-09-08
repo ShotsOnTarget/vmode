@@ -29,7 +29,7 @@ labels_absent = ["cut"]     # leaves the column when the Engineer has cut it
 role = "engineer"
 tier = "engineer"
 wip = 2
-poll_seconds = 300
+poll_seconds = 60
 adapter = "opencode"
 
 [columns.building]          # a cut Story whose pairs are being built; nobody pulls, everyone sees
