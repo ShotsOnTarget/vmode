@@ -1,4 +1,5 @@
 import pathlib
+import re
 
 from pull_once.pull_once import pull_once
 from record_run.record_run import record_run
@@ -24,8 +25,8 @@ def _make_kind(kind, state):
 
 def _cap_config(tmp_path, cap, name="board.toml"):
     text = _BOARD_TOML.read_text()
-    text = text.replace(
-        "max_parallel_model_runs = 6", f"max_parallel_model_runs = {cap}"
+    text = re.sub(
+        r"max_parallel_model_runs = \d+", f"max_parallel_model_runs = {cap}", text
     )
     dest = tmp_path / name
     dest.write_text(text)
@@ -34,8 +35,8 @@ def _cap_config(tmp_path, cap, name="board.toml"):
 
 def _ghost_config(tmp_path, cap, name="board.toml"):
     text = _BOARD_TOML.read_text()
-    text = text.replace(
-        "max_parallel_model_runs = 6", f"max_parallel_model_runs = {cap}"
+    text = re.sub(
+        r"max_parallel_model_runs = \d+", f"max_parallel_model_runs = {cap}", text
     )
     text += (
         "\n[columns.ghost]\n"

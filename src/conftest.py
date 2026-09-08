@@ -8,6 +8,18 @@ import pytest
 _COUNTER = itertools.count()
 
 
+@pytest.fixture(autouse=True)
+def _empty_record_cache():
+    """record_run remembers a read for a moment and forgets it on any write.
+    A fixture that swaps the whole record underneath it is not a write, so
+    every test starts and ends with that memory empty."""
+    from record_run.record_run import _cache
+
+    _cache.clear()
+    yield
+    _cache.clear()
+
+
 @pytest.fixture
 def fake_bd(tmp_path, monkeypatch):
     """The in-memory record: VMODE_RECORD=fake, reset per test, cwd a fresh git repo."""

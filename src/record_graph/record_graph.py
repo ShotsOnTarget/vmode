@@ -8,14 +8,20 @@ def _label(labels, prefix):
     )
 
 
-def record_graph() -> dict[str, dict]:
+def record_graph(items: list | None = None) -> dict[str, dict]:
     """Every non-event item as a dict: id, kind, title, owner, state, parent,
     checks (validates links), needs (blocks links), claimed_by.
 
     parent is the record's own parent field. Verification and validation
     items have none, so they fall back to the item they check; a test job
-    hangs under its Story beside the code it checks, so no fallback."""
-    items = record_run(["list", "--all", "--exclude-type", "event"])
+    hangs under its Story beside the code it checks, so no fallback.
+
+    items: rows already fetched from the record, to shape without fetching
+    again. Default None reads the whole record, which is what a caller that
+    needs every item wants. column_graph passes the few rows one column can
+    act on, so a puller shapes those and no others."""
+    if items is None:
+        items = record_run(["list", "--all", "--exclude-type", "event"])
     graph = {}
     for item in items:
         item_id = item["id"]

@@ -35,3 +35,22 @@ def test_client_from_env(bd_repo, monkeypatch):
     with pytest.raises(RecordError) as info:
         record_run(["list"])
     assert "bd-missing" in str(info.value)
+
+
+def test_a_repeated_read_is_answered_from_memory(fake_bd):
+    record_run(["create", "item one"])
+
+    first = record_run(["list", "--all"])
+    second = record_run(["list", "--all"])
+
+    assert first == second
+    assert len(second) == 1
+
+
+def test_a_write_empties_the_memory_so_no_read_is_stale(fake_bd):
+    record_run(["create", "item one"])
+    record_run(["list", "--all"])
+
+    record_run(["create", "item two"])
+
+    assert len(record_run(["list", "--all"])) == 2
