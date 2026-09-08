@@ -1,5 +1,5 @@
 from pipeline_run_count.pipeline_run_count import pipeline_run_count
 
 
-def test_pipeline_run_count_returns_four():
-    assert pipeline_run_count() == 4
+def test_pipeline_run_count_returns_five():
+    assert pipeline_run_count() == 5
