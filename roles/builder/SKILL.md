@@ -37,7 +37,7 @@ For a test job:
 
 - `src/<name>/test_<name>.<ext>` covering every case named on the sheet, and nothing more.
 
-Then a report, in `../shared/report-format.md`.
+Then a report, in the shape of `../shared/report-format.md`. That path is a template to copy the shape of, never a file to write to; the report is the text you return when the job ends.
 
 ## The one check
 
