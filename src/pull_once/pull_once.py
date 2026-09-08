@@ -11,7 +11,10 @@ def _global_headroom(graph: dict, config: dict) -> int:
         kind
         for rules in config["columns"].values()
         if rules["tier"] not in ("none", "human")
+        and rules["role"] != "none"
+        and rules["poll_seconds"] > 0
         for kind in rules["kinds"]
+        if kind != "intent"
     }
     busy = sum(
         item["state"] == "in_progress" and item["kind"] in modelled
