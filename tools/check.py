@@ -2,8 +2,12 @@
 
 Prints the failed rule names, one per line, exactly as the Supervisor's
 gates will name them, and exits 1 if there are any. With a job id the
-sheet's cases are checked too; without one only tests_failed is reported
-from the tests. Same function the gates call: they cannot disagree.
+job's kind picks the rules the way prove_rules does: a test job gets the
+test-only gate, its own file's shape, format, lint and case names against
+the sheet, and no pytest run; a code job runs the tests and is not checked
+for cases, because a code sheet names none. Without a job id the kind is
+unknown, so only tests_failed is reported from the tests. Same function
+the gates call, called the same way: they cannot disagree.
 """
 
 import sys
@@ -26,8 +30,10 @@ def main(argv: list[str]) -> int:
         if len(argv) > 2:
             from record_show_item.record_show_item import record_show_item
 
-            sheet = record_show_item(argv[2])["sheet"]
-            options["cases"] = sheet_cases(sheet)
+            info = record_show_item(argv[2])
+            options["kind"] = info["kind"]
+            if info["kind"] == "test":
+                options["cases"] = sheet_cases(info["sheet"])
     except Exception as exc:  # record not reachable: shape, lint, tests still run
         print(f"(record unavailable: {str(exc)[:80]})", file=sys.stderr)
     rules = check_folder(folder, options)
