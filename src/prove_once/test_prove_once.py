@@ -62,3 +62,19 @@ def test_ordinary_pass_removes_ready_from_job_with_unmet_need(fake_bd, tmp_path)
     assert result == []
     assert record_show_item(job_id)["state"] == "waiting"
     assert record_show_item(story_id)["state"] == "ready"
+
+
+def test_ordinary_pass_leaves_job_waiting_under_an_ungated_story(fake_bd, tmp_path):
+    """A Story the Ready gate has not released must not have its jobs promoted.
+
+    Seen live on 2026-09-08: a smoke Story sat at waiting with no ready gate
+    event while a Builder was already running one of its jobs, because the
+    job's needs were trivially met. That is a gate bypass, not a promotion.
+    """
+    config_path = _config(tmp_path)
+    story_id = _create("Story S", "kind:story,state:waiting")
+    job_id = _create("Free code", "kind:code,state:waiting", parent=story_id)
+
+    prove_once(config_path)
+
+    assert record_show_item(job_id)["state"] == "waiting"
