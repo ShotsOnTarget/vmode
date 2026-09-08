@@ -94,7 +94,9 @@ adapter = "opencode"
 
 [columns.learn]             # Analyst reads the log for a Verified Story
 kinds = ["story"]
-states = ["done", "in_progress"]
+states = ["done"]           # not in_progress: a Story mid-cut has no gate events to learn from,
+                           # and listing it here took it out of the Engineer's column and
+                           # held the Analyst's only slot. See note vm-pi7.5.1.
 labels_absent = ["learned"] # leaves the column when the Analyst adds this label
 role = "analyst"
 tier = "analyst"
