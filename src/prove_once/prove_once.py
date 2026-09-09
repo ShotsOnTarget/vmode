@@ -9,6 +9,7 @@ from ready_gather.ready_gather import ready_gather
 from record_graph.record_graph import record_graph
 from record_labels.record_labels import record_labels
 from record_set_state.record_set_state import record_set_state
+from summary_for.summary_for import summary_for
 
 # Gate-approved Story states. Not in_progress: that Story is still being cut.
 _RELEASED = ("ready", "checking", "done")
@@ -59,20 +60,19 @@ def _promote() -> None:
 
 
 def prove_once(config_path: str) -> list[str]:
-    """Gate prove jobs, then cut stories, then advance done stories.
+    """Gate prove jobs, cut stories, advance done stories.
     Args: config_path: board config path. Returns: prove job ids.
-    Side effects: record states, one ready event per cut story.
     """
     config = board_config(config_path)
+    recipient = summary_for(config)
     graph, labels = record_graph(), record_labels()
     processed = []
     for item in column_items("prove", graph, labels, config):
-        job_id = item["id"]
         folder = _folder_of(item["title"])
-        gathered = prove_gather(job_id, folder)
-        gathered.update(folder=folder, repo=".")
-        prove_apply(job_id, gathered)
-        processed.append(job_id)
+        gathered = prove_gather(item["id"], folder)
+        gathered.update(folder=folder, repo=".", recipient=recipient)
+        prove_apply(item["id"], gathered)
+        processed.append(item["id"])
     proposal_sweep(record_graph())
     _ready()
     _advance()
