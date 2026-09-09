@@ -38,7 +38,7 @@ def release_strike(item_id: str, prior_state: str, reason: str) -> str:
     work, so the item normally returns to prior_state for another try. The
     count is the run of release: comments since the last usage: comment, so
     a finished run resets it. On the third release in a row the item is set
-    blocked instead and a note item under it, owned by the supervisor and
+    blocked instead and a note item under it, owned by the architect and
     addressed to the Architect, says why, so a run that can never finish
     stops looping unseen. Outputs: the state set, prior_state or 'blocked'.
     Side effects: one release: comment (reason kept to 1000 characters), the
@@ -51,6 +51,6 @@ def release_strike(item_id: str, prior_state: str, reason: str) -> str:
         return prior_state
     record_set_state(item_id, "blocked")
     title = f"released {strikes} times: {reason[:50]}"
-    note = record_create_item("note", title, "supervisor", item_id)
+    note = record_create_item("note", title, "architect", item_id)
     record_add_note(note["id"], _FOR.format(n=strikes, reason=reason[:300]))
     return "blocked"
