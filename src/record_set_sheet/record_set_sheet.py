@@ -34,12 +34,16 @@ def record_set_sheet(item_id: str, text: str) -> dict:
 
 
 def _main(argv: list[str], stream) -> dict:
-    """The command line: the item id as the one argument, the sheet on stdin."""
+    """The command line: the item id as the one argument, the sheet on stdin,
+    read as UTF-8 and stripped of the byte-order mark Windows PowerShell puts
+    in front of a piped here-string."""
     if len(argv) != 1:
         raise ValueError(
             "usage: python -m record_set_sheet.record_set_sheet <id> < sheet"
         )
-    return record_set_sheet(argv[0], stream.read())
+    raw = stream.buffer.read() if hasattr(stream, "buffer") else stream.read()
+    text = raw.decode("utf-8-sig") if isinstance(raw, bytes) else raw
+    return record_set_sheet(argv[0], text.lstrip("﻿"))
 
 
 if __name__ == "__main__":

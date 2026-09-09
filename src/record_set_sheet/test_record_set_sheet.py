@@ -78,5 +78,8 @@ def test_command_line_reads_the_sheet_from_stdin(fake_bd):
 
     assert result == {"id": item_id, "sheet": text}
     assert record_show_item(item_id)["sheet"] == text
+    # a piped here-string arrives with a byte-order mark on Windows; it goes
+    with_bom = io.TextIOWrapper(io.BytesIO(("﻿" + text).encode("utf-8")))
+    assert _main([item_id], with_bom)["sheet"] == text
     with pytest.raises(ValueError):
         _main([], io.StringIO(text))
