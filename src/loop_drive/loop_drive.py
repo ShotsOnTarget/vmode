@@ -1,80 +1,80 @@
 import os
-from contextlib import contextmanager
+import subprocess
+from pathlib import Path
 
 from loop_mint.loop_mint import loop_mint
 from loop_snapshot.loop_snapshot import loop_snapshot
 from prove_once.prove_once import prove_once
 from pull_once.pull_once import pull_once
 from record_graph.record_graph import record_graph
-from record_labels.record_labels import record_labels
 from scripted_builder.scripted_builder import scripted_builder
 from scripted_engineer.scripted_engineer import scripted_engineer
 
 
-def _engineer(recipe: dict):
-    return lambda item, column: scripted_engineer({**item, "recipe": recipe}, column)
-
-
-def _builder(recipes: dict[str, dict]):
-    def invoke(item, column):
-        name = item["title"].removesuffix(" code").removesuffix(" test")
-        return scripted_builder({**item, "recipe": recipes.get(name, {})}, column)
-
-    return invoke
-
-
-def _rounds(config_path: str, repo: str, story_id: str, recipes: dict[str, dict]):
+def _builds(config, repo, story, recipes):
     snapshots = []
-    invoke = _builder(recipes)
     for _ in range(12):
-        prove_once(config_path)
-        if not pull_once("builder", config_path, invoke):
+        prove_once(config)
+
+        def builder(item, column):
+            name = item["title"].removesuffix(" code").removesuffix(" test")
+            return scripted_builder({**item, "recipe": recipes.get(name, {})}, column)
+
+        if not pull_once("builder", config, builder):
             break
-        snapshots.append(loop_snapshot("build", story_id, repo))
-        prove_once(config_path)
-        snapshots.append(loop_snapshot("prove", story_id, repo))
+        snapshots.append(loop_snapshot("build", story, repo))
+        prove_once(config)
+        snapshots.append(loop_snapshot("prove", story, repo))
     return snapshots
 
 
-@contextmanager
-def _environment(repo: str):
-    previous = os.environ.copy()
-    os.environ["PYTHONPATH"] = os.path.join(repo, "src")
-    os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
-    os.environ["PYTEST_ADDOPTS"] = "-p no:cacheprovider"
-    os.environ["RUFF_CACHE_DIR"] = os.path.join(os.path.dirname(repo), ".ruff-cache")
-    try:
-        yield
-    finally:
-        os.environ.clear()
-        os.environ.update(previous)
+def _prepare(repo):
+    if not (Path(repo) / "pytest.ini").exists():
+        script = (
+            "from pathlib import Path; import subprocess; p=Path('.')"
+            ";(p/'pytest.ini').write_text('[pytest]\\npythonpath = src\\n"
+            "testpaths = src\\naddopts = --import-mode=importlib -p no:"
+            "cacheprovider\\n')"
+            ";(p/'.gitignore').write_text('__pycache__/\\n*.pyc\\n"
+            ".pytest_cache/\\n.ruff_cache/\\n')"
+            ";(p/'src').mkdir(exist_ok=True); subprocess.run(['git','add','-A'],"
+            "check=True)"
+            ";subprocess.run(['git','-c','user.name=loop','-c','user.email=loop@vmode.local',"
+            "'commit','-q','-m','loop: repository prepared'],check=True)"
+        )
+        subprocess.run(["python", "-c", script], cwd=repo, check=True)
 
 
-def loop_drive(
-    intent_id: str,
-    config_path: str,
-    repo: str,
-    engineer_recipe: dict,
-    *builder_recipe_args: dict[str, dict],
-) -> list[dict]:
-    """Drive a minted Story through engineering, building, and proving.
+def _pipeline(args):
+    intent, config, repo, engineer_recipe, builder_recipes = args
+    story = loop_mint(intent)
 
-    Inputs are intent, config, repo, and scripted recipes. Returns snapshots;
-    drives the record and temporarily changes test environment variables.
-    """
-    with _environment(repo):
-        os.makedirs(os.path.join(repo, "src"), exist_ok=True)
-        story_id = loop_mint(intent_id)
-        pull_once("engineer", config_path, _engineer(engineer_recipe))
-        snapshots = [loop_snapshot("engineer", story_id, repo)]
-        prove_once(config_path)
-        snapshots.append(loop_snapshot("ready", story_id, repo))
-        story = record_graph()[story_id]
-        if (
-            story["state"] != "ready"
-            or engineer_recipe.get("stop_after_ready")
-            or "cut" not in record_labels().get(story_id, [])
-        ):
-            return snapshots
-        snapshots.extend(_rounds(config_path, repo, story_id, builder_recipe_args[0]))
+    def engineer(item, column):
+        return scripted_engineer({**item, "recipe": engineer_recipe}, column)
+
+    pull_once("engineer", config, engineer)
+    snapshots = [loop_snapshot("engineer", story, repo)]
+    prove_once(config)
+    snapshots.append(loop_snapshot("ready", story, repo))
+    if not (
+        record_graph()[story]["state"] == "ready"
+        and not engineer_recipe.get("stop_after_ready")
+    ):
         return snapshots
+    snapshots.extend(_builds(config, repo, story, builder_recipes))
+    return snapshots
+
+
+def loop_drive(intent_id, config_path, repo, engineer_recipe, *builder_recipe_args):
+    """Drive a scripted pipeline. Inputs are ids, paths, recipes; outputs snapshots."""
+    _prepare(repo)
+    previous = os.environ.get("PYTHONPATH")
+    os.environ["PYTHONPATH"] = os.path.join(repo, "src")
+    try:
+        return _pipeline(
+            (intent_id, config_path, repo, engineer_recipe, builder_recipe_args[0])
+        )
+    finally:
+        os.environ.pop("PYTHONPATH", None)
+        if previous is not None:
+            os.environ["PYTHONPATH"] = previous
