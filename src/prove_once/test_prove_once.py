@@ -1,5 +1,7 @@
 import pathlib
 
+from board_config.board_config import board_config
+from column_of.column_of import column_of
 from prove_once.prove_once import prove_once
 from record_add_link.record_add_link import record_add_link
 from record_create_item.record_create_item import record_create_item
@@ -8,6 +10,7 @@ from record_set_sheet.record_set_sheet import record_set_sheet
 from record_show_item.record_show_item import record_show_item
 
 _ROOT = pathlib.Path(__file__).resolve().parents[2]
+_SHIPPED_CONFIG = str(_ROOT / "roles" / "board.toml")
 
 
 def _config(tmp_path):
@@ -184,3 +187,28 @@ def test_ready_gate_accepts_removed_existing_test_end_to_end(fake_bd, tmp_path):
 
     assert record_show_item(story)["state"] == "ready"
     assert record_show_item(test)["state"] == "ready"
+
+
+def test_bounce_note_routes_to_engineer_queue(fake_bd, tmp_path):
+    job_id = _create("blocked code", "kind:code,state:checking")
+    folder = "blocked"
+    src = pathlib.Path.cwd() / "src" / folder
+    src.mkdir(parents=True)
+    (src / f"{folder}.py").write_text("import os\n")
+
+    prove_once(_SHIPPED_CONFIG)
+
+    rows = record_run(["show", job_id])
+    row = rows[0] if isinstance(rows, list) else rows
+    note_id = next(
+        dep["id"]
+        for dep in row.get("dependents", [])
+        if dep.get("dependency_type") == "parent-child"
+        and "kind:note" in dep.get("labels", [])
+    )
+    note = record_show_item(note_id)
+    assert note["owner"] == "engineer"
+    assert "- **For**: engineer" in note["sheet"]
+    labels = record_run(["show", note_id])[0].get("labels", [])
+    config = board_config(_SHIPPED_CONFIG)
+    assert column_of(note, labels, config) == "engineer_notes"
