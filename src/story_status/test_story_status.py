@@ -42,6 +42,20 @@ def _story_graph(state="ready"):
     }
 
 
+def _note(item_id, title, owner, parent, state="waiting"):
+    return {
+        "id": item_id,
+        "kind": "note",
+        "title": title,
+        "owner": owner,
+        "state": state,
+        "parent": parent,
+        "checks": [],
+        "needs": [],
+        "claimed_by": "",
+    }
+
+
 def _mk(title, **kw):
     args = ["create", title, "-a", "me", "--no-inherit-labels"]
     for flag, value in kw.items():
@@ -202,3 +216,24 @@ def test_unknown_story_raises(fake_bd):
 def test_non_story_id_raises(fake_bd):
     with pytest.raises(ValueError):
         story_status("c1", _story_graph(), {})
+
+
+def test_open_notes_include_story_and_job_notes(fake_bd):
+    graph = _story_graph()
+    graph.update(
+        {
+            "n0": _note("n0", "answered", "supervisor", "s1", state="done"),
+            "n1": _note("n1", "split the function?", "engineer", "c1"),
+            "n2": _note("n2", "which harness", "architect", "t1"),
+        }
+    )
+    result = story_status("s1", graph, {})
+    assert result["notes"] == [
+        {"id": "n1", "title": "split the function?", "owner": "engineer"},
+        {"id": "n2", "title": "which harness", "owner": "architect"},
+    ]
+
+
+def test_open_notes_empty_when_none(fake_bd):
+    result = story_status("s1", _story_graph(), {})
+    assert result["notes"] == []
