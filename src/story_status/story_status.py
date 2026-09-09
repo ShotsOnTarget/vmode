@@ -42,21 +42,18 @@ def _run_entry(event: dict) -> dict:
 
 
 def story_status(story_id: str, graph: dict, labels: dict) -> dict:
-    """Summarise a Story: its jobs and their run history.
+    """Summarise a Story: its jobs, run history and open notes.
 
-    Inputs: story_id, a Story item id; graph, as record_graph() returns
-    it; labels, an id to its label strings, as record_labels() returns.
-    Outputs: id, state, jobs (one per code/test job, ordered by id) and
-    runs (built/proven/ready timeline events, in time order, deduped).
-    Reads only its arguments, mutates nothing. Raises ValueError when
-    story_id is absent from graph or is not a story.
+    Inputs: story_id; graph (record_graph()) and labels (record_labels()).
+    Outputs: id, state, jobs (one per code/test job by id), runs and notes
+    (open notes under the story and its jobs). Mutates nothing; raises
+    ValueError when story_id is absent or not a story.
     """
     if story_id not in graph or graph[story_id].get("kind") != "story":
         raise ValueError(story_id)
 
     jobs = story_jobs(story_id, graph)
     job_ids = sorted(jobs["code"] + [t for ts in jobs["tests"].values() for t in ts])
-
     seen = set()
     runs = []
     for event in timeline(story_id, graph):
@@ -66,10 +63,18 @@ def story_status(story_id: str, graph: dict, labels: dict) -> dict:
         if key not in seen:
             seen.add(key)
             runs.append(_run_entry(event))
-
+    notes = [
+        {"id": n, "title": i["title"], "owner": i["owner"]}
+        for n, i in graph.items()
+        if i.get("kind") == "note"
+        and i.get("parent") in ({story_id} | set(job_ids))
+        and i.get("state") != "done"
+    ]
+    notes.sort(key=lambda x: x["id"])
     return {
         "id": story_id,
         "state": graph[story_id]["state"],
         "jobs": [_job_entry(job_id, graph, labels) for job_id in job_ids],
         "runs": runs,
+        "notes": notes,
     }
