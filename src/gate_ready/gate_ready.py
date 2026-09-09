@@ -25,7 +25,11 @@ def _orphan(_sj, _sheets, orphans, under):
 _RULES = (_no_intent, _code_without_test, _sheet_missing, _orphan)
 
 
-def _sheet_names(sj, sheets, extras):
+def _landed(graph, code, test):
+    return all(graph.get(j, {}).get("state") == "done" for j in (code, test))
+
+
+def _sheet_names(sj, sheets, extras, graph):
     existing = extras.get("existing", [])
     mapping = extras.get("existing_tests")
     if isinstance(mapping, dict):
@@ -35,7 +39,7 @@ def _sheet_names(sj, sheets, extras):
         for c in sj["code"]
         if sheets.get(c) and sj["tests"][c]
         for t in sj["tests"][c]
-        if sheets.get(t)
+        if sheets.get(t) and not _landed(graph, c, t)
     ]
     names = set()
     for code, test in pairs:
@@ -53,7 +57,8 @@ def gate_ready(
         extras None or with checklist items, existing function names,
         and the gathered existing test names by function.
     Outputs: ordered distinct failed rule names; extras None runs only
-        the four graph rules.
+        the four graph rules. The sheet rules skip a pair whose jobs are
+        both done: a re-armed Story is not refused for landed work.
     Side effects: none. Pure.
     """
     if story_id not in graph or graph[story_id].get("kind") != "story":
@@ -70,5 +75,5 @@ def gate_ready(
         broken.append("no_checklist")
     if any(not i.strip().endswith(_METHODS) for i in checklist):
         broken.append("checklist_method")
-    broken.extend(_sheet_names(sj, sheets, extras))
+    broken.extend(_sheet_names(sj, sheets, extras, graph))
     return broken

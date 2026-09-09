@@ -108,6 +108,16 @@ def test_clean_passes():
     assert gate_ready("story1", graph, sheets, _extras()) == []
 
 
+def test_landed_pair_skips_sheet_rules():
+    """A pair whose jobs are both done is history: a re-armed Story is not
+    refused for a sheet that already passed (0013-4, 2026-09-09)."""
+    graph, sheets = _clean_graph()
+    extras = _extras(existing={"f": ["test_first", "test_second"]})
+    assert "sheet_exists_without_change" in gate_ready("story1", graph, sheets, extras)
+    graph["code1"]["state"] = graph["test1"]["state"] = "done"
+    assert gate_ready("story1", graph, sheets, extras) == []
+
+
 def test_not_a_story_raises():
     graph, sheets = _clean_graph()
     with pytest.raises(ValueError):
