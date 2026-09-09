@@ -251,7 +251,7 @@ def test_cli_prints_questions(fake_bd):
         "VMODE_RECORD": "fake",
     }
     result = subprocess.run(
-        [sys.executable, "-m", "board_api", "0"],
+        [sys.executable, "-m", "board_api.board_api", "0"],
         capture_output=True,
         text=True,
         env=env,
