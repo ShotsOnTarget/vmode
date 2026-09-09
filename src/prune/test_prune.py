@@ -89,3 +89,12 @@ def test_a_test_job_being_built_owns_its_folder(repo):
 def test_leftover_parent_is_the_code_job(repo):
     found = [f for f in prune(_graph("done"), repo) if f["rule"] == "leftover_files"]
     assert found and found[0]["parent"] == "c"
+
+
+def test_no_state_named_with_itself_as_parent(repo):
+    """An item with no state label is invisible everywhere; the finding says so."""
+    graph = _graph("done")
+    graph["c"]["state"] = ""
+    found = [f for f in prune(graph, repo) if f["rule"] == "no_state"]
+    assert found == [{"rule": "no_state", "target": "c", "parent": "c"}]
+    assert not [f for f in prune(_graph("done"), repo) if f["rule"] == "no_state"]

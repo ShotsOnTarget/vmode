@@ -38,7 +38,9 @@ def prune(graph: dict, repo: str) -> list[dict]:
     changes in a folder with no open code or test job; parent its code job;
     a test job counts because tests are built first while the code job
     still waits, which raised 37 false notes before 2026-09-08), no_record_item
-    (a src folder with no code job; parent None), and every orphan (parent itself).
+    (a src folder with no code job; parent None), no_state (an item with no
+    state label, which no column, gate or sweep can see; parent itself; five
+    such items hid on 2026-09-09), and every orphan (parent itself).
     """
     jobs = _owners(graph)
     findings = []
@@ -50,6 +52,9 @@ def prune(graph: dict, repo: str) -> list[dict]:
             findings.append(_finding("leftover_files", folder, parent))
     findings += [
         _finding("no_record_item", f, None) for f in _folders(repo) if f not in jobs
+    ]
+    findings += [
+        _finding("no_state", i, i) for i, it in graph.items() if not it.get("state")
     ]
     findings += [_finding(o["rule"], o["id"], o["id"]) for o in find_orphans(graph)]
     return findings
