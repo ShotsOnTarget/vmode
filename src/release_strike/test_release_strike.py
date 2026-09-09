@@ -41,8 +41,18 @@ def test_a_blocked_item_gets_a_note_for_the_architect(fake_bd):
     notes = [i for i in record_graph().values() if i["kind"] == "note"]
     assert len(notes) == 1
     assert notes[0]["parent"] == job
-    assert notes[0]["owner"] == "supervisor"
+    assert notes[0]["owner"] == "architect"
     assert notes[0]["title"].startswith("released 3 times")
+    assert _comments(notes[0]["id"])[-1].startswith("For: architect")
+
+
+def test_third_release_note_is_owned_by_architect(fake_bd):
+    job = _job()
+    for reason in ("one", "two", "three"):
+        release_strike(job, "ready", reason)
+    notes = [i for i in record_graph().values() if i["kind"] == "note"]
+    assert len(notes) == 1
+    assert notes[0]["owner"] == "architect"
     assert _comments(notes[0]["id"])[-1].startswith("For: architect")
 
 
