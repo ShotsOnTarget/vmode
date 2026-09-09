@@ -28,6 +28,17 @@ def test_fields(tmp_path):
     assert row["parent"] == "p"
 
 
+def test_remove_label_and_repeated_flags():
+    """--remove-label takes a label off, and a repeated flag applies once per
+    occurrence, so one update can swap a state label as bd does."""
+    db = _db()
+    db["items"]["c"]["labels"] = ["kind:code", "state:waiting"]
+    args = ["update", "c", "--remove-label", "state:waiting"]
+    args += ["--add-label", "state:ready", "--add-label", "cut", "-s", "open"]
+    row = fake_update(args, db, "t")[0]
+    assert row["labels"] == ["kind:code", "state:ready", "cut"]
+
+
 def test_claim_and_release():
     db = _db()
     fake_update(["update", "c", "--claim", "--actor", "b-1"], db, "t")
