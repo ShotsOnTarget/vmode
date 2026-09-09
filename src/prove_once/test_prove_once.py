@@ -130,6 +130,7 @@ def _sheets(folder, cases, removed=()):
             "- **Inputs**: x.",
             "- **Outputs**: Return an empty list.",
             "- **Change**: rewrite",
+            f"- **Facts**: {folder} returns None today ({folder}.py)",
         ]
     )
     lines = [
