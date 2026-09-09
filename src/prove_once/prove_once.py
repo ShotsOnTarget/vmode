@@ -1,3 +1,4 @@
+from advance_done.advance_done import advance_done
 from board_config.board_config import board_config
 from column_items.column_items import column_items
 from gate_ready.gate_ready import gate_ready
@@ -20,8 +21,7 @@ def _folder_of(title: str) -> str:
 
 
 def _ready() -> None:
-    graph = record_graph()
-    labels = record_labels()
+    graph, labels = record_graph(), record_labels()
     for story_id, item in graph.items():
         cut = "cut" in labels.get(story_id, [])
         if item["kind"] != "story" or item["claimed_by"] or not cut:
@@ -32,19 +32,6 @@ def _ready() -> None:
         extra = {k: gathered[k] for k in ("checklist", "existing", "existing_tests")}
         rules = gate_ready(story_id, gathered["graph"], gathered["sheets"], extra)
         ready_apply(story_id, rules, gathered)
-
-
-def _advance() -> None:
-    graph = record_graph()
-    for item in graph.values():
-        if item["kind"] != "story" or item["claimed_by"]:
-            continue
-        if item["state"] not in ("waiting", "ready"):
-            continue
-        jobs = [j for j in graph.values() if j["parent"] == item["id"]]
-        jobs = [j for j in jobs if j["kind"] in ("code", "test")]
-        if jobs and all(job["state"] == "done" for job in jobs):
-            record_set_state(item["id"], "checking")
 
 
 def _promote() -> None:
@@ -60,13 +47,14 @@ def _promote() -> None:
 
 
 def prove_once(config_path: str) -> list[str]:
-    """Gate prove jobs, cut stories, advance done stories.
+    """Gate prove jobs, cut stories, advance done stories and intents.
     Args: config_path: board config path. Returns: prove job ids.
+    Side effects: record states, one ready event per cut story.
     """
     config = board_config(config_path)
-    recipient = summary_for(config)
     graph, labels = record_graph(), record_labels()
     processed = []
+    recipient = summary_for(config)
     for item in column_items("prove", graph, labels, config):
         folder = _folder_of(item["title"])
         gathered = prove_gather(item["id"], folder)
@@ -75,6 +63,6 @@ def prove_once(config_path: str) -> list[str]:
         processed.append(item["id"])
     proposal_sweep(record_graph())
     _ready()
-    _advance()
+    advance_done(record_graph())
     _promote()
     return processed

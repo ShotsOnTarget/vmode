@@ -42,6 +42,24 @@ def test_ordinary_pass_promotes_job_when_last_need_done(fake_bd, tmp_path):
     assert record_show_item(story_id)["state"] == "ready"
 
 
+def test_intent_advances_when_every_story_is_done(fake_bd, tmp_path):
+    """An Intent whose Stories are all verified goes to the Board's column on
+    its own; before 2026-09-09 someone had to set it by hand."""
+    config_path = _config(tmp_path)
+    intent_id = _create("Intent I", "kind:intent,state:in_progress")
+    done_id = _create("Story A", "kind:story,state:done", parent=intent_id)
+    open_id = _create("Story B", "kind:story,state:checking", parent=intent_id)
+
+    prove_once(config_path)
+    assert record_show_item(intent_id)["state"] == "in_progress"
+
+    record_run(["update", open_id, "--remove-label", "state:checking"])
+    record_run(["update", open_id, "--add-label", "state:done"])
+    prove_once(config_path)
+    assert record_show_item(intent_id)["state"] == "checking"
+    assert record_show_item(done_id)["state"] == "done"
+
+
 def test_ordinary_pass_leaves_job_waiting_when_need_unmet(fake_bd, tmp_path):
     config_path = _config(tmp_path)
     story_id = _create("Story S", "kind:story,state:ready")
