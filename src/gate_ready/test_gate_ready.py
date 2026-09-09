@@ -7,30 +7,34 @@ def _node(kind, parent, checks=None):
     return {"kind": kind, "parent": parent, "checks": list(checks) if checks else []}
 
 
-def _code(function="f"):
-    return (
-        "\n".join(
-            [
-                "# Instruction sheet",
-                "",
-                "- **Job id**: c1",
-                "- **Kind**: code",
-                "- **Parent Story**: s",
-                f"- **Function name**: `{function}`",
-                f"- **Folder**: `src/{function}/`",
-                "- **Signature**: `f() -> None`",
-                "- **Inputs**: x: a value.",
-                "- **Outputs**: Return an empty list.",
-                "- **Checklist items this job serves**: 1",
-            ]
-        )
-        + "\n"
+def _code(function="f", change=None):
+    lines = [
+        "# Instruction sheet",
+        "",
+        "- **Job id**: c1",
+        "- **Kind**: code",
+    ]
+    if change is not None:
+        lines.append(f"- **Change**: {change}")
+    lines.extend(
+        [
+            "- **Parent Story**: s",
+            f"- **Function name**: `{function}`",
+            f"- **Folder**: `src/{function}/`",
+            "- **Signature**: `f() -> None`",
+            "- **Inputs**: x: a value.",
+            "- **Outputs**: Return an empty list.",
+            "- **Checklist items this job serves**: 1",
+        ]
     )
+    return "\n".join(lines) + "\n"
 
 
-def _test_sheet(function="f", cases=None):
+def _test_sheet(function="f", cases=None, removed=None):
     if cases is None:
         cases = ["test_first", "test_second"]
+    if removed is None:
+        removed = []
     lines = [
         "# Instruction sheet",
         "",
@@ -47,6 +51,8 @@ def _test_sheet(function="f", cases=None):
     ]
     for name in cases:
         lines.append(f"  - `{name}`: works")
+    for name in removed:
+        lines.append(f"  - `{name}`: removed, superseded")
     return "\n".join(lines) + "\n"
 
 
@@ -55,7 +61,7 @@ def _extras(checklist=None, existing=None):
         checklist = ["Do x [testing]"]
     if existing is None:
         existing = []
-    return {"checklist": list(checklist), "existing": list(existing)}
+    return {"checklist": list(checklist), "existing": existing}
 
 
 def _clean_graph():
@@ -168,3 +174,28 @@ def test_extras_none_graph_rules_only():
     assert result == []
     assert "no_checklist" not in result
     assert "sheet_no_cases" not in result
+
+
+def test_existing_case_missing():
+    graph, sheets = _clean_graph()
+    sheets["code1"] = _code("f", change="reworked the outputs")
+    sheets["test1"] = _test_sheet("f", cases=["test_first"])
+    extras = _extras(existing={"f": ["test_first", "test_dropped"]})
+    result = gate_ready("story1", graph, sheets, extras)
+    assert "sheet_existing_case_missing:test_dropped" in result
+
+
+def test_existing_case_kept_passes():
+    graph, sheets = _clean_graph()
+    sheets["code1"] = _code("f", change="reworked the outputs")
+    sheets["test1"] = _test_sheet("f", cases=["test_first", "test_second"])
+    extras = _extras(existing={"f": ["test_first", "test_second"]})
+    assert gate_ready("story1", graph, sheets, extras) == []
+
+
+def test_existing_case_removed_passes():
+    graph, sheets = _clean_graph()
+    sheets["code1"] = _code("f", change="reworked the outputs")
+    sheets["test1"] = _test_sheet("f", cases=["test_first"], removed=["test_second"])
+    extras = _extras(existing={"f": ["test_first", "test_second"]})
+    assert gate_ready("story1", graph, sheets, extras) == []
