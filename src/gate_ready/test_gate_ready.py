@@ -7,7 +7,7 @@ def _node(kind, parent, checks=None):
     return {"kind": kind, "parent": parent, "checks": list(checks) if checks else []}
 
 
-def _code(function="f", change=None):
+def _code(function="f", change=None, facts="f reads x (f.py)"):
     lines = [
         "# Instruction sheet",
         "",
@@ -16,6 +16,7 @@ def _code(function="f", change=None):
     ]
     if change is not None:
         lines.append(f"- **Change**: {change}")
+        lines.append(f"- **Facts**: {facts}")
     lines.extend(
         [
             "- **Parent Story**: s",
@@ -201,6 +202,14 @@ def test_existing_case_kept_passes():
     sheets["test1"] = _test_sheet("f", cases=["test_first", "test_second"])
     extras = _extras(existing={"f": ["test_first", "test_second"]})
     assert gate_ready("story1", graph, sheets, extras) == []
+
+
+def test_change_without_facts_named():
+    """The Ready gate names no_facts, prefixed like every sheet rule."""
+    graph, sheets = _clean_graph()
+    sheets["code1"] = _code("f", change="reworked", facts="")
+    extras = _extras(existing={"f": ["test_first", "test_second"]})
+    assert "sheet_no_facts" in gate_ready("story1", graph, sheets, extras)
 
 
 def test_existing_case_removed_passes():
