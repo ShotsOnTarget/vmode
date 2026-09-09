@@ -39,3 +39,46 @@ def test_bad_action_rejected(fake_bd):
 
     with pytest.raises(ValueError):
         raise_note(job_id, outcome)
+
+
+def test_bounce_note_owned_by_for_role(fake_bd):
+    job_id = _job()
+    outcome = {
+        "action": "bounce",
+        "retries": 1,
+        "rules": ["tests_failed"],
+        "recipient": "engineer",
+    }
+
+    note_id = raise_note(job_id, outcome)
+
+    note = record_show_item(note_id)
+    assert note["owner"] == "engineer"
+    assert "- **For**: engineer" in note["sheet"]
+
+
+def test_escalate_note_owned_by_for_role(fake_bd):
+    job_id = _job()
+    outcome = {
+        "action": "escalate",
+        "retries": 3,
+        "rules": ["tests_failed"],
+        "recipient": "architect",
+    }
+
+    note_id = raise_note(job_id, outcome)
+
+    note = record_show_item(note_id)
+    assert note["owner"] == "architect"
+    assert "- **For**: architect" in note["sheet"]
+
+
+def test_supervisor_finding_note_contract_unchanged(fake_bd):
+    job_id = _job()
+    outcome = {"action": "bounce", "retries": 1, "rules": ["tests_failed"]}
+
+    note_id = raise_note(job_id, outcome)
+
+    note = record_show_item(note_id)
+    assert note["owner"] == "supervisor"
+    assert "**For**" not in note["sheet"]
