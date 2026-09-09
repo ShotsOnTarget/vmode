@@ -1,4 +1,5 @@
 import pathlib
+from datetime import UTC, datetime
 
 from board_columns.board_columns import board_columns
 from board_config.board_config import board_config
@@ -6,8 +7,10 @@ from board_decide.board_decide import board_decide
 from board_rollup.board_rollup import board_rollup
 from board_tree.board_tree import board_tree
 from columns_rows.columns_rows import columns_rows
+from open_questions.open_questions import open_questions
 from record_graph.record_graph import record_graph
 from record_labels.record_labels import record_labels
+from record_run.record_run import record_run
 from record_set_state.record_set_state import record_set_state
 from record_show_item.record_show_item import record_show_item
 from story_status.story_status import story_status
@@ -38,8 +41,22 @@ def board_api(name: str, query: dict, body: dict) -> object:
         ),
         "release": lambda: _release(body["id"]),
         "status": lambda: story_status(query["id"], record_graph(), record_labels()),
+        "open_questions": lambda: _open_questions(query.get("hours", 0)),
     }
     return handlers[name]()
+
+
+def _open_questions(hours) -> list[dict]:
+    graph = record_graph()
+    try:
+        hours = float(hours)
+    except (TypeError, ValueError):
+        hours = 0.0
+    notes = [it for i, it in graph.items() if it["kind"] == "note"]
+    for it in notes:
+        row = record_run(["show", it["id"]])[0]
+        it.update(created_at=row["created_at"], comments=row.get("comments", []))
+    return open_questions(notes, graph, hours, datetime.now(UTC))
 
 
 def _release(item_id: str) -> dict:
