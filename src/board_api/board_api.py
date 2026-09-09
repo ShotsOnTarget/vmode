@@ -1,4 +1,6 @@
+import json
 import pathlib
+import sys
 from datetime import UTC, datetime
 
 from board_columns.board_columns import board_columns
@@ -70,3 +72,9 @@ def _columns(config: dict) -> list[dict]:
     rows = columns_rows(config)
     labels = {row["id"]: row.get("labels", []) for row in rows}
     return board_columns(record_graph(rows), labels, config)
+
+
+if __name__ == "__main__":
+    hours = sys.argv[1] if len(sys.argv) > 1 else 0
+    for question in board_api("open_questions", {"hours": hours}, {}):
+        print(json.dumps(question))

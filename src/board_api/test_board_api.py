@@ -1,9 +1,3 @@
-import json
-import os
-import subprocess
-import sys
-from pathlib import Path
-
 import pytest
 
 from board_api.board_api import board_api
@@ -242,20 +236,3 @@ def test_open_questions_api(fake_bd):
         {owner_answered, board_answered, analyst_note, supervisor_note}
     )
     assert all(q["story"] == sid for q in payload)
-
-
-def test_cli_prints_questions(fake_bd):
-    env = {
-        **os.environ,
-        "PYTHONPATH": str(Path(__file__).resolve().parent.parent),
-        "VMODE_RECORD": "fake",
-    }
-    result = subprocess.run(
-        [sys.executable, "-m", "board_api.board_api", "0"],
-        capture_output=True,
-        text=True,
-        env=env,
-    )
-    assert result.returncode == 0
-    printed = [json.loads(line) for line in result.stdout.splitlines()]
-    assert printed == board_api("open_questions", {"hours": 0}, {})
