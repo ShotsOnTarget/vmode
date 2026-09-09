@@ -1,8 +1,17 @@
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
 import pytest
 
 from board_api.board_api import board_api
 from log_append.log_append import log_append
+from record_add_note.record_add_note import record_add_note
+from record_create_item.record_create_item import record_create_item
 from record_run.record_run import record_run
+from record_set_state.record_set_state import record_set_state
 
 
 def _intent():
@@ -182,3 +191,71 @@ def test_status_view(fake_bd):
     assert {"id", "state", "jobs", "runs"} <= payload.keys()
     assert payload["id"] == sid
     assert len(payload["jobs"]) == 2
+
+
+def _question_job():
+    iid = _intent()
+    sid = record_run(
+        [
+            "create",
+            "widget story",
+            "-t",
+            "epic",
+            "-l",
+            "kind:story,state:ready",
+            "-a",
+            "board",
+            "--no-inherit-labels",
+            "--parent",
+            iid,
+        ]
+    )["id"]
+    jid = record_create_item("code", "widget job", "builder", parent=sid)["id"]
+    return iid, sid, jid
+
+
+def _note(jid, title, owner):
+    return record_create_item("note", title, owner, parent=jid)["id"]
+
+
+def test_open_questions_api(fake_bd):
+    _, sid, jid = _question_job()
+
+    open_note = _note(jid, "open question", "engineer")
+    builder_note = _note(jid, "builder question", "builder")
+    done_unanswered = _note(jid, "done without answer", "engineer")
+    record_add_note(done_unanswered, "looks fine")
+    record_set_state(done_unanswered, "done")
+
+    owner_answered = _note(jid, "owner answered", "engineer")
+    record_add_note(owner_answered, "answer (engineer): fixed")
+    board_answered = _note(jid, "board answered", "builder")
+    record_add_note(board_answered, "answer (board): agreed")
+    analyst_note = _note(jid, "analyst note", "analyst")
+    supervisor_note = _note(jid, "supervisor note", "supervisor")
+
+    payload = board_api("open_questions", {"hours": 0}, {})
+
+    returned = {q["id"] for q in payload}
+    assert {open_note, builder_note, done_unanswered} <= returned
+    assert returned.isdisjoint(
+        {owner_answered, board_answered, analyst_note, supervisor_note}
+    )
+    assert all(q["story"] == sid for q in payload)
+
+
+def test_cli_prints_questions(fake_bd):
+    env = {
+        **os.environ,
+        "PYTHONPATH": str(Path(__file__).resolve().parent.parent),
+        "VMODE_RECORD": "fake",
+    }
+    result = subprocess.run(
+        [sys.executable, "-m", "board_api", "0"],
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    assert result.returncode == 0
+    printed = [json.loads(line) for line in result.stdout.splitlines()]
+    assert printed == board_api("open_questions", {"hours": 0}, {})
