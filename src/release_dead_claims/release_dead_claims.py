@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime
 
 from record_run.record_run import record_run
 from record_set_state.record_set_state import record_set_state
@@ -29,25 +29,32 @@ def _release(item_id: str, state: str) -> None:
 def release_dead_claims(
     graph: dict, alive: set[str], timeout_seconds: int = 1800, now: str | None = None
 ) -> list[str]:
-    """Release claims held by a dead or stalled puller.
+    """Release claims nobody can vouch for.
 
-    A claimed_by is a puller claim only when the text after its final dash
-    is a pid (all digits); a person claim, an empty claim, and an item with
-    no claim are left alone. A puller claim is released when its pid is not
-    in alive, or when now minus the item's updated_at exceeds
-    timeout_seconds, whatever state the item is in. Releasing empties the
-    claim slot and, only when the item's state was in_progress, moves the
-    item back to ready; any other state is kept. Side effects: reads each
-    released item's updated_at and writes the release through the record.
-    Returns the ids released, in graph order.
+    claimed_by is either empty (no claim), a person such as architect whose
+    name carries no pid, or a puller 'role-<pid>'. An empty claim is never
+    touched. alive is the set of running puller pids; an empty alive set is
+    an unavailable process listing, never proof that every puller is dead,
+    so while it is empty no claim is released for being unlisted. A claim
+    is stale when now is given and the item's updated_at is older than
+    timeout_seconds. A puller claim whose pid is missing from a non-empty
+    alive set is released at once; a stale claim is released whether it is
+    a puller's or a person's. Releasing empties the claim slot and, only
+    when the item's state was in_progress, moves the item back to ready;
+    any other state is kept. Side effects: reads each released item's
+    updated_at and writes the release through the record. Returns the ids
+    released, in graph order.
     """
-    current = _parse(now) if now else datetime.now(UTC)
+    current = _parse(now) if now else None
     released = []
     for item_id, item in graph.items():
-        pid = _puller_pid(item.get("claimed_by") or "")
-        if pid is None:
+        claimed_by = item.get("claimed_by") or ""
+        if not claimed_by:
             continue
-        if pid in alive and not _stale(item_id, timeout_seconds, current):
+        pid = _puller_pid(claimed_by)
+        dead = pid is not None and alive and pid not in alive
+        stale = current is not None and _stale(item_id, timeout_seconds, current)
+        if not dead and not stale:
             continue
         _release(item_id, item["state"])
         released.append(item_id)
