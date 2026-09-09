@@ -1,4 +1,5 @@
 from board_routes.board_routes import board_routes
+from record_create_item.record_create_item import record_create_item
 from record_run.record_run import record_run
 
 
@@ -160,3 +161,15 @@ def test_status_json(fake_bd):
     assert status == 200
     assert content_type == "application/json"
     assert set(payload.keys()) == {"id", "state", "jobs", "runs"}
+
+
+def test_open_questions_json(fake_bd):
+    nid = record_create_item("note", "open question", "architect", parent=_story())[
+        "id"
+    ]
+    status, content_type, payload = board_routes(
+        "GET", "/api/open_questions", {"hours": "0"}, {}
+    )
+    assert status == 200
+    assert content_type == "application/json"
+    assert nid in [q["id"] for q in payload]
