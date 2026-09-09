@@ -56,7 +56,8 @@ def test_live_pid_released_after_timeout(fake_bd):
 
 def test_person_claim_kept(fake_bd):
     job = _job("in_progress", "fable")
-    assert release_dead_claims(record_graph(), set()) == []
+    now = _now_after(job, 0)
+    assert release_dead_claims(record_graph(), set(), now=now) == []
     assert record_graph()[job]["claimed_by"] == "fable"
 
 
@@ -69,7 +70,8 @@ def test_empty_claim_kept(fake_bd):
 def test_empty_alive_set_keeps_all_claims(fake_bd):
     puller = _job("in_progress", "builder-4242")
     person = _job("in_progress", "architect")
-    assert release_dead_claims(record_graph(), set()) == []
+    now = _now_after(puller, 0)
+    assert release_dead_claims(record_graph(), set(), now=now) == []
     graph = record_graph()
     assert graph[puller]["claimed_by"] == "builder-4242"
     assert graph[puller]["state"] == "in_progress"

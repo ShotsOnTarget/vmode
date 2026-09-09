@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from record_run.record_run import record_run
 from record_set_state.record_set_state import record_set_state
@@ -36,16 +36,17 @@ def release_dead_claims(
     touched. alive is the set of running puller pids; an empty alive set is
     an unavailable process listing, never proof that every puller is dead,
     so while it is empty no claim is released for being unlisted. A claim
-    is stale when now is given and the item's updated_at is older than
-    timeout_seconds. A puller claim whose pid is missing from a non-empty
-    alive set is released at once; a stale claim is released whether it is
-    a puller's or a person's. Releasing empties the claim slot and, only
+    is stale when the item's updated_at is older than timeout_seconds; now
+    defaults to the current UTC time when it is not given. A puller claim
+    whose pid is missing from a non-empty alive set is released at once; a
+    stale claim is released whether it is a puller's or a person's.
+    Releasing empties the claim slot and, only
     when the item's state was in_progress, moves the item back to ready;
     any other state is kept. Side effects: reads each released item's
     updated_at and writes the release through the record. Returns the ids
     released, in graph order.
     """
-    current = _parse(now) if now else None
+    current = _parse(now) if now else datetime.now(UTC)
     released = []
     for item_id, item in graph.items():
         claimed_by = item.get("claimed_by") or ""
