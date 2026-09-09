@@ -37,7 +37,9 @@ def release_dead_claims(
     an unavailable process listing, never proof that every puller is dead,
     so while it is empty no claim is released for being unlisted. A claim
     is stale when the item's updated_at is older than timeout_seconds; now
-    defaults to the current UTC time when it is not given. A puller claim
+    defaults to the current UTC time when it is not given and alive is not
+    empty, so housekeep still ages claims out without passing now, while a
+    failed listing (an empty alive set) releases nothing. A puller claim
     whose pid is missing from a non-empty alive set is released at once; a
     stale claim is released whether it is a puller's or a person's.
     Releasing empties the claim slot and, only
@@ -46,7 +48,7 @@ def release_dead_claims(
     updated_at and writes the release through the record. Returns the ids
     released, in graph order.
     """
-    current = _parse(now) if now else datetime.now(UTC)
+    current = _parse(now) if now else (datetime.now(UTC) if alive else None)
     released = []
     for item_id, item in graph.items():
         claimed_by = item.get("claimed_by") or ""
