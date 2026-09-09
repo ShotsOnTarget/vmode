@@ -25,6 +25,8 @@ def _sheet(kind, job_id, parent, opts):
     ]
     if kind == "code" and change:
         lines.append("- **Change**: new function.")
+    if kind == "code":
+        lines.append("- **Facts**: scripted; nothing probed.")
     if kind == "test":
         lines.append("- **Cases**:")
         lines.append(f"  - `test_{name}_works`: works.")
