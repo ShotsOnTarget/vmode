@@ -9,13 +9,15 @@ from record_set_state.record_set_state import record_set_state
 
 
 def _proposal(proposal_id: str, decision: str, reason: str) -> dict:
-    """Yes applies the proposal's diff and closes it; No reopens it with the reason."""
+    """Yes applies the proposal's diff and closes it; No closes it with the
+    reason. A refused proposal is decided, not sent back: reopened kept it in
+    the verify column for good (2026-09-09, vm-qkxel.7.20)."""
     if decision == "yes":
         today = datetime.date.today().isoformat()
         return {**proposal_apply(proposal_id, ".", today), "state": "done"}
-    record_set_state(proposal_id, "reopened")
-    record_add_note(proposal_id, f"board: no: {reason}")
-    return {"id": proposal_id, "state": "reopened"}
+    record_add_note(proposal_id, f"architect: no: {reason}")
+    record_set_state(proposal_id, "done")
+    return {"id": proposal_id, "state": "done"}
 
 
 def _smoke_override(intent_id: str) -> str:
