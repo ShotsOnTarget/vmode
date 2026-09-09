@@ -1,4 +1,6 @@
+import json
 import os
+import sys
 import tempfile
 
 from record_run.record_run import record_run
@@ -11,6 +13,11 @@ def record_set_sheet(item_id: str, text: str) -> dict:
     text, `update <id> --body-file <path>` sends it to the record, then the
     temp file is removed. Raises ValueError when text is empty or
     whitespace. Returns {'id': item_id, 'sheet': text}.
+
+    From a shell, pipe the sheet in: `python -m record_set_sheet.record_set_sheet
+    <id>` reads the whole of stdin as the text, so a PowerShell here-string
+    carries a multi-line sheet in one command with no quoting (the Engineer
+    lost a third of a run to `python -c` quoting on 2026-09-09).
     """
     if not text.strip():
         raise ValueError("text must not be empty")
@@ -24,3 +31,16 @@ def record_set_sheet(item_id: str, text: str) -> dict:
         os.remove(path)
 
     return {"id": item_id, "sheet": text}
+
+
+def _main(argv: list[str], stream) -> dict:
+    """The command line: the item id as the one argument, the sheet on stdin."""
+    if len(argv) != 1:
+        raise ValueError(
+            "usage: python -m record_set_sheet.record_set_sheet <id> < sheet"
+        )
+    return record_set_sheet(argv[0], stream.read())
+
+
+if __name__ == "__main__":
+    print(json.dumps(_main(sys.argv[1:], sys.stdin)))

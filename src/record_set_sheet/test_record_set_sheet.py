@@ -1,3 +1,5 @@
+import io
+
 import pytest
 
 from record_run.record_run import record_run
@@ -63,3 +65,18 @@ def test_non_ascii_returned_dict_matches(fake_bd):
     result = record_set_sheet(item_id, text)
 
     assert result == {"id": item_id, "sheet": text}
+
+
+def test_command_line_reads_the_sheet_from_stdin(fake_bd):
+    """One argument, the id; the whole of stdin is the sheet, newlines and all."""
+    from record_set_sheet.record_set_sheet import _main
+
+    item_id = _item()
+    text = "# Instruction sheet\n\n- **Job id**: x\n- **Cases**:\n  - `test_a`: works\n"
+
+    result = _main([item_id], io.StringIO(text))
+
+    assert result == {"id": item_id, "sheet": text}
+    assert record_show_item(item_id)["sheet"] == text
+    with pytest.raises(ValueError):
+        _main([], io.StringIO(text))
