@@ -2,6 +2,7 @@ import pathlib
 import subprocess
 
 from loop_drive.loop_drive import loop_drive
+from prove_once.prove_once import prove_once
 from pull_once.pull_once import pull_once
 from record_graph.record_graph import record_graph
 from record_set_state.record_set_state import record_set_state
@@ -147,6 +148,28 @@ def test_loop_drive_blocks_after_three_builder_raises(fake_bd, monkeypatch):
     assert "blocked" in jobs(final)
     assert "released 3 times" in final["notes"]
     assert commits(final) == []
+
+
+def test_loop_drive_intent_advances_when_stories_done(fake_bd, monkeypatch):
+    """After the walk the Story is checking; once the Architect sets it done
+    the next prove_once moves its Intent to the Board's column on its own."""
+    snapshots = _run(
+        fake_bd,
+        monkeypatch,
+        "intent-6",
+        {"functions": ["alpha"]},
+        {"alpha": {}},
+    )
+    final = snapshots[-1]
+    assert final["story_state"] == "checking"
+    story_id = final["story_id"]
+    intent_id = record_graph()[story_id]["parent"]
+    record_set_state(intent_id, "in_progress")
+    prove_once(str(_BOARD_TOML))
+    assert record_graph()[intent_id]["state"] == "in_progress"
+    record_set_state(story_id, "done")
+    prove_once(str(_BOARD_TOML))
+    assert record_graph()[intent_id]["state"] == "checking"
 
 
 def test_loop_drive_skips_jobs_under_blocked_story(fake_bd, monkeypatch):
