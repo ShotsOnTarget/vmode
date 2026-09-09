@@ -1,3 +1,5 @@
+import pytest
+
 from housekeep.housekeep import housekeep
 from log_read_item.log_read_item import log_read_item
 from record_run.record_run import record_run
@@ -78,6 +80,100 @@ def test_a_stale_unchecked_note_is_cleared(fake_bd):
             "-l",
             "kind:validation,state:waiting,owner:board",
             "--no-inherit-labels",
+        ]
+    )["id"]
+    record_run(["dep", "add", validation, intent, "-t", "validates"])
+
+    result = housekeep(".")
+
+    assert note in result["cleared"]
+    assert "state:done" in record_run(["show", note])[0]["labels"]
+
+
+def _stale_unchecked_note(owner: str) -> tuple[str, str]:
+    intent = record_run(
+        [
+            "create",
+            "I",
+            "-t",
+            "epic",
+            "-l",
+            "kind:intent,state:ready,owner:board",
+            "--no-inherit-labels",
+        ]
+    )["id"]
+    note = record_run(
+        [
+            "create",
+            f"unchecked: {intent}",
+            "-t",
+            "task",
+            "-l",
+            f"kind:note,state:waiting,owner:{owner}",
+            "--no-inherit-labels",
+            "--parent",
+            intent,
+        ]
+    )["id"]
+    validation = record_run(
+        [
+            "create",
+            "V",
+            "-t",
+            "task",
+            "-l",
+            "kind:validation,state:waiting,owner:board",
+            "--no-inherit-labels",
+        ]
+    )["id"]
+    record_run(["dep", "add", validation, intent, "-t", "validates"])
+    return intent, note
+
+
+@pytest.mark.parametrize("owner", ["architect", "engineer", "analyst"])
+def test_housekeep_does_not_clear_other_role_finding_note(fake_bd, owner):
+    _, note = _stale_unchecked_note(owner)
+
+    result = housekeep(".")
+
+    assert note not in result["cleared"]
+    assert "state:waiting" in record_run(["show", note])[0]["labels"]
+
+
+def test_housekeep_still_clears_supervisor_finding_note(fake_bd):
+    intent = record_run(
+        [
+            "create",
+            "I",
+            "-t",
+            "epic",
+            "-l",
+            "kind:intent,state:ready,owner:board",
+            "--no-inherit-labels",
+        ]
+    )["id"]
+    validation = record_run(
+        [
+            "create",
+            "V",
+            "-t",
+            "task",
+            "-l",
+            "kind:validation,state:waiting,owner:board",
+            "--no-inherit-labels",
+        ]
+    )["id"]
+    note = record_run(
+        [
+            "create",
+            f"checks_nothing: {validation}",
+            "-t",
+            "task",
+            "-l",
+            "kind:note,state:waiting,owner:supervisor",
+            "--no-inherit-labels",
+            "--parent",
+            validation,
         ]
     )["id"]
     record_run(["dep", "add", validation, intent, "-t", "validates"])
