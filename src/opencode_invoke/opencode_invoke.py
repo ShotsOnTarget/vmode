@@ -46,7 +46,8 @@ def _failure(run: dict, fold: dict) -> str:
 
 
 def opencode_invoke(item: dict, column: str, root: str) -> dict:
-    """Run one job on opencode, write a transcript, and return the fold plus path."""
+    """Run one job on opencode, write its transcript, then fold and return the
+    fold plus path; the transcript lands first so a fold fault leaves evidence."""
     executable = shutil.which("opencode")
     if executable is None:
         raise RuntimeError("opencode not found on PATH")
@@ -59,11 +60,11 @@ def opencode_invoke(item: dict, column: str, root: str) -> dict:
     argv = _build_argv(executable, model, effort, prompt)
     run = harness_run(argv, root, 1800)
     events = _parse_events(run["stdout"])
-    fold = opencode_fold(events)
     meta = dict(
         item=item["id"], harness="opencode", model=model, effort=effort, role=role
     )
     transcript = transcript_write(events, meta, f"{root}/../vmode-runs")
+    fold = opencode_fold(events)
     if run["returncode"] != 0 or fold["error"]:
         raise RuntimeError(_failure(run, fold))
     return {

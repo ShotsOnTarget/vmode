@@ -250,6 +250,19 @@ def test_a_failed_run_still_writes_its_transcript(monkeypatch):
     assert len(transcript_calls) == 1
 
 
+def test_a_fold_fault_still_writes_its_transcript(monkeypatch):
+    """The transcript lands before the fold, so a fold that raises leaves evidence."""
+    _, transcript_calls = _patch_all(monkeypatch)
+
+    def broken_fold(events):
+        raise KeyError("total")
+
+    monkeypatch.setattr("opencode_invoke.opencode_invoke.opencode_fold", broken_fold)
+    with pytest.raises(KeyError):
+        opencode_invoke({"id": "vm-x", "kind": "code"}, "build", str(ROOT))
+    assert len(transcript_calls) == 1
+
+
 def test_nonzero_returncode_ends_in_runtimeerror(monkeypatch):
     _patch_all(monkeypatch, stdout="", stderr="boom", returncode=1)
     with pytest.raises(RuntimeError) as excinfo:
