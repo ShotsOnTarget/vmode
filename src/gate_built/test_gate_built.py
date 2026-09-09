@@ -66,3 +66,23 @@ def test_markdown_touched():
 
 def test_no_markdown_no_rule():
     assert "markdown_touched" not in gate_built(JOB, _inputs())
+
+
+def test_three_files_in_the_folder_too_many_whatever_changed():
+    """A third file that landed earlier still fails: the folder is counted."""
+    files = ["x.py", "test_x.py", "__main__.py"]
+    assert "too_many_files" in gate_built(JOB, _inputs(files=files))
+    assert "too_many_files" not in gate_built(JOB, _inputs(files=files[:2]))
+
+
+def test_suppression_comment_named():
+    """A comment that silences the tools is refused; the tools decide."""
+    lines = (
+        "# ruff: noqa: E501",
+        "# fmt: off",
+        "x = 1  # noqa",
+        "y = 2  # type: ignore",
+    )
+    for line in lines:
+        assert "suppressed_lint" in gate_built(JOB, _inputs(code=GOOD + line + "\n"))
+    assert "suppressed_lint" not in gate_built(JOB, _inputs())
