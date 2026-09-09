@@ -17,6 +17,9 @@ def prove_apply(job_id: str, gathered: dict) -> str:
     event = "gate_pass" if rules == [] else "gate_fail"
     action, state, retries = step("checking", event, gathered["retries"])
     outcome = {"action": action, "state": state, "retries": retries, "rules": rules}
+    recipient = gathered.get("recipient")
+    if isinstance(recipient, str) and recipient:
+        outcome["recipient"] = recipient
     prove_move(job_id, outcome)
     if action == "log_done":
         commit_job(job_id, gathered["folder"], gathered.get("repo", "."))
