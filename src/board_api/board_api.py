@@ -5,6 +5,7 @@ from board_config.board_config import board_config
 from board_decide.board_decide import board_decide
 from board_rollup.board_rollup import board_rollup
 from board_tree.board_tree import board_tree
+from columns_rows.columns_rows import columns_rows
 from record_graph.record_graph import record_graph
 from record_labels.record_labels import record_labels
 from record_set_state.record_set_state import record_set_state
@@ -31,9 +32,7 @@ def board_api(name: str, query: dict, body: dict) -> object:
         "tree": lambda: board_tree(query["id"], record_graph()),
         "item": lambda: record_show_item(query["id"]),
         "timeline": lambda: timeline(query["id"], record_graph()),
-        "columns": lambda: board_columns(
-            record_graph(), record_labels(), board_config(CONFIG)
-        ),
+        "columns": lambda: _columns(board_config(CONFIG)),
         "decide": lambda: board_decide(
             body.get("intent", ""), body.get("decision", ""), body.get("reason", "")
         ),
@@ -48,3 +47,9 @@ def _release(item_id: str) -> dict:
     if item["kind"] != "intent" or item["state"] != "waiting":
         raise ValueError(f"not a waiting intent: {item_id}")
     return record_set_state(item_id, "ready")
+
+
+def _columns(config: dict) -> list[dict]:
+    rows = columns_rows(config)
+    labels = {row["id"]: row.get("labels", []) for row in rows}
+    return board_columns(record_graph(rows), labels, config)
