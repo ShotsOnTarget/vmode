@@ -28,7 +28,7 @@ def _ready() -> None:
         if item["state"] not in ("waiting", "in_progress"):
             continue
         gathered = ready_gather(story_id, ".")
-        extra = {"checklist": gathered["checklist"], "existing": gathered["existing"]}
+        extra = {k: gathered[k] for k in ("checklist", "existing", "existing_tests")}
         rules = gate_ready(story_id, gathered["graph"], gathered["sheets"], extra)
         ready_apply(story_id, rules, gathered)
 
