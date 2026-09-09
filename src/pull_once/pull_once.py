@@ -45,24 +45,36 @@ def _busy() -> dict:
     return record_graph(rows)
 
 
+def _take(offers: list[dict], column: str, options: dict, headroom: int) -> list[str]:
+    """Claim and run offers, skipping refused claims, until headroom is filled."""
+    labels = options["labels"]
+    claimed = []
+    for item in offers:
+        if len(claimed) >= headroom:
+            break
+        item = {**item, "labels": list(labels.get(item["id"], []))}
+        if claim_and_run(item, column, options["role"], options):
+            claimed.append(item["id"])
+    return claimed
+
+
 def pull_once(role: str, config_path: str, invoke) -> list[str]:
     """Pull ready items into a role's columns and invoke work on them.
 
-    Reads the busy items once for the spend cap, then each of the role's
-    columns separately: a column's own rows, not the whole record.
+    A refused claim (another actor holds it) costs only the offer it was
+    made on, never the column's headroom; the pass moves to the next.
     """
     config = board_config(config_path)
     columns = [n for n, r in config["columns"].items() if r["role"] == role]
     if not columns:
         raise ValueError(f"no column for role: {role}")
     cap = _global_headroom(_busy(), config)
-    options = {"config": config, "invoke": invoke}
+    options = {"config": config, "invoke": invoke, "role": role}
     claimed = []
     for column in columns:
         graph, labels = column_graph(column, config)
         headroom = min(wip_headroom(column, graph, config), cap - len(claimed))
-        for item in column_items(column, graph, labels, config)[:headroom]:
-            item = {**item, "labels": list(labels.get(item["id"], []))}
-            if claim_and_run(item, column, role, options):
-                claimed.append(item["id"])
+        options["labels"] = labels
+        offers = column_items(column, graph, labels, config)
+        claimed.extend(_take(offers, column, options, headroom))
     return claimed
