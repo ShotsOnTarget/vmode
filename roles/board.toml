@@ -82,10 +82,11 @@ tier = "human"
 wip = 3
 poll_seconds = 0
 
-[columns.triage]            # Analyst disposes of notes raised by any role or the Supervisor
+[columns.triage]            # Analyst disposes of notes addressed to nobody: its own and the Supervisor's findings
 kinds = ["note"]
 states = ["waiting", "ready", "in_progress"]
 labels_absent = ["triaged"] # leaves the column when the Analyst has disposed of it
+owners = ["analyst", "supervisor"]  # a note For another role sits in that role's column below (0013-2)
 role = "analyst"
 tier = "analyst"
 wip = 1
@@ -103,6 +104,24 @@ tier = "analyst"
 wip = 1
 poll_seconds = 60
 adapter = "opencode"
+
+[columns.architect_notes]   # questions For the Architect; nobody pulls, the Architect answers (0013-2)
+kinds = ["note"]
+states = ["waiting", "ready", "in_progress"]
+owners = ["architect"]
+role = "none"
+tier = "none"
+wip = 99
+poll_seconds = 0
+
+[columns.engineer_notes]    # questions For the Engineer; nobody pulls, the Engineer answers (0013-2)
+kinds = ["note"]
+states = ["waiting", "ready", "in_progress"]
+owners = ["engineer"]
+role = "none"
+tier = "none"
+wip = 99
+poll_seconds = 0
 
 [columns.blocked]           # awaiting a person; nobody pulls, everyone sees. The note under a blocked item says who: its For line
 kinds = ["intent", "story", "code", "test", "proposal"]

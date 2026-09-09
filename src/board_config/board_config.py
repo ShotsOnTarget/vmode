@@ -10,6 +10,12 @@ def _check_limits(limits):
             raise ValueError(f"limits: invalid {key}")
 
 
+def _owners_disjoint(ca, cb):
+    oa = ca.get("owners")
+    ob = cb.get("owners")
+    return oa is not None and ob is not None and not (set(oa) & set(ob))
+
+
 def _check_conflicts(columns):
     names = list(columns)
     for i, a in enumerate(names):
@@ -19,6 +25,7 @@ def _check_conflicts(columns):
                 set(ca["kinds"]) & set(cb["kinds"])
                 and set(ca["states"]) & set(cb["states"])
                 and ca.get("labels_absent", []) == cb.get("labels_absent", [])
+                and not _owners_disjoint(ca, cb)
             ):
                 raise ValueError(f"{a}/{b}: conflicting kinds and states")
 
