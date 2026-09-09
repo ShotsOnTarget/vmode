@@ -25,6 +25,22 @@ Each is one Python call, or one command line. Output is always JSON.
 
 Run Python with `PYTHONPATH=src` from the repo root. The command-line form is for harnesses without a Python tool; the Python form is preferred.
 
+## Writing a sheet from a shell
+
+A sheet is multi-line text, and `python -c` cannot carry it through PowerShell quoting. Pipe it in instead: the module reads the whole of stdin as the sheet and takes the item id as its one argument. Never write a sheet into a file of your own; the record is the only place a sheet lives.
+
+```
+@'
+# Instruction sheet
+
+- **Job id**: vm-x.1.2
+- **Kind**: test
+...
+'@ | python -m record_set_sheet.record_set_sheet vm-x.1.2
+```
+
+The single-quoted here-string keeps every character literal, including backticks, `$` and quotes.
+
 Values: kind is one of intent, story, code, test, verification, validation. link is one of parent_of, needs_first, checks. state is one of waiting, ready, in_progress, blocked, checking, done, reopened. Anything else is rejected before touching the record.
 
 ## Fetching your instruction sheet

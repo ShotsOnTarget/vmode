@@ -53,7 +53,7 @@ below are the rest.
 | `create_pair(story_id, function_name, owner)` | creates both jobs, links them tests-first, returns `{'code': id, 'test': id}`. |
 | `sheet_skeleton(job)` | the sheet text for one job. `job` is a dict with id, kind, parent, title, and optional serves. |
 | `sheet_check(code, test, existing)` | the faults in a pair of sheet texts, as rule names. Empty list means good. `existing` is a dict of function name to its test names, from `existing_tests(name, root)` for each name in the codebase map; a bare list of names still works but then a change pair's missing cases go unchecked. |
-| `record_set_sheet(item_id, text)` | writes a sheet onto a job. This is how a sheet reaches the record. |
+| `record_set_sheet(item_id, text)` | writes a sheet onto a job. This is how a sheet reaches the record. From a shell, pipe the sheet as a single-quoted here-string into `python -m record_set_sheet.record_set_sheet <job id>` (see the work-record skill); never build a sheet inside `python -c`, and never write it to a file of your own. |
 | `record_add_link("needs_first", waits_id, first_id)` | makes `waits_id` wait for `first_id`. `create_pair` already does this within a pair; you need it only between pairs (step 7). |
 | `record_add_note(item_id, text)` | adds a note to an item. |
 | `record_run(["label", "add", story_id, "cut"])` | adds the `cut` label, your last act on a Story. |
