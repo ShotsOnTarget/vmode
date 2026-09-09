@@ -51,6 +51,18 @@ def _assignee(item_id):
     return row.get("assignee") or ""
 
 
+def _note_children(job_id):
+    row = record_run(["show", job_id])
+    row = row[0] if isinstance(row, list) else row
+    notes = []
+    for dep in row.get("dependents", []):
+        if dep.get("dependency_type") != "parent-child":
+            continue
+        if "kind:note" in dep.get("labels", []):
+            notes.append(dep["id"])
+    return notes
+
+
 _GOOD_CODE = (
     "def widget(x: int) -> int:"
     + chr(10)
@@ -229,3 +241,40 @@ def test_harness_and_model_none_when_absent(fake_bd, tmp_path):
     built = [e for e in entries if e["gate"] == "built"]
     assert built[0]["inputs"]["harness"] is None
     assert built[0]["inputs"]["model"] is None
+
+
+def test_recipient_routes_escalation_note(fake_bd, tmp_path):
+    item_id = _create("code")
+    gathered = _base_gathered(
+        tmp_path,
+        code="import os" + chr(10) + _GOOD_CODE,
+        retries=3,
+        recipient="engineer",
+    )
+
+    result = prove_apply(item_id, gathered)
+
+    assert result == "blocked"
+    notes = _note_children(item_id)
+    assert len(notes) == 1
+    note = record_show_item(notes[0])
+    assert note["owner"] == "engineer"
+    assert "- **For**: engineer" in note["sheet"]
+
+
+def test_missing_recipient_keeps_supervisor_note(fake_bd, tmp_path):
+    item_id = _create("code")
+    gathered = _base_gathered(
+        tmp_path,
+        code="import os" + chr(10) + _GOOD_CODE,
+        retries=3,
+    )
+
+    result = prove_apply(item_id, gathered)
+
+    assert result == "blocked"
+    notes = _note_children(item_id)
+    assert len(notes) == 1
+    note = record_show_item(notes[0])
+    assert note["owner"] == "supervisor"
+    assert "**For**" not in note["sheet"]
