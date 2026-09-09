@@ -60,16 +60,18 @@ def _ex(cf: dict, tf: dict, existing: dict[str, list[str]]) -> list[str]:
         return []
     if "change" not in cf:
         return ["exists_without_change"]
+    rules = [] if cf.get("facts", "").strip() else ["no_facts"]
     known = existing[n] if isinstance(existing, dict) else []
     present = set(tf.get("cases", []))
-    return [f"existing_case_missing:{x}" for x in known if x not in present]
+    return rules + [f"existing_case_missing:{x}" for x in known if x not in present]
 
 
 def sheet_check(code: str, test: str, existing: dict[str, list[str]]) -> list[str]:
     """Name the faults in a code and test sheet pair.
     Inputs: code and test sheet texts, and existing: test names per
     function as a dict, or the bare function names as a list, in which
-    case only exists_without_change can fire, never existing_case_missing.
+    case existing_case_missing never fires. A change pair on an existing
+    function needs a filled Facts line, the Engineer's findings (no_facts).
     Outputs: sorted distinct rule names, [] when clean.
     Side effects: none."""
     cf = sheet_fields(code)

@@ -103,11 +103,30 @@ def test_exists_without_change():
     assert "exists_without_change" in sheet_check(code, test, existing)
 
 
+CHANGE = "- **Change**: rewrite\n- **Facts**: f reads x from the record (f.py)"
+
+
 def test_exists_with_change_clean():
-    code = _code("f", extra="- **Change**: rewrite")
+    code = _code("f", extra=CHANGE)
     test = _test("f")
     existing = {"f": ["test_first", "test_second"]}
-    assert "exists_without_change" not in sheet_check(code, test, existing)
+    assert sheet_check(code, test, existing) == []
+
+
+def test_change_without_facts_refused():
+    """A change pair carries what the Engineer probed, or the Builders re-probe it."""
+    existing = {"f": ["test_first", "test_second"]}
+    for extra in ("- **Change**: rewrite", "- **Change**: rewrite\n- **Facts**:  "):
+        assert "no_facts" in sheet_check(_code("f", extra=extra), _test("f"), existing)
+    assert "no_facts" in sheet_check(
+        _code("f", extra="- **Change**: x"), _test("f"), ["f"]
+    )
+
+
+def test_new_function_needs_no_facts():
+    code = _code("f", extra="- **Change**: rewrite")
+    assert "no_facts" not in sheet_check(code, _test("f"), {"g": ["test_first"]})
+    assert "no_facts" not in sheet_check(_code("f"), _test("f"), {})
 
 
 def test_sorted_unique():
@@ -127,7 +146,7 @@ def test_sorted_unique():
 
 
 def test_change_omits_existing_case():
-    code = _code("f", extra="- **Change**: rewrite")
+    code = _code("f", extra=CHANGE)
     test = _test("f", cases=["test_first"])
     existing = {"f": ["test_first", "test_second", "test_third"]}
     result = sheet_check(code, test, existing)
@@ -137,7 +156,7 @@ def test_change_omits_existing_case():
 
 
 def test_change_keeps_existing_cases():
-    code = _code("f", extra="- **Change**: rewrite")
+    code = _code("f", extra=CHANGE)
     test = _test("f")
     existing = {"f": ["test_first", "test_second"]}
     result = sheet_check(code, test, existing)
@@ -145,7 +164,7 @@ def test_change_keeps_existing_cases():
 
 
 def test_change_removes_existing_case():
-    code = _code("f", extra="- **Change**: rewrite")
+    code = _code("f", extra=CHANGE)
     test = _test("f", cases=["test_first"], removed=["test_second"])
     existing = {"f": ["test_first", "test_second"]}
     result = sheet_check(code, test, existing)
@@ -153,7 +172,7 @@ def test_change_removes_existing_case():
 
 
 def test_new_function_skips_existing_case_rule():
-    code = _code("f", extra="- **Change**: rewrite")
+    code = _code("f", extra=CHANGE)
     test = _test("f", cases=["test_first"])
     existing = {"g": ["test_first", "test_second"]}
     result = sheet_check(code, test, existing)
@@ -161,7 +180,7 @@ def test_new_function_skips_existing_case_rule():
 
 
 def test_existing_as_names_only_skips_the_case_rule():
-    code = _code("f", extra="- **Change**: rewrite")
+    code = _code("f", extra=CHANGE)
     test = _test("f", cases=["test_first"])
     result = sheet_check(code, test, ["f", "g"])
     assert not any(r.startswith("existing_case_missing:") for r in result)
