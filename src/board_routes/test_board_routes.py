@@ -160,7 +160,7 @@ def test_status_json(fake_bd):
     status, content_type, payload = board_routes("GET", "/api/status", {"id": sid}, {})
     assert status == 200
     assert content_type == "application/json"
-    assert set(payload.keys()) == {"id", "state", "jobs", "runs"}
+    assert set(payload.keys()) == {"id", "jobs", "notes", "runs", "state"}
 
 
 def test_open_questions_json(fake_bd):

@@ -18,7 +18,15 @@ ROUTES = {
     ),
 }
 
-API_NAMES = ("intents", "tree", "item", "columns", "timeline", "status")
+API_NAMES = (
+    "intents",
+    "tree",
+    "item",
+    "columns",
+    "timeline",
+    "status",
+    "open_questions",
+)
 
 
 def board_routes(
