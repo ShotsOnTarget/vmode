@@ -1,7 +1,10 @@
 import pathlib
 
 from prove_once.prove_once import prove_once
+from record_add_link.record_add_link import record_add_link
+from record_create_item.record_create_item import record_create_item
 from record_run.record_run import record_run
+from record_set_sheet.record_set_sheet import record_set_sheet
 from record_show_item.record_show_item import record_show_item
 
 _ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -91,3 +94,93 @@ def test_a_story_still_being_cut_does_not_release_its_jobs(fake_bd, tmp_path):
     prove_once(config_path)
 
     assert record_show_item(job_id)["state"] == "waiting"
+
+
+def _sheets(folder, cases, removed=()):
+    code = "\n".join(
+        [
+            "# Instruction sheet",
+            "- **Job id**: c",
+            "- **Kind**: code",
+            "- **Parent Story**: s",
+            f"- **Function name**: `{folder}`",
+            f"- **Folder**: `src/{folder}/`",
+            "- **Signature**: `f() -> None`",
+            "- **Inputs**: x.",
+            "- **Outputs**: Return an empty list.",
+            "- **Change**: rewrite",
+        ]
+    )
+    lines = [
+        "# Instruction sheet",
+        "- **Job id**: t",
+        "- **Kind**: test",
+        "- **Parent Story**: s",
+        f"- **Function name**: `{folder}`",
+        f"- **Folder**: `src/{folder}/`",
+        "- **Signature**: `f() -> None`",
+        "- **Inputs**: x.",
+        "- **Outputs**: Return an empty list.",
+        "- **Cases**:",
+    ]
+    for name in cases:
+        lines.append(f"  - `{name}`: works")
+    for name in removed:
+        lines.append(f"  - `{name}`: removed, no longer needed")
+    return code, "\n".join(lines)
+
+
+def _cut_story(folder, cases, removed=()):
+    intent = record_create_item("intent", "Intent", "e")
+    story = record_create_item("story", "Story S", "e", intent["id"])
+    record_run(["label", "add", story["id"], "cut"])
+    record_run(["update", story["id"], "--acceptance", "1. x [testing]"])
+    record_create_item("verification", "Verify", "e", story["id"])
+    code = record_create_item("code", f"{folder} code", "e", story["id"])
+    test = record_create_item("test", f"{folder} test", "e", code["id"])
+    record_add_link("needs_first", code["id"], test["id"])
+    code_sheet, test_sheet = _sheets(folder, cases, removed)
+    record_set_sheet(code["id"], code_sheet)
+    record_set_sheet(test["id"], test_sheet)
+
+    src = pathlib.Path.cwd() / "src" / folder
+    src.mkdir(parents=True)
+    (src / f"{folder}.py").write_text(f"def {folder}():\n    return []\n")
+    (src / f"test_{folder}.py").write_text(
+        "def test_first():\n    pass\n\n\ndef test_second():\n    pass\n"
+    )
+    return story["id"], code["id"], test["id"]
+
+
+def test_ready_gate_refuses_omitted_existing_test_end_to_end(fake_bd, tmp_path):
+    config_path = _config(tmp_path)
+    story, code, test = _cut_story("alpha", ["test_first"])
+
+    prove_once(config_path)
+
+    assert record_show_item(story)["state"] == "waiting"
+    note = record_run(["comments", story])[-1]["text"]
+    assert "sheet_existing_case_missing:test_second" in note
+    assert "cut" not in record_run(["show", story])[0]["labels"]
+    assert record_show_item(code)["state"] != "ready"
+    assert record_show_item(test)["state"] != "ready"
+
+
+def test_ready_gate_accepts_kept_existing_test_end_to_end(fake_bd, tmp_path):
+    config_path = _config(tmp_path)
+    story, code, test = _cut_story("alpha", ["test_first", "test_second"])
+
+    prove_once(config_path)
+
+    assert record_show_item(story)["state"] == "ready"
+    assert record_show_item(test)["state"] == "ready"
+
+
+def test_ready_gate_accepts_removed_existing_test_end_to_end(fake_bd, tmp_path):
+    config_path = _config(tmp_path)
+    story, code, test = _cut_story("alpha", ["test_first"], removed=["test_second"])
+
+    prove_once(config_path)
+
+    assert record_show_item(story)["state"] == "ready"
+    assert record_show_item(test)["state"] == "ready"
