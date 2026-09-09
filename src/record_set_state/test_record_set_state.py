@@ -57,6 +57,38 @@ def test_reopened_opens(fake_bd):
     assert _show(item_id)["status"] == "open"
 
 
+def test_state_change_is_one_write(fake_bd, monkeypatch):
+    """Label off, label on and status set travel in one update, so a failed
+    write leaves the old state, never none (2026-09-09)."""
+    import record_set_state.record_set_state as mod
+
+    item_id = _make_item()
+    record_set_state(item_id, "waiting")
+    calls = []
+    real = mod.record_run
+
+    def spy(args):
+        calls.append(list(args))
+        return real(args)
+
+    monkeypatch.setattr(mod, "record_run", spy)
+    record_set_state(item_id, "ready")
+    writes = [c for c in calls if c[0] == "update"]
+    assert len(writes) == 1
+    assert "--remove-label" in writes[0] and "--add-label" in writes[0]
+    assert _state_labels(item_id) == ["state:ready"]
+
+
+def test_reopened_clears_claim(fake_bd):
+    """A reopened job is anyone's to take, not its last builder's."""
+    item_id = _make_item()
+    record_run(["update", item_id, "-a", "builder-7"])
+    record_set_state(item_id, "done")
+    assert _show(item_id)["assignee"] == "builder-7"
+    record_set_state(item_id, "reopened")
+    assert not _show(item_id)["assignee"]
+
+
 def test_ready_needs_checklist(fake_bd):
     story = record_run(["create", "S", "-t", "task", "-l", "kind:story,state:waiting"])
     with pytest.raises(ValueError):

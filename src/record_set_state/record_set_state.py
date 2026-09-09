@@ -30,17 +30,35 @@ def _check_ready(item_id: str, labels: list[str]) -> None:
         raise ValueError(f"story has no checklist: {item_id}")
 
 
+def _swap(labels: list[str], state: str) -> list[str]:
+    """The label flags that take the old state off and put the new one on."""
+    wanted = f"state:{state}"
+    args = []
+    for name in labels:
+        if name.startswith("state:") and name != wanted:
+            args += ["--remove-label", name]
+    if wanted not in labels:
+        args += ["--add-label", wanted]
+    return args
+
+
 def record_set_state(item_id: str, state: str) -> dict:
-    """Set an item's workflow state label and matching bd status."""
+    """Set an item's workflow state label and matching bd status in one write.
+
+    The old state label comes off and the new one goes on in the same
+    `update` call as the status, so a write that fails leaves the old state
+    rather than none (five items lost their label mid-swap on 2026-09-09
+    and vanished from every column). Setting reopened also clears the claim
+    slot, so any builder may take the job again.
+    """
     if state not in _VALID_STATES:
         raise ValueError(f"invalid state: {state}")
     labels = record_run(["label", "list", item_id])
     labels = [x if isinstance(x, str) else x.get("name", "") for x in labels]
     if state == "ready":
         _check_ready(item_id, labels)
-    for name in labels:
-        if name.startswith("state:"):
-            record_run(["label", "remove", item_id, name])
-    record_run(["label", "add", item_id, f"state:{state}"])
-    record_run(["update", item_id, "-s", _STATUS_MAP[state]])
+    args = ["update", item_id, *_swap(labels, state), "-s", _STATUS_MAP[state]]
+    if state == "reopened":
+        args += ["-a", ""]
+    record_run(args)
     return {"id": item_id, "state": state}
