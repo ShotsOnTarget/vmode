@@ -14,6 +14,7 @@ def test_code_skeleton_exact():
         "- **Signature**: \n"
         "- **Inputs**: \n"
         "- **Outputs**: \n"
+        "- **Facts**: \n"
         "- **Checklist items this job serves**: \n"
     )
     result = sheet_skeleton(job)
@@ -25,6 +26,13 @@ def test_code_skeleton_exact():
 def test_test_skeleton_has_cases_line():
     job = {"id": "a", "kind": "test", "parent": "p", "title": "f test"}
     assert sheet_skeleton(job).endswith("- **Cases**:\n")
+
+
+def test_facts_line_on_both_kinds():
+    """The Engineer fills Facts with what it probed; the line is there to fill."""
+    for kind in ("code", "test"):
+        job = {"id": "a", "kind": kind, "parent": "p", "title": f"f {kind}"}
+        assert "- **Facts**: \n" in sheet_skeleton(job)
 
 
 def test_serves_joined():

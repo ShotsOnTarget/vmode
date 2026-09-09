@@ -2,7 +2,8 @@ def sheet_skeleton(job: dict) -> str:
     """Build the instruction sheet text for one code or test job.
 
     Inputs: job, a dict with id, kind, parent, title, and optional serves.
-    Outputs: the sheet text with one trailing newline.
+    Outputs: the sheet text with one trailing newline, including an empty
+    Facts line for the Engineer's probe findings (0023-7, 2026-09-09).
     Side effects: none. Raises ValueError on bad kind, title, or ids.
     """
     job_id = job.get("id")
@@ -37,6 +38,7 @@ def sheet_skeleton(job: dict) -> str:
         "- **Signature**: ",
         "- **Inputs**: ",
         "- **Outputs**: ",
+        "- **Facts**: ",
         f"- **Checklist items this job serves**: {serves_text}",
     ]
     if kind == "test":
