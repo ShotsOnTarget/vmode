@@ -25,7 +25,11 @@ def _orphan(_sj, _sheets, orphans, under):
 _RULES = (_no_intent, _code_without_test, _sheet_missing, _orphan)
 
 
-def _sheet_names(sj, sheets, existing):
+def _sheet_names(sj, sheets, extras):
+    existing = extras.get("existing", [])
+    mapping = extras.get("existing_tests")
+    if isinstance(mapping, dict):
+        existing = mapping
     pairs = [
         (c, t)
         for c in sj["code"]
@@ -46,7 +50,8 @@ def gate_ready(
     """List the Ready-gate rules a story fails, [] when ready.
 
     Inputs: story_id, graph as record_graph returns, sheets by job id,
-        extras None or with checklist items and existing function names.
+        extras None or with checklist items, existing function names,
+        and the gathered existing test names by function.
     Outputs: ordered distinct failed rule names; extras None runs only
         the four graph rules.
     Side effects: none. Pure.
@@ -61,10 +66,9 @@ def gate_ready(
     if extras is None:
         return broken
     checklist = extras.get("checklist", [])
-    existing = extras.get("existing", [])
     if not checklist:
         broken.append("no_checklist")
     if any(not i.strip().endswith(_METHODS) for i in checklist):
         broken.append("checklist_method")
-    broken.extend(_sheet_names(sj, sheets, existing))
+    broken.extend(_sheet_names(sj, sheets, extras))
     return broken
