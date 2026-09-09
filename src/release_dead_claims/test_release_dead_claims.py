@@ -63,3 +63,31 @@ def test_empty_claim_kept(fake_bd):
     job = _job("in_progress", "")
     assert release_dead_claims(record_graph(), set()) == []
     assert record_graph()[job]["claimed_by"] == ""
+
+
+def test_empty_alive_set_keeps_all_claims(fake_bd):
+    puller = _job("in_progress", "builder-4242")
+    person = _job("in_progress", "architect")
+    assert release_dead_claims(record_graph(), set()) == []
+    graph = record_graph()
+    assert graph[puller]["claimed_by"] == "builder-4242"
+    assert graph[puller]["state"] == "in_progress"
+    assert graph[person]["claimed_by"] == "architect"
+    assert graph[person]["state"] == "in_progress"
+
+
+def test_stale_person_claim_released(fake_bd):
+    job = _job("in_progress", "architect")
+    now = _now_after(job, 7200)
+    assert release_dead_claims(record_graph(), set(), 1800, now) == [job]
+    graph = record_graph()
+    assert graph[job]["claimed_by"] == "" and graph[job]["state"] == "ready"
+
+
+def test_fresh_person_claim_kept_with_timeout(fake_bd):
+    job = _job("in_progress", "architect")
+    now = _now_after(job, 0)
+    assert release_dead_claims(record_graph(), set(), 1800, now) == []
+    graph = record_graph()
+    assert graph[job]["claimed_by"] == "architect"
+    assert graph[job]["state"] == "in_progress"
