@@ -11,6 +11,7 @@ A sheet is a contract, not a recipe. It says what the function must do and how i
 - **Signature**: exact.
 - **Inputs**: type and meaning of each.
 - **Outputs**: type and meaning; errors on bad input.
+- **Facts**: one line per Boundary the Engineer probed: the fact itself, then where it came from in brackets, for example `prove_move passes the outcome dict through to raise_note unchanged (prove_move.py)`. A Builder reads these instead of opening files outside its folder. On a change to an existing function the field must be filled; an empty one is refused as `no_facts`.
 - **Checklist items this job serves**: ids from the Story.
 - **Cases** (test jobs only): one line per test function, `- \`test_name\`: expected result`. A case the sheet retires is written `- \`test_name\`: removed, <why>`; the gate then expects it gone.
 
