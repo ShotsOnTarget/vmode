@@ -89,3 +89,19 @@ def test_adapter_key_allowed():
     assert column_valid("build", column) == []
     column["adapter"] = ""
     assert column_valid("build", column) != []
+
+
+def test_owners_list_allowed():
+    column = _valid_column()
+    column["owners"] = ["architect"]
+    assert column_valid("intent", column) == []
+
+
+def test_owners_non_string_reported():
+    column = _valid_column()
+    column["owners"] = ["architect", 1]
+    problems = column_valid("intent", column)
+    assert any(p.startswith("owners:") for p in problems)
+    column["owners"] = "architect"
+    problems = column_valid("intent", column)
+    assert any(p.startswith("owners:") for p in problems)
