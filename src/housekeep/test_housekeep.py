@@ -21,6 +21,29 @@ def _claimed_item(title: str, claim: str) -> str:
     return created["id"]
 
 
+class _Usage:
+    def __init__(self, free):
+        self.free = free
+
+
+def test_low_disk_is_logged_on_an_open_intent(fake_bd, monkeypatch):
+    """Under two gigabytes free, one Housekeep low_disk event names the free
+    space; with room, none (the drive filled unseen on 2026-09-09)."""
+    intent = record_run(
+        ["create", "I", "-t", "epic", "-l", "kind:intent,state:in_progress"]
+    )["id"]
+    usage = "low_disk.low_disk.shutil.disk_usage"
+    monkeypatch.setattr(usage, lambda p: _Usage(2**30))
+    result = housekeep(".")
+    assert result["low_disk"] == 1.0
+    events = log_read_item(intent)
+    assert len(events) == 1 and events[0]["rule"] == "low_disk"
+    assert "1.0 GB free" in str(events[0]["inputs"])
+    monkeypatch.setattr(usage, lambda p: _Usage(9 * 2**30))
+    assert housekeep(".")["low_disk"] is None
+    assert len(log_read_item(intent)) == 1
+
+
 def test_housekeep_writes_one_log_entry_per_released_claim(fake_bd):
     first = _claimed_item("w code", "builder-99999999")
     second = _claimed_item("v code", "builder-99999997")

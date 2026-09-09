@@ -1,4 +1,5 @@
 from log_append.log_append import log_append
+from low_disk.low_disk import low_disk
 from prune.prune import prune
 from puller_pids.puller_pids import puller_pids
 from record_add_note.record_add_note import record_add_note
@@ -50,13 +51,14 @@ def housekeep(repo: str) -> dict:
     is closed by the Supervisor itself, so nobody pays to dismiss a stale
     finding (17 unchecked notes were paid for before 2026-09-08). For each
     released claim a Housekeep log event is appended naming the released
-    item and the original claim that was broken.
-    Returns {'released', 'notes', 'cleared', 'unraised'}.
+    item and the original claim that was broken; a short drive too (low_disk).
+    Returns {'released', 'notes', 'cleared', 'unraised', 'low_disk'}.
     """
     graph = record_graph()
     claim_by = {item_id: item["claimed_by"] for item_id, item in graph.items()}
     released = release_dead_claims(graph, puller_pids())
     _log_releases(released, claim_by)
+    short = low_disk(repo, graph)
     seen = {(i["parent"], i["title"]) for i in graph.values() if i["kind"] == "note"}
     own, current = _open_findings(graph), set()
     notes, unraised = [], []
@@ -74,4 +76,5 @@ def housekeep(repo: str) -> dict:
             note_id, "cleared by the Supervisor: the finding no longer holds"
         )
         record_set_state(note_id, "done")
-    return dict(released=released, notes=notes, cleared=cleared, unraised=unraised)
+    result = dict(released=released, notes=notes, cleared=cleared)
+    return dict(result, unraised=unraised, low_disk=short)
