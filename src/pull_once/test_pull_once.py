@@ -3,6 +3,7 @@ import re
 
 from pull_once.pull_once import pull_once
 from record_run.record_run import record_run
+from record_set_state.record_set_state import record_set_state
 
 _BOARD_TOML = pathlib.Path(__file__).resolve().parents[2] / "roles" / "board.toml"
 
@@ -31,6 +32,22 @@ def _cap_config(tmp_path, cap, name="board.toml"):
     dest = tmp_path / name
     dest.write_text(text)
     return str(dest)
+
+
+def _wip_one_config(tmp_path, name="wip1.toml"):
+    text = _BOARD_TOML.read_text()
+    text = re.sub(r"wip = 4", "wip = 1", text, count=1)
+    text = re.sub(r"max_parallel_model_runs = \d+", "max_parallel_model_runs = 1", text)
+    dest = tmp_path / name
+    dest.write_text(text)
+    return str(dest)
+
+
+def _claimed_ready():
+    item_id = _make_item()
+    record_run(["update", item_id, "--claim", "--actor", "other"])
+    record_set_state(item_id, "ready")
+    return item_id
 
 
 def _ghost_config(tmp_path, cap, name="board.toml"):
@@ -96,3 +113,21 @@ def test_global_headroom_counts_modelled_work(fake_bd, tmp_path):
     config_path = _cap_config(tmp_path, 4, name="cap4.toml")
 
     assert pull_once("builder", config_path, _ok_invoke) == []
+
+
+def test_refused_claim_continues_to_next_offer(fake_bd, tmp_path):
+    _claimed_ready()
+    claimed_id = _make_item()
+    config_path = _cap_config(tmp_path, 2, name="refuse.toml")
+
+    assert pull_once("builder", config_path, _ok_invoke) == [claimed_id]
+
+
+def test_wip_one_refused_first_item_claims_second_against_fake_record(
+    fake_bd, tmp_path
+):
+    _claimed_ready()
+    claimed_id = _make_item()
+    config_path = _wip_one_config(tmp_path)
+
+    assert pull_once("builder", config_path, _ok_invoke) == [claimed_id]
