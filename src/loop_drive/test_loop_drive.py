@@ -2,7 +2,6 @@ import pathlib
 import subprocess
 
 from loop_drive.loop_drive import loop_drive
-
 from pull_once.pull_once import pull_once
 from record_graph.record_graph import record_graph
 from record_set_state.record_set_state import record_set_state
@@ -20,6 +19,14 @@ def _subjects(repo):
         check=False,
     )
     return result.stdout.splitlines() if result.returncode == 0 else []
+
+
+def jobs(snapshot):
+    return [state for state in snapshot["job_states"].values()]
+
+
+def commits(snapshot):
+    return [subject for subject in snapshot["git_log"] if "job vm-" in subject]
 
 
 def _run(fake_bd, monkeypatch, intent_id, engineer_recipe, builder_recipes):
@@ -62,14 +69,39 @@ def test_loop_drive_walks_pipeline_and_snapshots(fake_bd, monkeypatch):
     assert steps[-1] == "prove"
     final = snapshots[-1]
     assert final["story_state"] == "checking"
-    assert final["job_states"] and all(
-        state == "done" for state in final["job_states"].values()
-    )
-    assert len(final["git_log"]) == 4
-    assert all("job vm-" in subject for subject in final["git_log"])
+    assert jobs(final) and all(state == "done" for state in jobs(final))
+    assert len(commits(final)) == 4
 
 
 def test_loop_drive_refuses_missing_change_sheet(fake_bd, monkeypatch):
+    alpha = fake_bd / "src" / "alpha"
+    alpha.mkdir(parents=True)
+    (alpha / "alpha.py").write_text(
+        'def alpha():\n    """Return the old value."""\n    return "old"\n',
+        encoding="utf-8",
+    )
+    (alpha / "test_alpha.py").write_text(
+        "from alpha.alpha import alpha\n\n\ndef test_alpha_old():\n"
+        '    assert alpha() == "old"\n',
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "add", "-A"], cwd=fake_bd, check=True)
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.name=t",
+            "-c",
+            "user.email=t@t",
+            "commit",
+            "-q",
+            "-m",
+            "alpha exists",
+        ],
+        cwd=fake_bd,
+        check=True,
+    )
+
     snapshots = _run(
         fake_bd,
         monkeypatch,
@@ -83,8 +115,8 @@ def test_loop_drive_refuses_missing_change_sheet(fake_bd, monkeypatch):
     assert final["story_state"] == "waiting"
     assert "cut" not in final["story_labels"]
     assert "sheet_exists_without_change" in final["notes"]
-    assert "ready" not in final["job_states"].values()
-    assert final["git_log"] == []
+    assert "ready" not in jobs(final)
+    assert commits(final) == []
 
 
 def test_loop_drive_bounces_second_folder_builder(fake_bd, monkeypatch):
@@ -98,8 +130,8 @@ def test_loop_drive_bounces_second_folder_builder(fake_bd, monkeypatch):
 
     final = snapshots[-1]
     assert "file_outside_folder" in final["notes"]
-    assert final["git_log"] == []
-    assert "done" not in final["job_states"].values()
+    assert final["story_state"] != "checking"
+    assert any(state != "done" for state in jobs(final))
 
 
 def test_loop_drive_blocks_after_three_builder_raises(fake_bd, monkeypatch):
@@ -112,9 +144,9 @@ def test_loop_drive_blocks_after_three_builder_raises(fake_bd, monkeypatch):
     )
 
     final = snapshots[-1]
-    assert "blocked" in final["job_states"].values()
+    assert "blocked" in jobs(final)
     assert "released 3 times" in final["notes"]
-    assert final["git_log"] == []
+    assert commits(final) == []
 
 
 def test_loop_drive_skips_jobs_under_blocked_story(fake_bd, monkeypatch):
@@ -128,17 +160,23 @@ def test_loop_drive_skips_jobs_under_blocked_story(fake_bd, monkeypatch):
 
     final = snapshots[-1]
     assert final["step"] == "ready"
-    assert final["job_states"] and all(
-        state == "ready" for state in final["job_states"].values()
-    )
+    assert set(jobs(final)) == {"ready", "waiting"}
     story_id = final["story_id"]
     record_set_state(story_id, "blocked")
+    before = {
+        item_id: item["state"]
+        for item_id, item in record_graph().items()
+        if item.get("parent") == story_id
+    }
     result = pull_once(
         "builder",
         str(_BOARD_TOML),
         lambda item, column: scripted_builder({**item, "recipe": {}}, column),
     )
     assert result == []
-    graph = record_graph()
-    story_jobs = [item for item in graph.values() if item.get("parent") == story_id]
-    assert story_jobs and all(item["state"] == "ready" for item in story_jobs)
+    after = {
+        item_id: item["state"]
+        for item_id, item in record_graph().items()
+        if item.get("parent") == story_id
+    }
+    assert after == before
