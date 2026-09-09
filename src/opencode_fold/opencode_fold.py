@@ -7,13 +7,16 @@ def opencode_fold(events: list[dict]) -> dict:
     Inputs: events, the JSON objects parsed one per line from the stdout of
     `opencode run --format json`, in arrival order.
     Outputs: a dict with tokens (int), turns (int or None), cost_usd (float
-    or None), report (str), and error (bool).
+    or None), report (str), and error (bool). A step_finish whose tokens
+    dict has no total counts as zero tokens; the fold never raises on an
+    event's shape, since a fold that raises costs the Builder a strike
+    (seen 2026-09-09 on vm-2r998.3.2).
     Side effects: none.
     """
     finishes = [e for e in events if e.get("type") == "step_finish"]
 
     token_totals = [
-        f["part"]["tokens"]["total"]
+        int(f["part"]["tokens"].get("total") or 0)
         for f in finishes
         if isinstance(f.get("part", {}).get("tokens"), dict)
     ]

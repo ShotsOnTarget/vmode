@@ -49,3 +49,12 @@ def test_opencode_fold_counts_nothing_without_a_step():
     assert result["tokens"] == -1
     assert result["turns"] is None
     assert result["cost_usd"] is None
+
+
+def test_opencode_fold_tolerates_a_step_without_total():
+    """A step_finish whose tokens carry no total counts as zero, never raises."""
+    odd = {"type": "step_finish", "part": {"tokens": {"input": 3}, "cost": 0.1}}
+    result = opencode_fold(EVENTS + [odd])
+    assert result["tokens"] == 29524
+    assert result["turns"] == 3
+    assert result["error"] is False
