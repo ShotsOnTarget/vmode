@@ -3,7 +3,6 @@ import pytest
 from prove_rules.prove_rules import prove_rules
 
 CODE = 'def {n}(x: int) -> int:\n    """Add one."""\n    return x + 1\n'
-NOTE = "purpose\nsignature\ninputs\noutputs\nside effects\nwork item {n}-code\n"
 TEST = "from {n}.{n} import {n}\n\n\ndef test_adds():\n    assert {n}(1) == {v}\n"
 
 
@@ -21,7 +20,6 @@ def _folder(root, n, v=2):
     d = root / "src" / n
     d.mkdir()
     (d / f"{n}.py").write_text(CODE.format(n=n))
-    (d / f"{n}.md").write_text(NOTE.format(n=n))
     (d / f"test_{n}.py").write_text(TEST.format(n=n, v=v))
 
 
