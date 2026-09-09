@@ -1,5 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
+from fake_record.fake_record import DB
 from record_graph.record_graph import record_graph
 from record_run.record_run import record_run
 from release_dead_claims.release_dead_claims import release_dead_claims
@@ -91,3 +92,24 @@ def test_fresh_person_claim_kept_with_timeout(fake_bd):
     graph = record_graph()
     assert graph[job]["claimed_by"] == "architect"
     assert graph[job]["state"] == "in_progress"
+
+
+def test_default_now_ages_a_stale_claim(fake_bd, monkeypatch):
+    stale = _job("in_progress", "builder-4242")
+    fresh = _job("in_progress", "builder-4242")
+    DB["items"][stale]["updated_at"] = "2026-09-05T00:00:00Z"
+    DB["items"][fresh]["updated_at"] = "2026-09-05T02:59:00Z"
+
+    import release_dead_claims.release_dead_claims as mod
+
+    class _FixedClock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return cls(2026, 9, 5, 3, 0, 0, tzinfo=UTC)
+
+    monkeypatch.setattr(mod, "datetime", _FixedClock)
+    assert release_dead_claims(record_graph(), {"4242"}) == [stale]
+    graph = record_graph()
+    assert graph[stale]["claimed_by"] == "" and graph[stale]["state"] == "ready"
+    assert graph[fresh]["claimed_by"] == "builder-4242"
+    assert graph[fresh]["state"] == "in_progress"
