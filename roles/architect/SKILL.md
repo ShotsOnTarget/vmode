@@ -55,7 +55,7 @@ You write the Story and stop. The Engineer cuts it into job pairs, writes every 
 
 ## Observations are notes
 
-When you notice something outside the item you are working on (a duplicate, a gap, a lesson), create a `note` item under the item it concerns, with the observation as its description. It appears in the Analyst's triage column. Do not write it into a report or a file.
+When you notice something outside the item you are working on (a duplicate, a gap, a lesson), create a `note` item under the item it concerns, with the observation as its description. A note with no For line is the Analyst's to dispose of; a note For a role appears in that role's queue on the board and is closed only by that role's answer or by the Board, never by a sweep. Questions For you sit in the architect_notes column; answer them with `note_answer(note_id, "architect", text)` through the work-record skill. Do not write it into a report or a file.
 
 ## Stories and Intents live only in the record
 

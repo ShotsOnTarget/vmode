@@ -82,4 +82,4 @@ matches one that exists. That is a different thing, and still expected of you.
 
 ## Observations are notes
 
-When you notice something outside the Story you are cutting (a duplicate function, a gap, a lesson), create a `note` item under the item it concerns. It appears in the Analyst's triage column. Do not write it into a report or a file.
+When you notice something outside the Story you are cutting (a duplicate function, a gap, a lesson), create a `note` item under the item it concerns. A note with no For line is the Analyst's to dispose of; a note For a role appears in that role's queue on the board and is closed only by that role's answer or by the Board, never by a sweep. Do not write it into a report or a file.
